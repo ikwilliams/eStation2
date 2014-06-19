@@ -1,0 +1,10 @@
+.old
+.idea
+*.pyc
+*.*~
+log
+clean.sh
+ImportedPyModules
+TestFiles
+tmp
+log
