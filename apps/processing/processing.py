@@ -41,6 +41,7 @@ prod="FEWSNET_RFE"
 mapset='FEWSNET_Africa_8km'
 ext='.tif'
 
+
 #   ---------------------------------------------------------------------
 #   Define input files
 starting_sprod='RFE'
