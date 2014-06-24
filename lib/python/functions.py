@@ -11,6 +11,9 @@
 #	history: 1.0
 #
 
+# source eStation2 base definitions
+import locals
+
 # Import standard modules
 import os
 import sys
@@ -41,11 +44,12 @@ logger = log.my_logger(__name__)
 #   Date: 2014/05/06
 #   Input: string of numbers
 #   Output: return True if the input has the format YYYYMMDD, otherwise return False
-def is_date_yyyymmdd(string_date):
+def is_date_yyyymmdd(string_date, silent=False):
     isdate_yyyymmdd = False
     # check the length of string_date
     if len(str(string_date)) != 8:
-        logger.error('Invalid Date Format %s' % string_date)
+        if not silent:
+            logger.error('Invalid Date Format %s' % string_date)
         return isdate_yyyymmdd
 
     # check the yyyymmdd format
@@ -63,11 +67,43 @@ def is_date_yyyymmdd(string_date):
                     # isdate_yyyymmdd = date_format_yyyymmdd.group(0)
                     isdate_yyyymmdd = True
 
-    if not isdate_yyyymmdd:
+    if (not isdate_yyyymmdd) and (not silent):
         logger.error('Invalid Date Format   %s' % string_date)
 
     return isdate_yyyymmdd
 
+
+######################################################################################
+#   is_date_mmdd
+#   Purpose: Function validates if a date has  the format MMDD.
+#   Author: Simona Oancea, JRC, European Commission
+#   Refactored by: Jurriaan van 't Klooster
+#   Date: 2014/05/06
+#   Input: string of numbers
+#   Output: return True if the input has the format MMDD, otherwise return False
+def is_date_mmdd(string_date, silent=False):
+    isdate_mmdd = False
+    # check the length of string_date
+    if len(str(string_date)) != 4:
+        if not silent:
+            logger.error('Invalid Date Format %s' % string_date)
+        return isdate_mmdd
+
+    # check the mmdd format
+    date_format_mmdd = re.match('^[0-9][0-9][0-9][0-9]', str(string_date))
+    if date_format_mmdd:
+        month = int(string_date[0:2])
+        day = int(string_date[2:4])
+        # check the YYYY is real; between 1900 and current year
+        if 1 <= month <= 12:
+            # check the DD is real; not greater than 31
+            if 1 <= day <= 31:
+                isdate_mmdd = True
+
+    if (not isdate_mmdd) and (not silent):
+        logger.error('Invalid Date Format   %s' % string_date)
+
+    return isdate_mmdd
 
 ######################################################################################
 #   is_date_yyyymmddhhmm
@@ -77,11 +113,12 @@ def is_date_yyyymmdd(string_date):
 #   Date: 2014/05/06
 #   Input: string of numbers
 #   Output: return True if the input has the format YYYYMMDDHHMM, otherwise return False
-def is_date_yyyymmddhhmm(string_date):
+def is_date_yyyymmddhhmm(string_date, silent=False):
     isdate_yyyymmddhhmm = False
     # check the length of string_date
     if len(str(string_date)) != 12:
-        logger.error('Invalid Date Format %s' % string_date)
+        if not silent:
+            logger.error('Invalid Date Format %s' % string_date)
         return isdate_yyyymmddhhmm
 
     # check the yyyymmdd format
@@ -105,7 +142,7 @@ def is_date_yyyymmddhhmm(string_date):
                             # isdate = date_format_yyyymmddhhmm.group(0)
                             isdate_yyyymmddhhmm = True
 
-    if not isdate_yyyymmddhhmm:
+    if (not isdate_yyyymmddhhmm) and (not silent):
         logger.error('Invalid Date Format %s' % string_date)
 
     return isdate_yyyymmddhhmm
@@ -118,11 +155,12 @@ def is_date_yyyymmddhhmm(string_date):
 #   Date: 2014/05/06
 #   Input: string of numbers
 #   Output: return True if the input has the format YYYYDOY, otherwise return False
-def is_date_yyyydoy(string_date):
+def is_date_yyyydoy(string_date, silent=False):
     isdate_yyyydoy = False
     # check the length of string_date
     if 5 >= len(str(string_date)) <= 7:
-        logger.error('Invalid Length in Date Format %s' % string_date)
+        if not silent:
+            logger.error('Invalid Date Format %s' % string_date)
         return isdate_yyyydoy
 
     # check the yyyymmdd format
@@ -137,7 +175,7 @@ def is_date_yyyydoy(string_date):
                 # isdate_yyyydoy = date_format_yyyydoy.group(0)
                 isdate_yyyydoy = True
 
-    if not isdate_yyyydoy:
+    if (not isdate_yyyydoy) and (not silent):
         logger.error('Invalid Date Format   %s' % string_date)
 
     return isdate_yyyydoy
@@ -387,6 +425,40 @@ def conv_yymmk_2_yyyymmdd(yymmk):
     date_yyyymmdd = str(year)+month+day
     return date_yyyymmdd
 
+######################################################################################
+#   extract_from_date
+#   Purpose: extract year, month, day, hour and min from string date
+#            String is in format:
+#            YYYYMMDDHHMM or
+#            YYYYMMDD -> hh=0 and mm=0
+#   Author: Marco Clerici
+#   Date: 2014/06/22
+#   Input: string in the format YYYYMMDDHHMM/YYYYMMDD
+#   Output: year, month, day,
+
+def extract_from_date(str_date):
+
+    str_hour = '00'
+    str_min = '00'
+
+    if is_date_mmdd(str_date, silent=True):
+        str_year=''
+        str_month=str_date[0:2]
+        str_day=str_date[2:4]
+
+    if is_date_yyyymmdd(str_date, silent=True):
+        str_year=str_date[0:4]
+        str_month=str_date[4:6]
+        str_day=str_date[6:8]
+
+    if is_date_yyyymmddhhmm(str_date, silent=True):
+        str_year=str_date[0:4]
+        str_month=str_date[4:6]
+        str_day=str_date[6:8]
+        str_hour=str_date[8:10]
+        str_min=str_date[10:12]
+
+    return [str_year, str_month, str_day, str_hour, str_min]
 
 ######################################################################################
 #                            OTHER FUNCTIONS
@@ -460,3 +532,85 @@ def get_modis_tiles_list(mapset):
 
     tiles_list = ['h01v01', 'h01v02']
     return tiles_list
+
+######################################################################################
+#   check_output_dir
+#   Purpose: Check output directory exists, otherwise create it
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: output_dir
+#   Output: none
+#
+
+def check_output_dir(output_dir):
+
+    if not os.path.isdir(output_dir):
+        try:
+            os.makedirs(output_dir)
+        except:
+            logger.error("Cannot create directory %s"  % output_dir)
+
+        logger.info("Output directory %s created" % output_dir)
+
+    else:
+        logger.info("Output directory %s already exists" % output_dir)
+
+######################################################################################
+#   get_from_path_dir
+#   Purpose: Returns information form the directory
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: output_dir
+#   Output: none
+#   Description: returns information form the directory , which is always:
+#
+#   ['data_dir']+<productcode>+[derived/tif]+<subproductcode>
+#
+#
+
+def get_from_path_dir(dirname):
+
+    # Make sure there is a leading separator
+    mydir=dirname+os.path.sep
+
+    [head, subproductcode] = os.path.split(os.path.split(mydir)[0])
+
+    [head1, productcode] = os.path.split(os.path.split(head)[0])
+
+    return [productcode, subproductcode]
+
+######################################################################################
+#   get_from_path_filename
+#   Purpose: Returns information from the filename
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: filename
+#   Output: date, mapset and version
+#   Description: returns information form the filename, which is always:
+#
+#   <datefield>'_'<productcode>['_'<version>]'_'<subproductcode>'_'<mapset>'_'<ext>
+#
+#
+
+def get_from_path_filename(filename, productcode, subproductcode, extension=None):
+
+    if extension is None:
+        extension = '.tif'
+
+    # Remove the extension
+    filename_noext = filename.replace(extension,'')
+
+    # Get the date string
+    str_date = filename_noext.split('_')[0]
+
+    # Remove date
+    str_remain=filename_noext.replace(str_date+'_','')
+
+    # Remove the product_code
+    str_remain1=str_remain.replace(productcode+'_','')
+    str_remain =str_remain1.replace(subproductcode+'_','')
+
+    mapset = str_remain
+    return [str_date, mapset]
+
+
