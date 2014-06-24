@@ -1238,4 +1238,3 @@ def conv_data_type_to_gdal(type):
         return GDT_CFloat64
     else:
         return GDT_Int16
-

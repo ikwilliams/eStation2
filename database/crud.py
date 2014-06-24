@@ -1,13 +1,9 @@
 __author__ = "Jurriaan van 't Klooster"
 
+import sys
 # Import eStation lib modules
 from lib.python import es_logging as log
 from config.es_constants import *
-# import lib.python.querydb as querydb
-# from lib.python.mapset import *
-# from lib.python.functions import *
-# from lib.python.metadata import *
-
 
 from sqlalchemy import *
 from sqlalchemy.orm import *
@@ -52,8 +48,8 @@ class CrudDB:
                 #exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
                 #print "could not map table ", table_name
                 # Exit the script and print an error telling what happened.
-                raise logger.error("CrudDB: could not map table %s!" % table_name)
-                #raise Exception("CrudDB: could not map table %s!\n ->%s" % table_name, exceptionvalue)
+
+                logger.error("CrudDB: could not map table %s!" % table_name)
 
         #create a Session template that requires commit to be called explicit
         self.session = sessionmaker(bind=db, autoflush=True)
@@ -74,10 +70,9 @@ class CrudDB:
             return status
         except:
             exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-            #print traceback.format_exc()
+
             # Exit the script and print an error telling what happened.
-            raise logger.error("CrudDB: create record error in table {}!\n {}".format(table_name, exceptionvalue))
-            #raise Exception("CrudDB: create record error in table %s!\n ->%s" % table_name, exceptionvalue)
+            logger.error("CrudDB: create record error in table {}!\n {}".format(table_name, exceptionvalue))
         finally:
             if session:
                 session.close()
@@ -98,10 +93,8 @@ class CrudDB:
             return records
         except:
             exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-            #print traceback.format_exc()
             # Exit the script and print an error telling what happened.
-            raise logger.error("CrudDB: error read records of table {}!\n {}".format(table_name, exceptionvalue))
-            #raise Exception("CrudDB: error read records of table %s !\n ->%s" % table_name, exceptionvalue)
+            logger.error("CrudDB: error read records of table {}!\n {}".format(table_name, exceptionvalue))
         finally:
             if session:
                 session.close()
@@ -124,8 +117,7 @@ class CrudDB:
             exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
             #print traceback.format_exc()
             # Exit the script and print an error telling what happened.
-            raise logger.error("CrudDB: update record error in table {}!\n {}".format(table_name, exceptionvalue))
-            #raise Exception("CrudDB: update record error in table %s!\n ->%s" % table_name, exceptionvalue)
+            logger.error("CrudDB: update record error in table {}!\n {}".format(table_name, exceptionvalue))
         finally:
             if session:
                 session.close()
@@ -148,8 +140,7 @@ class CrudDB:
             exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
             #print traceback.format_exc()
             # Exit the script and print an error telling what happened.
-            raise logger.error("CrudDB: delete record error in table {}!\n {}".format(table_name, exceptionvalue))
-            #raise Exception("CrudDB: delete record error in table %s!\n ->%s" % table_name, exceptionvalue)
+            logger.error("CrudDB: delete record error in table {}!\n {}".format(table_name, exceptionvalue))
         finally:
             if session:
                 session.close()

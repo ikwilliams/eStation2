@@ -1,4 +1,4 @@
-<?php 
+<?php
 $CONFIG['DATA_VERSION']= "24/01/2014";
 
 

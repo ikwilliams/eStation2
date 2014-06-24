@@ -144,5 +144,3 @@ while 1:
         logger.fatal(str(e))
         exit(1)
 exit(0)
-
-
