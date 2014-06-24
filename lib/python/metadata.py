@@ -6,6 +6,11 @@
 #
 import datetime
 
+# Import eStation2 modules
+from lib.python import es_logging as log
+
+logger = log.my_logger(__name__)
+
 # Add:  Units, scaling factor, offset, nodata
 
 sds_metadata = { 'eStation2_product': '',
@@ -50,6 +55,20 @@ class SdsMetadata:
         # Go through the metadata list and write to sds
         for key, value in sds_metadata.iteritems():
             dataset.SetMetadataItem(key, value)
+
+    def read_from_ds(self, dataset):
+    #
+    #   Read std metadata structure from a file
+    #   Args:
+    #       dataset: osgeo.gdal dataset (open and georeferenced)
+
+        # Go through the metadata list and write to sds
+        for key, value in sds_metadata.iteritems():
+            try:
+                value = dataset.GetMetadataItem(key)
+                sds_metadata[key] = value
+            except:
+                logger.error('Error in reading metadata item %s' % key)
 
     def assign_time_now(self):
     #

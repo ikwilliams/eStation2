@@ -39,7 +39,7 @@ input_dir = locals.es2globals['test_data_in']
 # interm_dir = locals.es2globals['test_data_inter']
 
 #   Still to be done
-#   TODO-M.C.: upsert to DB
+#   TODO-M.C.test: upsert to DB
 #   TODO-M.C.: Add metadata to the output
 #   TODO-M.C.: functions to avoid repetitions
 #   TODO-M.C.: more checks on the IN/OUT
@@ -301,7 +301,7 @@ def upsert_processed_ruffus(file_fullpath):
         dirname = os.path.dirname(file_fullpath)
 
         # TODO-M.C.: add tests, try/except
-        [productcode, subproductcode] = get_from_path_dir(dirname)
+        [productcode, subproductcode, version] = get_from_path_dir(dirname)
         [str_date, mapsetcode] = get_from_path_filename(filename, productcode, subproductcode)
         [str_year, str_month, str_day, str_hour, str_min] = extract_from_date(str_date)
 
@@ -325,16 +325,21 @@ def upsert_processed_ruffus(file_fullpath):
                   'month': int(str_month),
                   'day': int(str_day),
                   'hour': int(str_hour),
+#                  'min': int(str_min),
                   'file_role': 'active',
                   'file_type': 'GTiff'}
 
-        if len(cruddb.read('products.products_data', **recordkey)) > 0:
-            logger.debug('Updating products_data record: ' + str(recordkey))
+        try:
+            cruddb.create('products.products_data', record)
+        except:
             cruddb.update('products.products_data', record)
-        else:
-            logger.debug('Creating products_data record: ' + str(recordkey))
-            status = cruddb.create('products.products_data', record)
-            print status
+
+        # if len(cruddb.read('products.products_data', **recordkey)) > 0:
+        #     logger.debug('Updating products_data record: ' + str(recordkey))
+        #     cruddb.update('products.products_data', record)
+        # else:
+        #     logger.debug('Creating products_data record: ' + str(recordkey))
+        #     cruddb.create('products.products_data', record)
 
 #   ---------------------------------------------------------------------
 #   Run the pipeline

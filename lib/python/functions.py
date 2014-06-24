@@ -577,7 +577,10 @@ def get_from_path_dir(dirname):
 
     [head1, productcode] = os.path.split(os.path.split(head)[0])
 
-    return [productcode, subproductcode]
+    # TODO-M.C.: implement version management
+    version = 'undefined'
+
+    return [productcode, subproductcode, version]
 
 ######################################################################################
 #   get_from_path_filename
