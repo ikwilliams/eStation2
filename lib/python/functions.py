@@ -438,8 +438,7 @@ def conv_yymmk_2_yyyymmdd(yymmk):
 
 def extract_from_date(str_date):
 
-    str_hour = '00'
-    str_min = '00'
+    str_hour = '0000'
 
     if is_date_mmdd(str_date, silent=True):
         str_year=''
@@ -455,10 +454,9 @@ def extract_from_date(str_date):
         str_year=str_date[0:4]
         str_month=str_date[4:6]
         str_day=str_date[6:8]
-        str_hour=str_date[8:10]
-        str_min=str_date[10:12]
+        str_hour=str_date[8:12]
 
-    return [str_year, str_month, str_day, str_hour, str_min]
+    return [str_year, str_month, str_day, str_hour]
 
 ######################################################################################
 #                            OTHER FUNCTIONS
@@ -535,25 +533,49 @@ def get_modis_tiles_list(mapset):
 
 ######################################################################################
 #   check_output_dir
-#   Purpose: Check output directory exists, otherwise create it
+#   Purpose: Check output directory exists, otherwise create it.
 #   Author: Marco Clerici, JRC, European Commission
 #   Date: 2014/06/22
-#   Inputs: output_dir
+#   Inputs: output_dir, or list of dirs
 #   Output: none
 #
 
 def check_output_dir(output_dir):
 
-    if not os.path.isdir(output_dir):
+    # Is it a list ?
+    if isinstance(output_dir, list):
+        my_dir=output_dir[0]
+    else:
+        my_dir=output_dir
+    # It dose exist ?
+    if not os.path.isdir(my_dir):
         try:
-            os.makedirs(output_dir)
+            os.makedirs(my_dir)
         except:
-            logger.error("Cannot create directory %s"  % output_dir)
+            logger.error("Cannot create directory %s"  % my_dir)
 
-        logger.info("Output directory %s created" % output_dir)
+        logger.info("Output directory %s created" % my_dir)
 
     else:
-        logger.info("Output directory %s already exists" % output_dir)
+
+        logger.info("Output directory %s already exists" % my_dir)
+
+######################################################################################
+#
+#   Purpose: return as single element of a list
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs:
+#   Output: none
+#
+
+def return_as_element_of_list(input_arg):
+
+    # Is it a list ?
+    if isinstance(input_arg, list):
+        return input_arg[0]
+    else:
+        return input_arg
 
 ######################################################################################
 #   get_from_path_dir

@@ -49,12 +49,14 @@ class SdsMetadata:
     #   Args:
     #       dataset: osgeo.gdal dataset (open and georeferenced)
 
-        # Check dataset is open
+        # TODO-M.C.: Check dataset is open
+        # TODO-M.C.: Write to a specific domain
 
+        # domain = 'eStation2'
 
         # Go through the metadata list and write to sds
         for key, value in sds_metadata.iteritems():
-            dataset.SetMetadataItem(key, value)
+            dataset.SetMetadataItem(key, value, )
 
     def read_from_ds(self, dataset):
     #
