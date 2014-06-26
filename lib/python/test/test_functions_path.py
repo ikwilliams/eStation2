@@ -13,7 +13,7 @@ class TestFunctionsPath(TestCase):
         dirname=sep+'base'+sep+'dir'+sep+'some'+sep+'where' + sep +\
                 'my_prod_code'+sep+'dir_type'+sep+'my_subprod_code'+sep
 
-        [prodcode,subprodcode] = get_from_path_dir(dirname)
+        [prodcode,subprodcode, version] = get_from_path_dir(dirname)
 
         self.assertEqual(prodcode,'my_prod_code')
         self.assertEqual(subprodcode,'my_subprod_code')

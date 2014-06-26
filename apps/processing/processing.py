@@ -35,7 +35,7 @@ from ruffus import *
 
 logger = log.my_logger(__name__)
 
-input_dir = locals.es2globals['test_data_in']
+input_dir = locals.es2globals['test_data_in']+'/FEWSNET_RFE/tif/RFE/'
 # interm_dir = locals.es2globals['test_data_inter']
 
 #   Still to be done
@@ -46,11 +46,11 @@ input_dir = locals.es2globals['test_data_in']
 #   TODO-M.C.ok: NODATA management -> not for RFE !!
 #   TODO-M.C.ok: Check and create output dir
 #   TODO-M.C.test: Activate/deactivate according to DB settings
-#   TODO-M.C.: Add a mechanism to extract/visualize the 'status' -> printout+grep ??
+#   TODO-M.C.test: Add a mechanism to extract/visualize the 'status' -> pipeline_printout(verbose=3)+grep-like function ?
 #   TODO-M.C.: create unittest-like functions for validating the chain
-#   TODO-M.C.: multiprocessing ?!?!
+#   TODO-M.C.: multiprocessing does not work -> VM issue ?
 #   TODO-M.C.test: add the Np anomalies
-#   TODO-M.C.: find a robust method to solve the tuple/string issue in filename
+#   TODO-M.C.test: find a robust method to solve the tuple/string issue in filename (fttb: return_as_element_of_list() ?)
 
 # Delete a file for re-creating
 
@@ -74,13 +74,13 @@ activate_10ddiff_comput=1
 activate_10dperc_comput=1
 activate_10dnp_comput=1
 
-activate_1moncum_comput=1
-activate_1monavg_comput=1
-activate_1monmin_comput=1
-activate_1monmax_comput=1
-activate_1mondiff_comput=1
-activate_1monperc_comput=1
-activate_1monnp_comput=1
+activate_1moncum_comput=0
+activate_1monavg_comput=0
+activate_1monmin_comput=0
+activate_1monmax_comput=0
+activate_1mondiff_comput=0
+activate_1monperc_comput=0
+activate_1monnp_comput=0
 
 #   ---------------------------------------------------------------------
 #   Define input files
@@ -156,8 +156,8 @@ out_prod_ident='_'+prod+'_'+output_sprod+'_'+mapset+ext
 formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
 
 formatter_out="{subpath[0][2]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
-ancillary_sprod = "10davg"
 
+ancillary_sprod = "10davg"
 ancillary_subdir = "derived"+os.path.sep+ancillary_sprod+os.path.sep
 ancillary_sprod_ident = '_'+prod+'_'+ancillary_sprod+'_'+mapset+ext
 ancillary_input="{subpath[0][2]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
@@ -454,8 +454,9 @@ def upsert_processed_ruffus(file_fullpath):
 def processing_fewsnet_rfe():
 
     logger.info("Entering routine %s" % 'processing_fewsnet_rfe')
-    pipeline_run(verbose=5)
+    #pipeline_printout(verbose=3)
+    #sleep 1
+    pipeline_run(verbose=2)
     #pipeline_run(multiprocess=6)
-    #pipeline_printout()
     #pipeline_printout()
     #pipeline_printout_graph('flowchart.jpg')
