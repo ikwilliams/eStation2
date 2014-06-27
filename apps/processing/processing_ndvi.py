@@ -7,142 +7,137 @@
 #
 
 # source my definitions
-# import locals
+import locals
 #
 
-# import standard modules
-# import glob
-# import os
-
 # Import eStation2 modules
-from lib.python import es_logging as log
 from config.es_constants import *
 import database.querydb as querydb
-from lib.python.mapset import *
 from lib.python.functions import *
 from lib.python.metadata import *
 from lib.python.image_proc import raster_image_math
 from lib.python.image_proc.recode import *
 import database.crud as crud
-#from apps.processing.processing import *
 
 # Import third-party modules
-
 from ruffus import *
 
 logger = log.my_logger(__name__)
-
-input_dir = locals.es2globals['test_data_in']+'/VGT_NDVI/tif/NDV/'   # ????????
-
 
 #   Still to be done
 
 #   General definitions for this processing chain
 prod="VGT_NDVI"
-mapset='WGS84_Africa_1km'
+mapset='WGS84_Guinea2Nig_1km'
 ext='.tif'
+version='undefined'
 
 #   general switch
-activate_vgt_ndvi_comput=0
+activate_vgt_ndvi_comput=1
 
 #   switch wrt to group
-activate_nvi_no_filter_stats=1
-activate_nvi_no_filter_anomalies=1
+activate_nvi_no_filter_stats=0
+activate_nvi_no_filter_anomalies=0
 
 activate_filtered_prods=1
-activate_filtered_stats=1
-activate_filtered_anomalies=1
+activate_filtered_stats=0
+activate_filtered_anomalies=0
 
-activate_monthly_prods=1
+activate_monthly_prods=0
 
-#   specific switch for each subproduct or small group
-# activate_ndv_comput=1
-# activate_10dmin_comput=1
-# activate_10dmax_comput=1
-# activate_10ddiff_comput=1
-# activate_10dperc_comput=1
-# activate_10dnp_comput=1
-#
-# activate_1moncum_comput=1
-# activate_1monavg_comput=1
-# activate_1monmin_comput=1
-# activate_1monmax_comput=1
-# activate_1mondiff_comput=1
-# activate_1monperc_comput=1
-# activate_1monnp_comput=1
+#   and for each prod in: activate_nvi_no_filter_stats
+activate_10davg_no_filter = 1
 
 #   ---------------------------------------------------------------------
 #   Define input files
 starting_sprod='NDV'
-in_prod_ident='_'+prod+'_'+starting_sprod+'_'+mapset+ext
-starting_files = input_dir+"*"+in_prod_ident
+in_prod_ident = set_path_filename_no_date(prod, starting_sprod, mapset, ext)
 
+input_dir = locals.es2globals['data_dir']+ \
+            set_path_sub_directory(prod, starting_sprod, 'tif', version)
+
+starting_files = input_dir+"*"+in_prod_ident
 
 #   ---------------------------------------------------------------------
 #   NDV avg x dekad (i.e. avg_dekad)
-output_sprod="10davg"
+output_sprod="10DAVG"
+
+out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
+output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version)
+
+formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
+formatter_out=["{subpath[0][3]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+
+@active_if(activate_vgt_ndvi_comput, activate_nvi_no_filter_stats, activate_10davg_no_filter)
+@collate(starting_files, formatter(formatter_in),formatter_out)
+def fewsnet_10davg(input_file, output_file):
+
+    output_file = list_to_element(output_file)
+    check_output_dir(os.path.dirname(output_file))
+    args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
+    raster_image_math.do_avg_image(**args)
+    #upsert_processed_ruffus(output_file)
+
 #   ---------------------------------------------------------------------
 #   NDV min x dekad (i.e. min_dekad)
-output_sprod="10dmin"
+output_sprod="10DMIN"
 #   ---------------------------------------------------------------------
 #   NDV max x dekad (i.e. max_dekad)
-output_sprod="10dmax"
+output_sprod="10DMAX"
 #   ---------------------------------------------------------------------
 #   NDV std x dekad (i.e. std_dekad)
-output_sprod="10dstd"
+output_sprod="10DSTD"
 #   ---------------------------------------------------------------------
 #   NDV med x dekad (i.e. med_dekad)
-output_sprod="10dmed"
+output_sprod="10DMED"
 
 #   ---------------------------------------------------------------------
 #   NDV stats per year -> TBDone
 #   ---------------------------------------------------------------------
 #   NDV stats per absolute -> TBDone
 
-
 #   ---------------------------------------------------------------------
 #   NDV linearx1/x2
 #   Note: here the difficulty is to manage the +1/-1 dekad across the year
 
-output_sprod="ndvi_linearx1"
-output_subdir="derived"+os.path.sep+output_sprod+os.path.sep
-out_prod_ident='_'+prod+'_'+output_sprod+'_'+mapset+ext
+output_sprod="NDVI_LINEARX1"
+out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
+output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version)
 
 def generate_parameters_on_the_fly():
 
+        # TODO-M.C.: replace with functions that parse all 'tif/NDV' files and finds out two neighbors
         parameters = [
-                        ['20130511_VGT_NDVI_NDV_WGS84_Africa_1km.tif','20130521_VGT_NDVI_NDV_WGS84_Africa_1km.tif','20130601_VGT_NDVI_NDV_WGS84_Africa_1km.tif'],
-                        ['20130521_VGT_NDVI_NDV_WGS84_Africa_1km.tif','20130601_VGT_NDVI_NDV_WGS84_Africa_1km.tif','20130611_VGT_NDVI_NDV_WGS84_Africa_1km.tif'],
-                        ['20130601_VGT_NDVI_NDV_WGS84_Africa_1km.tif','20130611_VGT_NDVI_NDV_WGS84_Africa_1km.tif','20130621_VGT_NDVI_NDV_WGS84_Africa_1km.tif']
+            [('20100101_VGT_NDVI_NDV_WGS84_Guinea2Nig_1km.tif','20100111_VGT_NDVI_NDV_WGS84_Guinea2Nig_1km.tif','20100121_VGT_NDVI_NDV_WGS84_Guinea2Nig_1km.tif'), 'my_out.tif'],
+            [('20100101_VGT_NDVI_NDV_WGS84_Guinea2Nig_1km.tif','20100111_VGT_NDVI_NDV_WGS84_Guinea2Nig_1km.tif','20100121_VGT_NDVI_NDV_WGS84_Guinea2Nig_1km.tif'), 'my_out.tif'],
+            [('20100101_VGT_NDVI_NDV_WGS84_Guinea2Nig_1km.tif','20100111_VGT_NDVI_NDV_WGS84_Guinea2Nig_1km.tif','20100121_VGT_NDVI_NDV_WGS84_Guinea2Nig_1km.tif'), 'my_out.tif']
         ]
+
+        # TODO-M.C.: create function to append directory to list of parameters
         for job_pars in parameters:
-                yield [input_dir+job_pars[0],input_dir+job_pars[1],input_dir+job_pars[2]]
+            pars_list = []
+            for element in job_pars:
+                if isinstance(element,tuple):
+                    new_element = ()
+                    for component in element:
+                        new_element = new_element + (input_dir+component,)
+                else:
+                    new_element = input_dir+element
+                pars_list.append(new_element)
+            yield pars_list
 
+        # for job_pars in parameters:
+        #     yield job_pars
 
-#   Starting files + avg
-#formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-#formatter_out="{subpath[0][2]}"+os.path.sep+output_subdir+"{YYYY[0]}-1{MMDD[0]}"+out_prod_ident
-
-# ancillary_sprod = "10davg"
-# ancillary_subdir = "derived"+os.path.sep+ancillary_sprod+os.path.sep
-# ancillary_sprod_ident = '_'+prod+'_'+ancillary_sprod+'_'+mapset+ext
-# ancillary_input="{subpath[0][2]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
-
-#@transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
-#@transform(starting_files, formatter(formatter_in), formatter_out)
-@active_if(activate_vgt_ndvi_comput)
+@active_if(activate_vgt_ndvi_comput, activate_filtered_prods)
 @files(generate_parameters_on_the_fly)
-def ndvi_linearx1(input_file, input_file1, input_file2):
+def ndvi_linearx1(input_files, output_file):
 
-    print "input_file: ", input_file
-    print "input_file1:", input_file1
-    print "input_file2:", input_file2
+    print "input_file: ", input_files[0]
+    print "input_file1:", input_files[1]
+    print "input_file2:", input_files[2]
 
-
-
-
-
-
+    print "output_file:", output_file
 
 
 #   ---------------------------------------------------------------------
