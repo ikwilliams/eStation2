@@ -48,7 +48,7 @@ ext='.tif'
 version='undefined'
 
 #   general switch
-activate_fewsnet_rfe_comput=1
+activate_fewsnet_rfe_comput=0
 
 #   switch wrt temporal resolution
 activate_10d_comput=1
@@ -75,7 +75,7 @@ activate_1monnp_comput=1
 starting_sprod='RFE'
 in_prod_ident = set_path_filename_no_date(prod, starting_sprod, mapset, ext)
 
-input_dir = locals.es2globals['test_data_in']+ \
+input_dir = locals.es2globals['data_dir']+ \
             set_path_sub_directory(prod, starting_sprod, 'tif', version)
 
 starting_files = input_dir+"*"+in_prod_ident
