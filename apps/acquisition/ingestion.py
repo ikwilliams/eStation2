@@ -686,6 +686,8 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 #       echo_query[option]: force print-out from query_db funtions
 #
 
+    # TODO-M.C.: manage version
+    version_undef='undefined'
     logger.info("Entering routine %s for product %s - date %s" % ('ingest_file', product, in_date))
 
     # Test the file/files exists
@@ -802,11 +804,9 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
                 hour = None
 
         # Define output directory and make sure it exists
-        output_directory = data_dir_out+ \
-                           str(product['productcode']).upper() + \
-                           '/tif/' + \
-                           os.path.sep + \
-                           str(subproducts[ii]['subproduct']).upper()
+        output_directory = data_dir_out+ func.set_path_sub_directory(product['productcode'],subproducts[ii]['subproduct'],
+                                                                '.tif', version_undef)
+
         try:
             if not os.path.exists(output_directory):
                 os.makedirs(output_directory)
@@ -815,10 +815,11 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             return 1
 
         # Define output filename
-        output_filename = output_directory + os.path.sep + output_date_str + "_" \
-                                          + str(product['productcode']).upper() + '_' \
-                                          + str(subproducts[ii]['subproduct']).upper() + "_" \
-                                          + mapset_id + '.tif'
+        output_filename = output_directory + func.set_path_filename(output_date_str,
+                                                               product['productcode'],
+                                                               subproducts[ii]['subproduct'],
+                                                               mapset_id,
+                                                               '.tif')
 
         # -------------------------------------------------------------------------
         # Manage IN/OUT mapset and assess if re-projection has to be done
