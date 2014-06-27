@@ -4,6 +4,7 @@
 #	date:	 31.03.2014
 #   descr:	 Defines members and methods of the metadata class
 #
+import os
 import datetime
 
 # Import eStation2 modules
@@ -23,7 +24,8 @@ sds_metadata = { 'eStation2_product': '',
                  'eStation2_scaling_factor': '',
                  'eStation2_scaling_offset': '',
                  'eStation2_conversion': '',
-                 'eStation2_nodata': ''
+                 'eStation2_nodata': '',
+                 'eStation2_subdir': ''
 
 }
 
@@ -42,6 +44,7 @@ class SdsMetadata:
         sds_metadata['eStation2_scaling_offset'] = 'my_scaling_offset'
         sds_metadata['eStation2_conversion'] = 'Phys = DN * scaling_factor + scaling_offset'
         sds_metadata['eStation2_nodata'] = 'my_nodata'
+        sds_metadata['eStation2_subdir'] = 'my_subdir'
 
     def write_to_ds(self, dataset):
     #
@@ -94,6 +97,13 @@ class SdsMetadata:
     #
     #   Assign mapset
         sds_metadata['eStation2_mapset'] = str(mapset_short_name)
+
+    def assign_subdir_from_fulldir(self, full_directory):
+    #
+    #   Assign subdir
+        subdirs =  full_directory.split(os.path.sep)
+        subdir = subdirs[-4]+os.path.sep+subdirs[-3]+os.path.sep+subdirs[-2]+os.path.sep
+        sds_metadata['eStation2_subdir'] = str(subdir)
 
     def assign_input_files(self, input_files):
     #

@@ -10,6 +10,8 @@
 #
 #	history: 1.0
 #
+#   TODO-M.C.: replace, where needed/applicable,  datetime()
+#
 
 # source eStation2 base definitions
 import locals
@@ -34,7 +36,6 @@ logger = log.my_logger(__name__)
 ######################################################################################
 #                            DATE FUNCTIONS
 ######################################################################################
-
 
 ######################################################################################
 #   is_date_yyyymmdd
@@ -459,9 +460,180 @@ def extract_from_date(str_date):
     return [str_year, str_month, str_day, str_hour]
 
 ######################################################################################
-#                            OTHER FUNCTIONS
+#                            FILE/DIRECTORY  NAMING and MANAGEMENT
 ######################################################################################
+#
+#   General rules:
+#       dir is always
+#                       ['data_dir']+<product_code>+[derived/tif]+<sub_product_code>
+#       e.g.            /data/processing/FEWSNET_RFE/derived/10davg
+#
+#       filename is always
+#                       <datefield>'_'<product_code>['_'<version>]'_'<sub_product_code>'_'<mapset>'_'<ext>
+#       e.g.            0611_FEWSNET_RFE_10davg_FEWSNET_Africa_8km.tif
+#
+#   Conventions: product_code : UPPERCASE, 1+ '_" separators
+#                sub_product_code : UPPERCASE, 0+ '_" separators
+#
+######################################################################################
+#   set_path_filename_nodate
+#   Purpose: From product_code, sub_product_code, mapset, extension -> filename W/O date
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: sub_product_code, mapset
+#   Output: process_id, subdir
+#   Description: creates filename WITHOUT date field (for ruffus formatters)
+#
+#
+def set_path_filename_no_date(product_code, sub_product_code, mapset_id, extension):
 
+    filename_nodate =     "_" + str(product_code.upper()) + '_' \
+                              + str(sub_product_code.upper()) + "_" \
+                              + mapset_id + extension
+
+    return filename_nodate
+
+######################################################################################
+#   set_path_filename
+#   Purpose: From date, product_code, sub_product_code, mapset, extension -> filename
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: sub_product_code, mapset
+#   Output: process_id, subdir
+#   Description: creates filename
+#
+#
+def set_path_filename(date_str, product_code, sub_product_code, mapset_id, extension):
+
+    filename = date_str + set_path_filename_no_date(product_code, sub_product_code, mapset_id, extension)
+    return filename
+
+######################################################################################
+#   set_path_sub_directory
+#   Purpose: From product_code, sub_product_code, type, version  -> sub_directory
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: product_code, sub_product_code, type, version
+#   Output: subdir, e.g. FEWSNET_RFE/tif/RFE/
+#   Description: creates filename
+#
+#
+def set_path_sub_directory(product_code, sub_product_code, type, version):
+
+    sub_directory = str(product_code.upper()) + os.path.sep + \
+                    type + os.path.sep +\
+                    str(sub_product_code.upper()) + os.path.sep
+
+    return sub_directory
+
+######################################################################################
+#   set_path_filename
+#   Purpose: From date, product_code, sub_product_code, mapset, extension -> filename
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: sub_product_code, mapset
+#   Output: process_id, subdir
+#   Description: creates filename
+#
+#
+def set_path_filename(date_str, product_code, sub_product_code, mapset_id, extension):
+
+    filename = date_str + set_path_filename_no_date(product_code, sub_product_code, mapset_id, extension)
+    return filename
+
+
+######################################################################################
+#   get_from_path_dir
+#   Purpose: From directory -> prod, subprod, version
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: output_dir
+#   Output: none
+#   Description: returns information form the directory
+#
+#
+#   NOTE:
+
+def get_from_path_dir(dirname):
+
+    # Make sure there is a leading separator
+    mydir=dirname+os.path.sep
+
+    [head, sub_product_code] = os.path.split(os.path.split(mydir)[0])
+
+    [head1, product_code] = os.path.split(os.path.split(head)[0])
+
+    # TODO-M.C.: implement version management
+    version = 'undefined'
+
+    return [product_code, sub_product_code, version]
+
+######################################################################################
+#   get_from_path_filename
+#   Purpose: From filename -> product_code, sub_product_code
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: filename
+#   Output: date, mapset and version
+#   Description: returns information form the filename
+#
+#
+
+def get_from_path_filename(filename, product_code, sub_product_code, extension=None):
+
+    if extension is None:
+        extension = '.tif'
+
+    # Remove the extension
+    filename_noext = filename.replace(extension,'')
+
+    # Get the date string
+    str_date = filename_noext.split('_')[0]
+
+    # Remove date
+    str_remain=filename_noext.replace(str_date+'_','')
+
+    # Remove the product_code
+    str_remain1=str_remain.replace(product_code+'_','')
+    str_remain =str_remain1.replace(sub_product_code+'_','')
+
+    mapset = str_remain
+    return [str_date, mapset]
+
+
+######################################################################################
+#   check_output_dir
+#   Purpose: Check output directory exists, otherwise create it.
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: output_dir, or list of dirs
+#   Output: none
+#
+
+def check_output_dir(output_dir):
+
+    # Is it a list ?
+    if isinstance(output_dir, list):
+        my_dir=output_dir[0]
+    else:
+        my_dir=output_dir
+    # It does exist ?
+    if not os.path.isdir(my_dir):
+        try:
+            os.makedirs(my_dir)
+        except:
+            logger.error("Cannot create directory %s"  % my_dir)
+
+        logger.info("Output directory %s created" % my_dir)
+
+    else:
+
+        logger.debug("Output directory %s already exists" % my_dir)
+
+
+######################################################################################
+#                            MISCELLANEOUS
+######################################################################################
 
 #  Simple function to show the memory Usage
 # (see http://stackoverflow.com/questions/552744/how-do-i-profile-memory-usage-in-python)
@@ -469,21 +641,6 @@ def mem_usage(point=""):
     usage = resource.getrusage(resource.RUSAGE_SELF)
     return '''%s: usertime=%s systime=%s mem=%s mb
            ''' % (point, usage[0], usage[1], (usage[2]*resource.getpagesize())/1000000.0)
-
-
-######################################################################################
-#   create_prod_filename
-#   Purpose: Create the full product path+name
-#   Author: Simona Oancea, JRC, European Commission
-#   Date: 2014/04/08
-#   Inputs: product, subproduct, version, mapset, date
-#   Output: directory and filename
-#
-def create_prod_filename(product, subproduct, version, mapset, date):
-
-    sub_dir = 'VGT_NDVI/tif/NDV/'
-    filename = '20130701_VGT_NDVI_NDV_WGS84_Africa_1km.tif'
-    return sub_dir, filename
 
 
 ######################################################################################
@@ -531,111 +688,45 @@ def get_modis_tiles_list(mapset):
     tiles_list = ['h01v01', 'h01v02']
     return tiles_list
 
-######################################################################################
-#   check_output_dir
-#   Purpose: Check output directory exists, otherwise create it.
-#   Author: Marco Clerici, JRC, European Commission
-#   Date: 2014/06/22
-#   Inputs: output_dir, or list of dirs
-#   Output: none
-#
-
-def check_output_dir(output_dir):
-
-    # Is it a list ?
-    if isinstance(output_dir, list):
-        my_dir=output_dir[0]
-    else:
-        my_dir=output_dir
-    # It dose exist ?
-    if not os.path.isdir(my_dir):
-        try:
-            os.makedirs(my_dir)
-        except:
-            logger.error("Cannot create directory %s"  % my_dir)
-
-        logger.info("Output directory %s created" % my_dir)
-
-    else:
-
-        logger.info("Output directory %s already exists" % my_dir)
 
 ######################################################################################
 #
-#   Purpose: return as single element of a list
+#   Purpose: convert a non list/tuple object to a list
 #   Author: Marco Clerici, JRC, European Commission
 #   Date: 2014/06/22
 #   Inputs:
 #   Output: none
 #
 
-def return_as_element_of_list(input_arg):
+def element_to_list(input_arg):
 
-    # Is it a list ?
-    if isinstance(input_arg, list):
+    # Is it a list or a tuple ?
+    if type(input_arg) in (type([]), type(())):
+        return input_arg
+    else:
+        my_list = []
+        my_list.append(input_arg)
+    return my_list
+
+######################################################################################
+#
+#   Purpose: converts from list/tuple to element (the first one)
+#            it raises a warning if there is more than one element
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs:
+#   Output: none
+#
+
+def list_to_element(input_arg):
+
+    # Is it a list or a tuple
+    if type(input_arg) in (type([]), type(())):
+        if len(input_arg) > 1:
+            logger.warning('List/tuple contains more than 1 element !')
+
         return input_arg[0]
     else:
         return input_arg
-
-######################################################################################
-#   get_from_path_dir
-#   Purpose: Returns information form the directory
-#   Author: Marco Clerici, JRC, European Commission
-#   Date: 2014/06/22
-#   Inputs: output_dir
-#   Output: none
-#   Description: returns information form the directory , which is always:
-#
-#   ['data_dir']+<productcode>+[derived/tif]+<subproductcode>
-#
-#
-
-def get_from_path_dir(dirname):
-
-    # Make sure there is a leading separator
-    mydir=dirname+os.path.sep
-
-    [head, subproductcode] = os.path.split(os.path.split(mydir)[0])
-
-    [head1, productcode] = os.path.split(os.path.split(head)[0])
-
-    # TODO-M.C.: implement version management
-    version = 'undefined'
-
-    return [productcode, subproductcode, version]
-
-######################################################################################
-#   get_from_path_filename
-#   Purpose: Returns information from the filename
-#   Author: Marco Clerici, JRC, European Commission
-#   Date: 2014/06/22
-#   Inputs: filename
-#   Output: date, mapset and version
-#   Description: returns information form the filename, which is always:
-#
-#   <datefield>'_'<productcode>['_'<version>]'_'<subproductcode>'_'<mapset>'_'<ext>
-#
-#
-
-def get_from_path_filename(filename, productcode, subproductcode, extension=None):
-
-    if extension is None:
-        extension = '.tif'
-
-    # Remove the extension
-    filename_noext = filename.replace(extension,'')
-
-    # Get the date string
-    str_date = filename_noext.split('_')[0]
-
-    # Remove date
-    str_remain=filename_noext.replace(str_date+'_','')
-
-    # Remove the product_code
-    str_remain1=str_remain.replace(productcode+'_','')
-    str_remain =str_remain1.replace(subproductcode+'_','')
-
-    mapset = str_remain
-    return [str_date, mapset]
 
 
