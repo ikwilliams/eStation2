@@ -33,6 +33,7 @@ from lib.python.metadata import *
 from lib.python.image_proc import raster_image_math
 from lib.python.image_proc.recode import *
 import database.crud as crud
+from apps.processing.processing_switches import *
 
 # Import third-party modules
 from ruffus import *
@@ -48,11 +49,11 @@ ext='.tif'
 version='undefined'
 
 #   general switch
-activate_fewsnet_rfe_comput=0
+#activate_fewsnet_rfe_comput=0
 
 #   switch wrt temporal resolution
 activate_10d_comput=1
-activate_1month_comput=1
+activate_1month_comput=0
 
 #   specific switch for each subproduct
 activate_10davg_comput=1
@@ -76,19 +77,18 @@ starting_sprod='RFE'
 in_prod_ident = set_path_filename_no_date(prod, starting_sprod, mapset, ext)
 
 input_dir = locals.es2globals['data_dir']+ \
-            set_path_sub_directory(prod, starting_sprod, 'tif', version)
+            set_path_sub_directory(prod, starting_sprod, 'tif', version, mapset)
 
 starting_files = input_dir+"*"+in_prod_ident
 
 #   ---------------------------------------------------------------------
 #   Average
 output_sprod="10DAVG"
-
 out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version)
+output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
 
 formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out=["{subpath[0][3]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
 @active_if(activate_fewsnet_rfe_comput, activate_10d_comput, activate_10davg_comput)
 @collate(starting_files, formatter(formatter_in),formatter_out)
@@ -105,10 +105,10 @@ def fewsnet_10davg(input_file, output_file):
 #   Minimum
 output_sprod="10DMIN"
 out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version)
+output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
 
 formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out=["{subpath[0][3]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
 @active_if(activate_fewsnet_rfe_comput, activate_10d_comput, activate_10dmin_comput)
 @collate(starting_files, formatter(formatter_in),formatter_out)
@@ -124,10 +124,10 @@ def fewsnet_10dmin(input_file, output_file):
 #   Maximum
 output_sprod="10DMAX"
 out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version)
+output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
 
 formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out=["{subpath[0][3]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
 @active_if(activate_fewsnet_rfe_comput, activate_10d_comput, activate_10dmax_comput)
 @collate(starting_files, formatter(formatter_in),formatter_out)
@@ -143,16 +143,16 @@ def fewsnet_10dmax(input_file, output_file):
 #   10dDiff
 output_sprod="10DIFF"
 out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version)
+output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
 
 #   Starting files + avg
 formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out="{subpath[0][3]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
 
 ancillary_sprod = "10davg"
 ancillary_sprod_ident = set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
-ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived',version)
-ancillary_input="{subpath[0][3]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
+ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived',version, mapset)
+ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
 @follows(fewsnet_10davg)
 @active_if(activate_fewsnet_rfe_comput, activate_10d_comput, activate_10ddiff_comput)
@@ -169,16 +169,16 @@ def fewsnet_10ddiff(input_file, output_file):
 #   10dperc
 output_sprod="10DPERC"
 out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version)
+output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
 
 #   Starting files + avg
 formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out="{subpath[0][3]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
 
 ancillary_sprod = "10davg"
 ancillary_sprod_ident = set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
-ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived',version)
-ancillary_input="{subpath[0][3]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
+ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived', version, mapset)
+ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
 @follows(fewsnet_10davg)
 @active_if(activate_fewsnet_rfe_comput, activate_10d_comput, activate_10dperc_comput)
@@ -195,21 +195,21 @@ def fewsnet_10dperc(input_file, output_file):
 #   10dnp
 output_sprod="10DNP"
 out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version)
+output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
 
 #   Starting files + min + max
 formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out="{subpath[0][3]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
 
 ancillary_sprod_1 = "10DMIN"
 ancillary_sprod_ident_1 = set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
-ancillary_subdir_1      = set_path_sub_directory(prod, ancillary_sprod_1, 'derived',version)
-ancillary_input_1="{subpath[0][3]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
+ancillary_subdir_1      = set_path_sub_directory(prod, ancillary_sprod_1, 'derived',version, mapset)
+ancillary_input_1="{subpath[0][4]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
 
 ancillary_sprod_2 = "10DMAX"
 ancillary_sprod_ident_2 = set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
-ancillary_subdir_2      = set_path_sub_directory(prod, ancillary_sprod_2, 'derived',version)
-ancillary_input_2="{subpath[0][3]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
+ancillary_subdir_2      = set_path_sub_directory(prod, ancillary_sprod_2, 'derived',version, mapset)
+ancillary_input_2="{subpath[0][4]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
 
 @follows(fewsnet_10dmin, fewsnet_10dmax)
 @active_if(activate_fewsnet_rfe_comput, activate_10d_comput, activate_10dnp_comput)
@@ -226,11 +226,11 @@ def fewsnet_10dnp(input_file, output_file):
 #   1moncum
 output_sprod="1MONCUM"
 out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version)
+output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
 
 # inputs: files from same months
 formatter_in="(?P<YYYYMM>[0-9]{6})(?P<DD>[0-9]{2})"+in_prod_ident
-formatter_out="{subpath[0][3]}"+os.path.sep+output_subdir+"{YYYYMM[0]}"+'01'+out_prod_ident
+formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYYMM[0]}"+'01'+out_prod_ident
 
 # @follows(fewsnet_10davg)
 @active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1moncum_comput)
@@ -250,10 +250,10 @@ in_prod_ident=set_path_filename_no_date(prod, new_input_subprod, mapset, ext)
 
 output_sprod="1MONAVG"
 out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version)
+output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
 
 formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out=["{subpath[0][3]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
 @active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1monavg_comput)
 @collate(fewsnet_1moncum, formatter(formatter_in),formatter_out)
@@ -269,10 +269,10 @@ def fewsnet_1monavg(input_file, output_file):
 #   Monthly Minimum
 output_sprod="1MONMIN"
 out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version)
+output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
 
 formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out=["{subpath[0][3]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
 @active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1monmin_comput)
 @collate(fewsnet_1moncum, formatter(formatter_in),formatter_out)
@@ -288,12 +288,12 @@ def fewsnet_1monmin(input_file, output_file):
 #   Monthly Maximum
 output_sprod="1MONMAX"
 out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version)
+output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
 
 reg_ex_in="[0-9]{4}([0-9]{4})"+in_prod_ident
 
 formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out=["{subpath[0][3]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
 @active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1monmax_comput)
 @collate(fewsnet_1moncum, formatter(formatter_in),formatter_out)
@@ -309,17 +309,17 @@ def fewsnet_1monmax(input_file, output_file):
 #   1monDiff
 output_sprod="1MONDIFF"
 out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version)
+output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
 
 # inputs
 #   Starting files + avg
 formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out="{subpath[0][3]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
 
 ancillary_sprod = "1monavg"
 ancillary_sprod_ident = set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
-ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived',version)
-ancillary_input="{subpath[0][3]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
+ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived', version, mapset)
+ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
 @follows(fewsnet_1monavg)
 @active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1mondiff_comput)
@@ -336,17 +336,17 @@ def fewsnet_1mondiff(input_file, output_file):
 #   1monperc
 output_sprod="1MONPERC"
 out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version)
+output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
 
 # inputs
 #   Starting files + avg
 formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out="{subpath[0][3]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
 
 ancillary_sprod = "1MONAVG"
 ancillary_sprod_ident = set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
-ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived',version)
-ancillary_input="{subpath[0][3]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
+ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived',version, mapset)
+ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
 @follows(fewsnet_1monavg)
 @active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1monperc_comput)
@@ -363,21 +363,21 @@ def fewsnet_1monperc(input_file, output_file):
 #   1monnp
 output_sprod="1MONNP"
 out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version)
+output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
 
 #   Starting files + min + max
 formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out="{subpath[0][3]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
 
 ancillary_sprod_1 = "1MONMIN"
 ancillary_sprod_ident_1 = set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
-ancillary_subdir_1      = set_path_sub_directory(prod, ancillary_sprod_1, 'derived',version)
-ancillary_input_1="{subpath[0][3]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
+ancillary_subdir_1      = set_path_sub_directory(prod, ancillary_sprod_1, 'derived',version, mapset)
+ancillary_input_1="{subpath[0][4]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
 
 ancillary_sprod_2 = "1MONMAX"
 ancillary_sprod_ident_2 = set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
-ancillary_subdir_2      = set_path_sub_directory(prod, ancillary_sprod_2, 'derived',version)
-ancillary_input_2="{subpath[0][3]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
+ancillary_subdir_2      = set_path_sub_directory(prod, ancillary_sprod_2, 'derived',version, mapset)
+ancillary_input_2="{subpath[0][4]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
 
 @follows(fewsnet_1monmin, fewsnet_1monmax)
 @active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1monnp_comput)
@@ -403,8 +403,8 @@ def upsert_processed_ruffus(file_fullpath):
         dirname = os.path.dirname(file_fullpath)
 
         # TODO-M.C.: add tests, try/except
-        [productcode, subproductcode, version] = get_from_path_dir(dirname)
-        [str_date, mapsetcode] = get_from_path_filename(filename, productcode, subproductcode)
+        [productcode, subproductcode, version, mapsetcode] = get_from_path_dir(dirname)
+        str_date = get_date_from_path_filename(filename)
         [str_year, str_month, str_day, str_hour] = extract_from_date(str_date)
 
         if str_year == '':
@@ -415,6 +415,7 @@ def upsert_processed_ruffus(file_fullpath):
                      'version': 'undefined',
                      'mapsetcode': mapsetcode,
                      'product_datetime': str_date}
+
 
         record = {'productcode': productcode.lower(),
                   'subproductcode': subproductcode.lower(),
@@ -440,12 +441,15 @@ def upsert_processed_ruffus(file_fullpath):
 #   ---------------------------------------------------------------------
 #   Run the pipeline
 
-def processing_fewsnet_rfe():
+def processing_fewsnet_rfe(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
+                           pipeline_printout_graph_level=0):
 
     logger.info("Entering routine %s" % 'processing_fewsnet_rfe')
-    #pipeline_printout(verbose=5)
-    #sleep 1
-    pipeline_run(verbose=3)
-    #pipeline_run(multiprocess=6)
-    #pipeline_printout()
-    #pipeline_printout_graph('flowchart.jpg')
+    if pipeline_run_level > 0:
+        pipeline_run(verbose=pipeline_run_level, touch_files_only=pipeline_run_touch_only)
+
+    if pipeline_printout_level > 0:
+        pipeline_printout()
+
+    if pipeline_printout_graph_level > 0:
+        pipeline_printout_graph('flowchart.jpg')
