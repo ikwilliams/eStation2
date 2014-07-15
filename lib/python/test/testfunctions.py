@@ -13,7 +13,8 @@ class TestFunctionsDate(TestCase):
     str_hh = '13'
     str_mm = '30'
     str_doy = '121'
-    str_dkx = '1'
+    str_dkx = 'dk1'
+    str_dkn = '1'
 
     julian_dekad = 1129
     julian_month = 377
@@ -22,7 +23,7 @@ class TestFunctionsDate(TestCase):
     string_yyyymmdd = str_yyyy+str_month+str_day
     string_yyyymmddhhmm = string_yyyymmdd+str_hh+str_mm
     string_yyyydoy = str_yyyy+str_doy
-    string_yymmk = str_yyyy[2:4]+str_month+str_dkx
+    string_yymmk = str_yyyy[2:4]+str_month+str_dkn
     string_yyyy_mm_dkx = str_yyyy+'_'+str_month+'_'+str_dkx
 
     def test_is_date_time(self):
