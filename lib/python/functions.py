@@ -181,7 +181,6 @@ def is_date_yyyydoy(string_date, silent=False):
 
     return isdate_yyyydoy
 
-
 ######################################################################################
 #   conv_date_2_dekad
 #   Purpose: Function returns a dekad by using a date (YYYYMMDD) as input.
@@ -236,7 +235,7 @@ def conv_date_2_month(year_month_day):
 
 ######################################################################################
 #   conv_dekad_2_date
-#   Purpose: Function returns a date (YYYYMMDD) by using a dekad as input
+#   Purpose: Function returns a date (YYYYMMDD) by using a 'julian' dekad as input
 #            The dekads are counted having as reference January 1, 1980.
 #   Author: Simona Oancea, JRC, European Commission
 #   Refactored by: Jurriaan van 't Klooster
@@ -254,12 +253,12 @@ def conv_dekad_2_date(dekad):
         day = dekad - year * 36 - month * 3
         dekad_date = 10000 * (year + 1980) + 100 * (month + 1) + day * 10 + 1
 
-    return dekad_date
+    return str(dekad_date)
 
 
 ######################################################################################
 #   conv_month_2_date
-#   Purpose: Function returns a date by using the no of month as input
+#   Purpose: Function returns a date by using the 'julian' month as input
 #            The months are counted having as reference January 1, 1980.
 #   Author: Simona Oancea, JRC, European Commission
 #   Refactored by: Jurriaan van 't Klooster
@@ -268,8 +267,8 @@ def conv_dekad_2_date(dekad):
 #   Output: YYYYMMDD, otherwise 0
 def conv_month_2_date(month):
     month_date = -1
-    if not 1 <= int(str(month)) <= 12:
-        logger.error('Invalid Month Value: %s. Must be >= 1 and <= 12' % month)
+    if not 1 <= int(str(month)):
+        logger.error('Invalid Month Value: %s. Must be >= 1 ' % month)
     else:
         month = int(str(month)) - 1
         year = month / 12
@@ -277,32 +276,7 @@ def conv_month_2_date(month):
         #returns always the first dekad of the month
         month_date = 10000 * (year + 1980) + 100 * (month + 1) + 1
 
-    return month_date
-
-
-###
-#
-# date2RepCycle
-# author: Marco Clerici, JRC, European Commission
-# date: 04/05/2010
-# Converts a date in format YYYYMMDDHHMM to the MSG repeat cycle (15 min) since 1980:01:01 00:00
-###
-#function date2RepCycle(){
-#    if [ $# -ne 1 ]; then
-#	echo '0'
-#    else
-#	if [ -z "$(isYYYYMMDDHHMM $1)" ]; then
-#	    echo "0"
-#	else
-#	    local date=${1:0:8}
-#	    local hh=${1:8:2}
-#	    local min=${1:10:2}
-#		jday=$(YYYYMMDD2Jday $date)
-#	    str=` echo " (${jday}-1)*96 + ${hh}*4 + ${min}/15+1" | bc`
-#		echo $str
-#	fi
-#    fi
-#}
+    return str(month_date)
 
 
 ######################################################################################
@@ -510,41 +484,27 @@ def set_path_filename(date_str, product_code, sub_product_code, mapset_id, exten
 
 ######################################################################################
 #   set_path_sub_directory
-#   Purpose: From product_code, sub_product_code, type, version  -> sub_directory
+#   Purpose: From product_code, sub_product_code, type, version, mapset  -> sub_directory
 #   Author: Marco Clerici, JRC, European Commission
 #   Date: 2014/06/22
 #   Inputs: product_code, sub_product_code, type, version
-#   Output: subdir, e.g. FEWSNET_RFE/tif/RFE/
+#   Output: subdir, e.g. FEWSNET_RFE/FEWSNET_Africa_8km/tif/RFE/
 #   Description: creates filename
 #
 #
-def set_path_sub_directory(product_code, sub_product_code, type, version):
+def set_path_sub_directory(product_code, sub_product_code, type, version, mapset):
 
     sub_directory = str(product_code.upper()) + os.path.sep + \
+                    mapset + os.path.sep +\
                     type + os.path.sep +\
                     str(sub_product_code.upper()) + os.path.sep
 
     return sub_directory
 
-######################################################################################
-#   set_path_filename
-#   Purpose: From date, product_code, sub_product_code, mapset, extension -> filename
-#   Author: Marco Clerici, JRC, European Commission
-#   Date: 2014/06/22
-#   Inputs: sub_product_code, mapset
-#   Output: process_id, subdir
-#   Description: creates filename
-#
-#
-def set_path_filename(date_str, product_code, sub_product_code, mapset_id, extension):
-
-    filename = date_str + set_path_filename_no_date(product_code, sub_product_code, mapset_id, extension)
-    return filename
-
 
 ######################################################################################
 #   get_from_path_dir
-#   Purpose: From directory -> prod, subprod, version
+#   Purpose: From full_dir -> prod, subprod, version, mapset
 #   Author: Marco Clerici, JRC, European Commission
 #   Date: 2014/06/22
 #   Inputs: output_dir
@@ -554,23 +514,25 @@ def set_path_filename(date_str, product_code, sub_product_code, mapset_id, exten
 #
 #   NOTE:
 
-def get_from_path_dir(dirname):
+def get_from_path_dir(dir_name):
 
-    # Make sure there is a leading separator
-    mydir=dirname+os.path.sep
+    # Make sure there is a leading separator at the end of 'dir'
+    mydir=dir_name+os.path.sep
 
     [head, sub_product_code] = os.path.split(os.path.split(mydir)[0])
 
-    [head1, product_code] = os.path.split(os.path.split(head)[0])
+    [head1, mapset] = os.path.split(os.path.split(head)[0])
+
+    [head, product_code] = os.path.split(head1)
 
     # TODO-M.C.: implement version management
     version = 'undefined'
 
-    return [product_code, sub_product_code, version]
+    return [product_code, sub_product_code, version, mapset]
 
 ######################################################################################
 #   get_from_path_filename
-#   Purpose: From filename -> product_code, sub_product_code
+#   Purpose: From filename-> str_date
 #   Author: Marco Clerici, JRC, European Commission
 #   Date: 2014/06/22
 #   Inputs: filename
@@ -579,27 +541,71 @@ def get_from_path_dir(dirname):
 #
 #
 
-def get_from_path_filename(filename, product_code, sub_product_code, extension=None):
+def get_date_from_path_filename(filename, extension=None):
 
     if extension is None:
         extension = '.tif'
 
     # Remove the extension
-    filename_noext = filename.replace(extension,'')
+    #filename_noext = filename.replace(extension,'')
 
     # Get the date string
-    str_date = filename_noext.split('_')[0]
+    str_date = filename.split('_')[0]
 
     # Remove date
-    str_remain=filename_noext.replace(str_date+'_','')
+    #str_remain=filename_noext.replace(str_date+'_','')
 
     # Remove the product_code
-    str_remain1=str_remain.replace(product_code+'_','')
-    str_remain =str_remain1.replace(sub_product_code+'_','')
+    #str_remain1=str_remain.replace(product_code+'_','')
+    #str_remain =str_remain1.replace(sub_product_code+'_','')
 
-    mapset = str_remain
-    return [str_date, mapset]
+    #mapset = str_remain
+    return str_date
 
+######################################################################################
+#   get_date_from_path_full
+#   Purpose: From full_path -> date
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: filename
+#   Output: date
+#   Description: returns information form the fullpath
+#
+#
+
+def get_date_from_path_full(full_path):
+
+    # Remove the directory
+    dir, filename = os.path.split(full_path)
+
+    # Get the date string
+    str_date = filename.split('_')[0]
+
+    return str_date
+
+######################################################################################
+#   get_all_from_path_full
+#   Purpose: From full_path -> product_code, sub_product_code, date, mapset, (version)
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: filename
+#   Output: date
+#   Description: returns information form the fullpath
+#
+#
+
+def get_all_from_path_full(full_path):
+
+    # Split directory and filename
+    dir, filename = os.path.split(full_path)
+
+    # Get info from directory
+    product_code, sub_product_code, version, mapset = get_from_path_dir(dir)
+
+    # Get info from filename
+    str_date = get_date_from_path_filename(filename)
+
+    return [product_code, sub_product_code, version, str_date, mapset]
 
 ######################################################################################
 #   check_output_dir
@@ -729,4 +735,56 @@ def list_to_element(input_arg):
     else:
         return input_arg
 
+######################################################################################
+#
+#   Purpose: given a file (t0), returns the two 'temporally-adjacent' ones
+#            It also checks files exists (single file or empty list)
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/07/09
+#   Inputs:
+#   Output: none
+#
 
+def files_temp_ajacent(file_t0, step='dekad', extension='.tif'):
+
+    # Checks t0 exists
+    if not os.path.isfile(file_t0):
+        logger.warning('Input file does not exist: %s ' % file_t0)
+        return None
+    file_list = []
+
+    # Extract dir input file
+    dir, filename  = os.path.split(file_t0)
+
+    # Extract all info from full path
+    product_code, sub_product_code, version, date_t0, mapset = get_all_from_path_full(file_t0)
+
+    if step == 'dekad':
+
+        dekad_t0 = conv_date_2_dekad(date_t0)
+        # Compute/Check file before
+        dekad_m = dekad_t0-1
+        date_m = conv_dekad_2_date(dekad_m)
+        file_m = dir+os.path.sep+set_path_filename(str(date_m), product_code, sub_product_code, mapset, extension)
+
+        if os.path.isfile(file_m):
+            file_list.append(file_m)
+        else:
+            logger.warning('File before t0 does not exist: %s ' % file_m)
+
+        # Compute/Check file after
+        dekad = conv_date_2_dekad(date_t0)
+        dekad_p = dekad_t0+1
+        date_p = conv_dekad_2_date(dekad_p)
+        file_p = dir+os.path.sep+set_path_filename(str(date_p), product_code, sub_product_code, mapset, extension)
+
+        if os.path.isfile(file_p):
+            file_list.append(file_p)
+        else:
+            logger.warning('File after t0 does not exist: %s ' % file_p)
+
+        return file_list
+
+    else:
+        logger.warning('Time step (%s) not yet foreseen. Exit. ' % step)
+        return None

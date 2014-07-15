@@ -33,6 +33,8 @@ class SdsMetadata:
 
     def __init__(self):
 
+
+
         sds_metadata['eStation2_product'] = 'my_product'
         sds_metadata['eStation2_subProduct'] = 'my_sub_product'
         sds_metadata['eStation2_version'] = 'my_product_version'
