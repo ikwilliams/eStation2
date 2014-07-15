@@ -805,8 +805,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         # Define output directory and make sure it exists
         output_directory = data_dir_out+ func.set_path_sub_directory(product['productcode'],subproducts[ii]['subproduct'],
-                                                                '.tif', version_undef)
-
+                                                                'tif', version_undef, mapset_id)
         try:
             if not os.path.exists(output_directory):
                 os.makedirs(output_directory)
