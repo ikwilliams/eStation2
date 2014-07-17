@@ -6,13 +6,18 @@
 #
 
 from __future__ import absolute_import
+import datetime
 
 import locals
 
-from .exceptions import (WrongFrequencyValue, WrongFrequencyUnit, WrongFrequencyType)
+from .exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
+        WrongFrequencyType, WrongFrequencyDateFormat)
+
+from .helpers import add_years, add_months, add_dekads
 
 class Frequency(object):
     class UNIT:
+        YEAR = 'year'
         MONTH = 'month'
         DEKAD = 'dekad'
         DAY = 'day'
@@ -21,6 +26,10 @@ class Frequency(object):
     class TYPE:
         PER = 'p'
         EVERY = 'e'
+
+    class DATEFORMAT:
+        DATETIME = 'YYYYMMDDHHMM'
+        DATE = 'YYYYMMDD'
 
     @classmethod
     def _check_constant(class_, constant_name, value):
@@ -33,7 +42,52 @@ class Frequency(object):
     @classmethod
     def dateformat_default(class_, unit):
         if unit in (class_.UNIT.DEKAD, class_.UNIT.MONTH):
-            return 'YYYYMMDD'
+            return class_.DATEFORMAT.DATE
+        return class_.DATEFORMAT.DATETIME
+
+    def filename_mask_ok(self, filename):
+        if len(filename) > len(self.dateformat) + 1:
+            if filename[:len(self.dateformat)].isdigit():
+                return filename[len(self.dateformat)] == "_"
+        return False
+
+    def format_date(self, date):
+        if self.dateformat == self.DATEFORMAT.DATE:
+            return date.strftime("%Y%m%d")
+        elif self.dateformat == self.DATEFORMAT.DATE:
+            return date.strftime("%Y%m%d%H%M")
+        else:
+            raise Exception("Dateformat not managed: %s" % self.dateformat)
+
+    def get_next_date(self, date, value):
+        if self.unit == self.UNIT.YEAR:
+            return add_years(date, value)
+        elif self.unit == self.UNIT.MONTH:
+            return add_months(date, value)
+        elif self.unit == self.UNIT.DEKAD:
+            return add_dekads(date, value)
+        elif self.unit == self.UNIT.DAY:
+            return date + datetime.timedelta(days=value)
+        elif self.unit == self.UNIT.HOURS:
+            return date + datetime.timedelta(hours=value)
+        else:
+            raise Exception("Unit not managed: %s" % self.unit)
+
+    def next_filename(self, filename):
+        date_parts = (int(filename[:4]), int(filename[4:6]), int(filename[6:8]))
+        if self.dateformat == self.DATEFORMAT.DATE:
+            date = datetime.date(*date_parts)
+        else:
+            date_parts += (int(filename[8:10]), int(filename[10:12]))
+            date = datetime.datetime(*date_parts)
+        if self.type_ == self.TYPE.EVERY:
+            date = self.get_next_date(date, self.value)
+        elif self.type_ == self.TYPE.PER:
+            new_date = self.get_next_date(date)
+            date = date + (new_date - date)/self.value
+        else:
+            raise Exception("Dateformat not managed: %s" % self.dateformat)
+        return self.format_date(date) + filename[len(self.dateformat):]
 
     def __init__(self, value, unit, type_, dateformat=None):
         if not isinstance(value, int):
@@ -42,6 +96,8 @@ class Frequency(object):
             raise WrongFrequencyUnit(unit)
         if not self._check_constant('TYPE', type_):
             raise WrongFrequencyType(type_)
+        if dateformat and not self._check_constant('DATEFORMAT', dateformat):
+            raise WrongFrequencyDateFormat(dateformat)
         self.value = value
         self.unit = unit
         self.type_ = type_
@@ -49,7 +105,6 @@ class Frequency(object):
 
 
 class Dataset(object):
-
     def __init__(self, product, subproduct):
         self.product = product
         self.subproduct = subproduct

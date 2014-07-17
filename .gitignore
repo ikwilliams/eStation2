@@ -2,6 +2,7 @@
 .old
 .idea
 *.pyc
+*.swp
 *.*~
 log
 clean.sh

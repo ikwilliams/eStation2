@@ -21,3 +21,14 @@ class WrongFrequencyUnit(Exception):
 class WrongFrequencyType(Exception):
     def __init__(self, type_):
         super(WrongFrequencyType, self).__init__(u"Wrong frequency type: %s" % type_)
+
+
+class WrongFrequencyDateFormat(Exception):
+    def __init__(self, dateformat):
+        super(WrongFrequencyDateFormat, self).__init__(u"Wrong frequency dateformat: %s" % dateformat)
+
+
+class WrongSequence(Exception):
+    def __init__(self, filename, filename_expected):
+        super(WrongSequence, self).__init__(u"Wrong sequence: found=%s expected=%s"
+                % (filename, filename_expected))
