@@ -15,7 +15,7 @@ from .exceptions import WrongSequence
 def find_gaps(filenames, frequency):
     gaps = []
     next_filename = None
-    for filename in filenames:
+    for filename in sorted(filenames):
         if not frequency.filename_mask_ok(filename):
             continue
         if not next_filename is None:
