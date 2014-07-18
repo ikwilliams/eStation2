@@ -41,7 +41,7 @@ class Frequency(object):
 
     @classmethod
     def dateformat_default(class_, unit):
-        if unit in (class_.UNIT.DEKAD, class_.UNIT.MONTH):
+        if unit in (class_.UNIT.DEKAD, class_.UNIT.MONTH, class_.UNIT.DAY):
             return class_.DATEFORMAT.DATE
         return class_.DATEFORMAT.DATETIME
 
