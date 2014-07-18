@@ -103,6 +103,7 @@ class TestHelpersGap(unittest.TestCase):
                 "20140521_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
                 "20140601_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
                 ]
+        self.files_day = self.files[:3]
 
     def test_find_gap_dekad_no_gap(self):
         self.assertEqual([], find_gaps(self.files, 
@@ -116,6 +117,12 @@ class TestHelpersGap(unittest.TestCase):
         self.assertEqual(len(gap), 2)
         self.assertEqual(gap[0], self.files[10])
         self.assertEqual(gap[1], self.files[11])
+
+    def test_find_gap_day(self):
+        gap = find_gaps(self.files_day,
+            frequency=Frequency(value=1,
+                unit=Frequency.UNIT.DAY, type_=Frequency.TYPE.EVERY))
+        self.assertEqual(len(gap), 19)
 
 
 class TestDatasets(unittest.TestCase):
