@@ -9,18 +9,6 @@ import os
 import sys
 
 #this_dir=os.path.abspath(os.path.dirname(__file__))
-
-my_dir = '/srv/www/MarcoDev/eStation2/'
-oth_dir = '/srv/www/JurDev/eStation2/'
-
-list = sys.path
-
-if my_dir not in list:
-    sys.path.append(my_dir)
-
-if oth_dir in list:
-    sys.path.remove(oth_dir)
-
 es2globals = {
     'host': 'localhost',
     'port': '5432',
