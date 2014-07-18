@@ -4,30 +4,35 @@ import database.querydb as querydb
 
 db = querydb.connect_db()
 
-product = 'vgt_ndvi'
-subproduct = 'ndv'
-pkey = {"productcode": product, "subproductcode": subproduct}
-product_info = querydb.get_product_out_info(echo=True, **pkey)
-product_out_params = {"out_data_type": product_info.data_type_id,
-                      "out_scale_factor": product_info.scale_factor,
-                      "out_scale_offset": product_info.scale_offset,
-                      "out_nodata": product_info.nodata}
 
-print product_out_params
+result = querydb.get_dataacquisitions(echo=True)
+print result
 
 
-args = {"productcode": product,
-        "subproductcode": subproduct,
-        "datasource_descr_id": 'EO:EUM:DAT:SPOT:S10NDVI'}
-product_in_info = querydb.get_product_in_info(echo=True, **args)
-product_in_params = {"in_data_type": product_in_info.data_type_id,
-                     "in_scale_factor": product_in_info.scale_factor,
-                     "in_scale_offset": product_in_info.scale_offset,
-                     "in_nodata": product_in_info.no_data,
-                     "in_mask_min": product_in_info.scale_offset,
-                     "in_mask_max": product_in_info.scale_offset}
-
-print product_in_params
+#product = 'vgt_ndvi'
+#subproduct = 'ndv'
+#pkey = {"productcode": product, "subproductcode": subproduct}
+#product_info = querydb.get_product_out_info(echo=True, **pkey)
+#product_out_params = {"out_data_type": product_info.data_type_id,
+#                      "out_scale_factor": product_info.scale_factor,
+#                      "out_scale_offset": product_info.scale_offset,
+#                      "out_nodata": product_info.nodata}
+#
+#print product_out_params
+#
+#
+#args = {"productcode": product,
+#        "subproductcode": subproduct,
+#        "datasource_descr_id": 'EO:EUM:DAT:SPOT:S10NDVI'}
+#product_in_info = querydb.get_product_in_info(echo=True, **args)
+#product_in_params = {"in_data_type": product_in_info.data_type_id,
+#                     "in_scale_factor": product_in_info.scale_factor,
+#                     "in_scale_offset": product_in_info.scale_offset,
+#                     "in_nodata": product_in_info.no_data,
+#                     "in_mask_min": product_in_info.scale_offset,
+#                     "in_mask_max": product_in_info.scale_offset}
+#
+#print product_in_params
 
 
 #pkey = {"productcode": "vgt_ndvi", "subproductcode": "ndv"}

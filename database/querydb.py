@@ -8,13 +8,20 @@
 import locals
 import sys
 import traceback
-import sqlsoup
-#from sqlsoup import Session
-from sqlalchemy.sql import or_, and_, desc, asc
+import json
+#import sqlsoup
+#import datetime
+#import JsonSerializer
+#import anyjson
+
+from sqlalchemy import engine
+from sqlalchemy.sql import func, select, or_, and_, desc, asc
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import func
+
 from lib.python import es_logging as log
 from config.es_constants import *
+
 
 logger = log.my_logger(__name__)
 
@@ -28,9 +35,10 @@ logger = log.my_logger(__name__)
 #   Date: 2014/05/16
 #   Input: None
 #   Output: Return connection handler to the database
-def connect_db():
+def connect_db_sqlsoup():
 
     try:
+        import sqlsoup
         sqlsoup_dns = "postgresql://%s:%s@%s/%s" % (dbglobals['dbUser'],
                                                     dbglobals['dbPass'],
                                                     dbglobals['host'],
@@ -46,7 +54,136 @@ def connect_db():
         logger.error("Database connection failed!\n -> {}".format(exceptionvalue))
         #raise Exception("Database connection failed!\n ->%s" % exceptionvalue)
 
-db = connect_db()
+
+def connect_db():
+
+    try:
+        schema = dbglobals['schema_products']
+
+        db_url = "postgresql://%s:%s@%s/%s" % (dbglobals['dbUser'],
+                                               dbglobals['dbPass'],
+                                               dbglobals['host'],
+                                               dbglobals['dbName'])
+        dbconn = engine.create_engine(db_url)
+        dbconn.schema = schema
+        return dbconn
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        #print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("Database connection failed!\n -> {}".format(exceptionvalue))
+        #raise Exception("Database connection failed!\n ->%s" % exceptionvalue)
+
+db = connect_db_sqlsoup()
+
+
+######################################################################################
+#   get_dataacquisitions(echo=False)
+#   Purpose: Query the database to get the product data acquisition list of all products.
+#            Mainly used in the GUI Acquisition tab.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2014/07/15
+#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
+#
+#   Output: Return the product data acquisition list of all products ordered by productcode.
+#
+#    SELECT productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data
+#    FROM products.product_acquisition_data_source;
+#
+def get_dataacquisitions(echo=False):
+    try:
+        session = db.session
+        pa = aliased(db.product_acquisition_data_source)
+        dataacquisitions = session.query(pa.productcode,
+                                         pa.subproductcode,
+                                         pa.version,
+                                         pa.data_source_id,
+                                         pa.defined_by,
+                                         pa.type,
+                                         pa.activated,
+                                         pa.store_original_data).order_by(asc(pa.productcode)).all()
+
+        dataacquisitions_json = json.dumps(dataacquisitions,
+                                           ensure_ascii=False,
+                                           sort_keys=True,
+                                           indent=4,
+                                           separators=(',', ': '))
+
+        if echo:
+            for row in dataacquisitions:
+                print row
+
+        return dataacquisitions_json
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and log the error telling what happened.
+        logger.error("get_dataacquisitions: Database query error!\n -> {}".format(exceptionvalue))
+
+
+######################################################################################
+#   get_products(echo=False)
+#   Purpose: Query the database to get the (Native) product list with their product category.
+#            Mainly used in the GUI Acquisition tab.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2014/07/08
+#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
+#
+#   Output: Return the (Native) product list with their product category
+#           ordered by product category order_index and productcode.
+
+#   SELECT p.productcode, p.version, p.activated, pc.category_id, pc.descriptive_name, pc.order_index
+#   FROM products.product p inner join products.product_category pc on p.category_id = pc.category_id
+#   WHERE p.product_type = 'Native'
+#   ORDER BY pc.order_index, productcode
+#
+def get_products(echo=False):
+    try:
+        session = db.session
+
+        #pc = session.query(db.product_category.category_id,
+        #                   db.product_category.descriptive_name,
+        #                   db.product_category.order_index).subquery()
+        pc = aliased(db.product_category)
+        p = aliased(db.product)
+
+        # The columns on the subquery "pc" are accessible through an attribute called "c"
+        # e.g. product.c.descriptive_name
+        productslist = session.query(p.productcode,
+                                     p.subproductcode,
+                                     p.version,
+                                     p.activated,
+                                     p.descriptive_name.label('prod_descr_name'),
+                                     p.description,
+                                     pc.category_id,
+                                     pc.descriptive_name.label('cat_descr_name'),
+                                     pc.order_index).\
+            outerjoin(pc, p.category_id == pc.category_id).\
+            filter(and_(p.product_type == 'Native')).\
+            order_by(asc(pc.order_index), asc(p.productcode)).all()
+
+        # To serialize query result with labels the database should be mapped in sqlalchemy first
+        #serialized_labels = [
+        #    serialize(label)
+        #    for label in productslist
+        #]
+        productslist_json = json.dumps(productslist, sort_keys=True, indent=4, separators=(',', ': '))
+
+        if echo:
+            for row in productslist:
+                print row
+
+        return productslist_json
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and log the error telling what happened.
+        logger.error("get_products: Database query error!\n -> {}".format(exceptionvalue))
+
 
 
 ######################################################################################

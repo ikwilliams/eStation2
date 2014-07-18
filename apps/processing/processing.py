@@ -316,7 +316,7 @@ def upsert_processed_ruffus(file_fullpath):
 
         record = {'productcode': productcode.lower(),
                   'subproductcode': subproductcode.lower(),
-                  'version': 'undef',
+                  'version': 'undefined',
                   'mapsetcode': mapsetcode,
                   'product_datetime': str_date,
                   'directory': dirname,

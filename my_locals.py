@@ -8,6 +8,21 @@ from locals import *
 
 dir()
 
+es2globals = {
+    'host': 'localhost',
+    'port': '5432',
+    'dbUser': 'estation',
+    'dbPass': 'mesadmin',
+    'dbName': 'estationdb',
+    'schema': 'products',
+    'base_dir': '/srv/www/JurDev/eStation2/',
+    'data_dir': this_dir+'/TestFiles/',
+    'ingest_dir': this_dir+'/TestFiles/',
+    'static_data_path': '',
+    'temp_dir': '/tmp/eStation2/'
+}
+
+
 # Overwrite Ingest_dir (for vm19)
 es2globals['ingest_dir'] = '/data/Archives/FewsNET/'
 

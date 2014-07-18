@@ -7,7 +7,19 @@
 
 import os, sys
 this_dir=os.path.abspath(os.path.dirname(__file__))
-sys.path.append(this_dir)
+#sys.path.append(this_dir)
+
+oth_dir = '/srv/www/MarcoDev/eStation2/'
+my_dir = '/srv/www/JurDev/eStation2/'
+
+list_syspath = sys.path
+
+if my_dir not in list_syspath:
+    sys.path.append(my_dir)
+
+if oth_dir in list_syspath:
+    sys.path.remove(oth_dir)
+
 
 es2globals = {
     'host': 'localhost',
@@ -16,7 +28,7 @@ es2globals = {
     'dbPass': 'mesadmin',
     'dbName': 'estationdb',
     'schema': 'products',
-    'base_dir': '/srv/www/eStation2/',
+    'base_dir': '/srv/www/JurDev/eStation2/',
     'data_dir': this_dir+'/TestFiles/',
     'ingest_dir': this_dir+'/TestFiles/',
     'static_data_path': '',
