@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 #
 #	purpose: Test dataset functions
 #	author:  Marco Beri marcoberi@gmail.com
@@ -78,7 +79,7 @@ class TestHelpersDate(unittest.TestCase):
 
 class TestHelpersGap(unittest.TestCase):
     def setUp(self):
-        self.files = [
+        self.files_dekad = [
                 "20131021_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
                 "20131101_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
                 "20131111_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
@@ -103,26 +104,89 @@ class TestHelpersGap(unittest.TestCase):
                 "20140521_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
                 "20140601_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
                 ]
-        self.files_day = self.files[:3]
+        self.files_day = self.files_dekad[:3]
+        self.files_15minutes = [
+                "201310212200_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "201310212215_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "201310212230_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "201310212245_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "201310212300_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "201310212315_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "201310212330_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "201310212345_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "201310220000_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "201310220015_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "201310220030_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                ]
+        self.files_months = [
+                "20131001_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20131101_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20131201_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140101_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140201_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140301_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                ]
 
     def test_find_gap_dekad_no_gap(self):
-        self.assertEqual([], find_gaps(self.files, 
+        self.assertEqual([], find_gaps(self.files_dekad, 
             frequency=Frequency(dateformat='YYYYMMDD', value=1,
                 unit=Frequency.UNIT.DEKAD, type_=Frequency.TYPE.EVERY)))
 
-    def test_find_gap_dekad_with_gap(self):
-        gap = find_gaps(self.files[:10] + self.files[12:], 
+    def test_find_gap_dekad_no_gap_per(self):
+        self.assertEqual([], find_gaps(self.files_dekad, 
             frequency=Frequency(dateformat='YYYYMMDD', value=1,
+                unit=Frequency.UNIT.DEKAD, type_=Frequency.TYPE.PER)))
+
+    def test_find_gap_dekad_with_gap(self):
+        gap = find_gaps(self.files_dekad[:10] + self.files_dekad[12:], 
+            frequency=Frequency(value=1,
                 unit=Frequency.UNIT.DEKAD, type_=Frequency.TYPE.EVERY))
         self.assertEqual(len(gap), 2)
-        self.assertEqual(gap[0], self.files[10])
-        self.assertEqual(gap[1], self.files[11])
+        self.assertEqual(gap[0], self.files_dekad[10])
+        self.assertEqual(gap[1], self.files_dekad[11])
+
+    def test_find_gap_dekad_with_gap_per(self):
+        gap = find_gaps(self.files_dekad[:10] + self.files_dekad[12:], 
+            frequency=Frequency(value=1,
+                unit=Frequency.UNIT.DEKAD, type_=Frequency.TYPE.PER))
+        self.assertEqual(len(gap), 2)
+        self.assertEqual(gap[0], self.files_dekad[10])
+        self.assertEqual(gap[1], self.files_dekad[11])
 
     def test_find_gap_day(self):
         gap = find_gaps(self.files_day,
             frequency=Frequency(value=1,
                 unit=Frequency.UNIT.DAY, type_=Frequency.TYPE.EVERY))
         self.assertEqual(len(gap), 19)
+
+    def test_find_gap_day_per(self):
+        gap = find_gaps(self.files_day,
+            frequency=Frequency(value=1,
+                unit=Frequency.UNIT.DAY, type_=Frequency.TYPE.PER))
+        self.assertEqual(len(gap), 19)
+
+    def test_find_gap_minutes(self):
+        self.assertEqual([], find_gaps(self.files_15minutes, 
+            frequency=Frequency(value=4,
+                unit=Frequency.UNIT.HOUR, type_=Frequency.TYPE.PER)))
+
+    def test_find_gap_minutes_with_gap(self):
+        gap = find_gaps(self.files_15minutes[:3] + self.files_15minutes[5:], 
+            frequency=Frequency(value=4,
+                unit=Frequency.UNIT.HOUR, type_=Frequency.TYPE.PER))
+        self.assertEqual(len(gap), 2)
+        self.assertEqual(gap[0], self.files_15minutes[3])
+        self.assertEqual(gap[1], self.files_15minutes[4])
+
+    def test_find_gap_months(self):
+        self.assertEqual([], find_gaps(self.files_months, 
+            frequency=Frequency(value=1,
+                unit=Frequency.UNIT.MONTH, type_=Frequency.TYPE.EVERY)))
+
+    def test_find_gap_months_per(self):
+        self.assertEqual([], find_gaps(self.files_months, 
+            frequency=Frequency(value=1,
+                unit=Frequency.UNIT.MONTH, type_=Frequency.TYPE.PER)))
 
 
 class TestDatasets(unittest.TestCase):
