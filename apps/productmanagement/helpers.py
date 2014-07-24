@@ -12,19 +12,40 @@ import datetime
 from .exceptions import WrongSequence
 
 
-def find_gaps(filenames, frequency):
+def find_gaps(unsorted_filenames, frequency, only_intervals=False, from_date=None, to_date=None):
     gaps = []
-    next_filename = None
-    for filename in sorted(filenames):
+    intervals = []
+    interval = []
+    next_filename = last_filename = None
+    last_filename_added = False
+    filenames = sorted(f for f in unsorted_filenames if not f is None)
+    mapset = frequency.get_mapset((filenames or [''])[0])
+    if not from_date is None:
+        next_filename = frequency.format_filename(from_date, mapset)
+    if not to_date is None:
+        last_filename = frequency.format_filename(to_date, mapset)
+        if (not filenames) or (filenames[-1] < last_filename):
+            last_filename_added = True
+            filenames.append(last_filename)
+    for filename in filenames:
         if not frequency.filename_mask_ok(filename):
             continue
         if not next_filename is None:
-            while next_filename < filename:
+            while next_filename < filename or (last_filename_added and next_filename == last_filename):
+                if len(interval) == 0:
+                    interval = [next_filename, next_filename]
+                else:
+                    interval[1] = next_filename
                 gaps.append(next_filename)
                 next_filename = frequency.next_filename(next_filename)
-            if next_filename != filename:
+            if interval:
+                intervals.append(interval)
+                interval = []
+            if next_filename != filename and filename != last_filename:
                 raise WrongSequence(filename, next_filename)
         next_filename = frequency.next_filename(filename)
+    if only_intervals:
+        return intervals
     return gaps
 
 

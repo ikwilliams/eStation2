@@ -73,6 +73,12 @@ class Frequency(object):
         else:
             raise Exception("Unit not managed: %s" % unit)
 
+    def get_mapset(self, filename):
+        return filename[len(self.dateformat):]
+
+    def format_filename(self, date, mapset):
+        return self.format_date(date) + mapset
+
     def next_filename(self, filename):
         date_parts = (int(filename[:4]), int(filename[4:6]), int(filename[6:8]))
         if self.dateformat == self.DATEFORMAT.DATE:
@@ -87,7 +93,7 @@ class Frequency(object):
             date = date + (new_date - date)/self.value
         else:
             raise Exception("Dateformat not managed: %s" % self.dateformat)
-        return self.format_date(date) + filename[len(self.dateformat):]
+        return self.format_filename(date, self.get_mapset(filename))
 
     def __init__(self, value, unit, type_, dateformat=None):
         if not isinstance(value, int):
