@@ -79,6 +79,13 @@ class Frequency(object):
     def format_filename(self, date, mapset):
         return self.format_date(date) + mapset
 
+    def check_date(self, date_datetime):
+        if type(date_datetime) is datetime.datetime and self.dateformat == self.DATEFORMAT.DATE:
+            return False
+        if type(date_datetime) is datetime.date and self.dateformat == self.DATEFORMAT.DATETIME:
+            return False
+        return True
+
     def next_filename(self, filename):
         date_parts = (int(filename[:4]), int(filename[4:6]), int(filename[6:8]))
         if self.dateformat == self.DATEFORMAT.DATE:

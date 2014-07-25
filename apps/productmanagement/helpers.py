@@ -9,10 +9,13 @@ from __future__ import absolute_import
 
 import datetime
 
-from .exceptions import WrongSequence
+from .exceptions import WrongSequence, WrongDateParameter
 
 
 def find_gaps(unsorted_filenames, frequency, only_intervals=False, from_date=None, to_date=None):
+    for date_parameter in (from_date, to_date):
+        if date_parameter and not frequency.check_date(date_parameter):
+            raise WrongDateParameter(date_parameter, frequency.dateformat)
     gaps = []
     intervals = []
     interval = []

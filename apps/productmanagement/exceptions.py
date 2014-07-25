@@ -32,3 +32,9 @@ class WrongSequence(Exception):
     def __init__(self, filename, filename_expected):
         super(WrongSequence, self).__init__(u"Wrong sequence: found=%s expected=%s"
                 % (filename, filename_expected))
+
+
+class WrongDateParameter(Exception):
+    def __init__(self, date, date_type_expected):
+        super(WrongDateParameter, self).__init__(u"Wrong date parameter: found=%s expected=%s"
+                % (unicode(date), date_type_expected))

@@ -14,7 +14,7 @@ import datetime
 from ..datasets import Dataset, Frequency
 from ..helpers import find_gaps, add_years, add_months, add_dekads
 from ..exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
-        WrongFrequencyType, WrongFrequencyDateFormat )
+        WrongFrequencyType, WrongFrequencyDateFormat, WrongDateParameter)
 
 
 class TestHelpersDate(unittest.TestCase):
@@ -218,3 +218,8 @@ class TestHelpersGap(unittest.TestCase):
             to_date=self.date_to,
             from_date=self.date_from)
         self.assertEqual(len(gap), 6)
+
+    def test_find_gap_wrong_parameters(self):
+        self.assertRaises(WrongDateParameter, find_gaps,
+            *([], Frequency(value=1, unit=Frequency.UNIT.HOUR, type_=Frequency.TYPE.EVERY),),
+            **{'to_date': datetime.date(2014, 10, 10)})
