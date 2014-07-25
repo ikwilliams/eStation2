@@ -54,24 +54,30 @@ class Frequency(object):
     def format_date(self, date):
         if self.dateformat == self.DATEFORMAT.DATE:
             return date.strftime("%Y%m%d")
-        elif self.dateformat == self.DATEFORMAT.DATE:
+        elif self.dateformat == self.DATEFORMAT.DATETIME:
             return date.strftime("%Y%m%d%H%M")
         else:
             raise Exception("Dateformat not managed: %s" % self.dateformat)
 
-    def get_next_date(self, date, value):
-        if self.unit == self.UNIT.YEAR:
+    def get_next_date(self, date, unit, value):
+        if unit == self.UNIT.YEAR:
             return add_years(date, value)
-        elif self.unit == self.UNIT.MONTH:
+        elif unit == self.UNIT.MONTH:
             return add_months(date, value)
-        elif self.unit == self.UNIT.DEKAD:
+        elif unit == self.UNIT.DEKAD:
             return add_dekads(date, value)
-        elif self.unit == self.UNIT.DAY:
+        elif unit == self.UNIT.DAY:
             return date + datetime.timedelta(days=value)
-        elif self.unit == self.UNIT.HOURS:
+        elif unit == self.UNIT.HOUR:
             return date + datetime.timedelta(hours=value)
         else:
-            raise Exception("Unit not managed: %s" % self.unit)
+            raise Exception("Unit not managed: %s" % unit)
+
+    def get_mapset(self, filename):
+        return filename[len(self.dateformat):]
+
+    def format_filename(self, date, mapset):
+        return self.format_date(date) + mapset
 
     def next_filename(self, filename):
         date_parts = (int(filename[:4]), int(filename[4:6]), int(filename[6:8]))
@@ -80,14 +86,14 @@ class Frequency(object):
         else:
             date_parts += (int(filename[8:10]), int(filename[10:12]))
             date = datetime.datetime(*date_parts)
-        if self.type_ == self.TYPE.EVERY:
-            date = self.get_next_date(date, self.value)
+        if self.type_ == self.TYPE.EVERY or self.value == 1:
+            date = self.get_next_date(date, self.unit, self.value)
         elif self.type_ == self.TYPE.PER:
-            new_date = self.get_next_date(date)
+            new_date = self.get_next_date(date, self.unit, 1)
             date = date + (new_date - date)/self.value
         else:
             raise Exception("Dateformat not managed: %s" % self.dateformat)
-        return self.format_date(date) + filename[len(self.dateformat):]
+        return self.format_filename(date, self.get_mapset(filename))
 
     def __init__(self, value, unit, type_, dateformat=None):
         if not isinstance(value, int):
