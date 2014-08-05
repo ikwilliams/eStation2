@@ -38,3 +38,9 @@ class WrongDateParameter(Exception):
     def __init__(self, date, date_type_expected):
         super(WrongDateParameter, self).__init__(u"Wrong date parameter: found=%s expected=%s"
                 % (unicode(date), date_type_expected))
+
+
+class NoProductFound(Exception):
+    def __init__(self, kwargs):
+        super(NoProductFound, self).__init__(u"No Product Found: %s"
+                % (",".join("%s='%s'" % (key, value) for key, value in kwargs.items())))

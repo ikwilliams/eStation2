@@ -7,11 +7,10 @@
 
 from __future__ import absolute_import
 import datetime
-
-import locals
+from database import querydb
 
 from .exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
-        WrongFrequencyType, WrongFrequencyDateFormat)
+        WrongFrequencyType, WrongFrequencyDateFormat, NoProductFound)
 
 from .helpers import add_years, add_months, add_dekads
 
@@ -118,9 +117,13 @@ class Frequency(object):
 
 
 class Dataset(object):
-    def __init__(self, product, subproduct):
-        self.product = product
-        self.subproduct = subproduct
+    def __init__(self, productcode, subproductcode, version=None):
+        kwargs = {'productcode':productcode, 'subproductcode':subproductcode}
+        if not version is None:
+            kwargs['version'] = version
+        self._product = querydb.get_product_out_info(**kwargs)
+        if self._product is None:
+            raise NoProductFound(kwargs)
         self._path = None
 
 
