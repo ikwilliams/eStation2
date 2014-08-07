@@ -22,14 +22,17 @@ class CrudDB(object):
     def get_db_url():
         if CrudDB.is_testing():
             if getattr(CrudDB, '_db_url', None) is None:
-                import tempfile, sqlite3, os
+                import sqlite3, os
+                # SQL Alchemy cound not execute full sql scripts
+                # so we use a regular file to import fixtures
+                #CrudDB._db_url = "sqlite://"
+                #con = sqlite3.connect(":memory:")
+                import tempfile
                 tf = tempfile.NamedTemporaryFile()
                 tmp_name = tf.name
                 tf.close()
                 CrudDB._db_url = "sqlite:///%s" % tmp_name
                 con = sqlite3.connect(tmp_name)
-                #CrudDB._db_url = "sqlite://"
-                #con = sqlite3.connect(":memory:")
                 con.executescript(file(os.path.join(os.path.dirname(__file__), "fixtures", "sqlite.sql")).read())
                 con.close()
                 dbglobals['schema_products'] = None
