@@ -19,7 +19,7 @@ from ..exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
 
 class TestDatasets(unittest.TestCase):
     def test_class(self):
-        self.assertIsInstance(Dataset(productcode="Product", subproductcode="SubProduct"), Dataset)
+        self.assertIsInstance(Dataset(productcode="fewsnet_rfe", subproductcode="rfe"), Dataset)
 
     def test_class_no_product(self):
         kwargs = {'productcode':"---prod---", 'subproductcode': "---subprod---"}

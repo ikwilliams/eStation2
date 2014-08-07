@@ -26,11 +26,13 @@ class CrudDB(object):
                 tf = tempfile.NamedTemporaryFile()
                 tmp_name = tf.name
                 tf.close()
-                CrudDB._db_url = "sqlite://%s" % tmp_name
-                CrudDB._db_url = "sqlite://"
-                con = sqlite3.connect(":memory:")
+                CrudDB._db_url = "sqlite:///%s" % tmp_name
+                con = sqlite3.connect(tmp_name)
+                #CrudDB._db_url = "sqlite://"
+                #con = sqlite3.connect(":memory:")
                 con.executescript(file(os.path.join(os.path.dirname(__file__), "fixtures", "sqlite.sql")).read())
                 con.close()
+                dbglobals['schema_products'] = None
             db_url = CrudDB._db_url
         else:
             db_url = "postgresql://%s:%s@%s/%s" % (dbglobals['dbUser'],

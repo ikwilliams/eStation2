@@ -1,6 +1,7 @@
 CREATE TABLE data_type (
     data_type_id character varying NOT NULL,
-    description character varying NOT NULL
+    description character varying NOT NULL,
+    PRIMARY KEY (data_type_id)
 );
 
 
@@ -21,14 +22,16 @@ CREATE TABLE datasource_description (
     product_release character varying,
     release_position character varying,
     release_length integer,
-    native_mapset character varying
+    native_mapset character varying,
     -- CONSTRAINT check_mapset_chk CHECK (check_mapset(native_mapset))
+    PRIMARY KEY (datasource_descr_id)
 );
 
 
 CREATE TABLE date_format (
     date_format character varying NOT NULL,
-    definition character varying
+    definition character varying,
+    PRIMARY KEY (date_format)
 );
 
 
@@ -94,7 +97,8 @@ CREATE TABLE frequency (
     time_unit character varying(1) NOT NULL,
     frequency real NOT NULL,
     frequency_type character varying(1) DEFAULT 'E' NOT NULL,
-    description character varying
+    description character varying,
+    PRIMARY KEY (frequency_id)
 );
 
 
@@ -182,7 +186,8 @@ CREATE TABLE product (
     mask_max double precision,
     unit character varying,
     data_type_id character varying NOT NULL,
-    masked boolean NOT NULL
+    masked boolean NOT NULL,
+    PRIMARY KEY (productcode, subproductcode, version)
 );
 
 
