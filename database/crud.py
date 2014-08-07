@@ -11,18 +11,45 @@ from sqlalchemy.orm import *
 
 logger = log.my_logger(__name__)
 
-class CrudDB:
+class CrudDB(object):
+    @staticmethod
+    def is_testing():
+        if getattr(CrudDB, "_testing", None) is None:
+            setattr(CrudDB, "_testing", sys.argv[0].endswith('nosetests'))
+        return CrudDB._testing
+
+    @staticmethod
+    def get_db_url():
+        if CrudDB.is_testing():
+            if getattr(CrudDB, '_db_url', None) is None:
+                import tempfile, sqlite3, os
+                tf = tempfile.NamedTemporaryFile()
+                tmp_name = tf.name
+                tf.close()
+                CrudDB._db_url = "sqlite://%s" % tmp_name
+                CrudDB._db_url = "sqlite://"
+                con = sqlite3.connect(":memory:")
+                con.executescript(file(os.path.join(os.path.dirname(__file__), "fixtures", "sqlite.sql")).read())
+                con.close()
+            db_url = CrudDB._db_url
+        else:
+            db_url = "postgresql://%s:%s@%s/%s" % (dbglobals['dbUser'],
+                                             dbglobals['dbPass'],
+                                             dbglobals['host'],
+                                             dbglobals['dbName'])
+        return db_url
+
+    @staticmethod
+    def get_db_engine():
+        return create_engine(CrudDB.get_db_url())
 
     # Initialize the DB
     def __init__(self, schema='products', echo=False):
+
         if schema == '':
             schema = dbglobals['schema_products']
 
-        db_url = "postgresql://%s:%s@%s/%s" % (dbglobals['dbUser'],
-                                               dbglobals['dbPass'],
-                                               dbglobals['host'],
-                                               dbglobals['dbName'])
-        db = create_engine(db_url)
+        db = CrudDB.create_engine()
         self.schema = schema
         db.echo = echo
         self.table_map = {}
