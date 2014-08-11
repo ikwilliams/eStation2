@@ -9,7 +9,7 @@ import datetime
 
 # Import eStation2 modules
 from lib.python import es_logging as log
-
+from lib.python.functions import get_subdir_from_path_full
 logger = log.my_logger(__name__)
 
 # Add:  Units, scaling factor, offset, nodata
@@ -24,6 +24,7 @@ sds_metadata = { 'eStation2_product': '',
                  'eStation2_scaling_factor': '',
                  'eStation2_scaling_offset': '',
                  'eStation2_conversion': '',
+                 'eStation2_unit': '',
                  'eStation2_nodata': '',
                  'eStation2_subdir': ''
 
@@ -32,8 +33,6 @@ sds_metadata = { 'eStation2_product': '',
 class SdsMetadata:
 
     def __init__(self):
-
-
 
         sds_metadata['eStation2_product'] = 'my_product'
         sds_metadata['eStation2_subProduct'] = 'my_sub_product'
@@ -47,6 +46,7 @@ class SdsMetadata:
         sds_metadata['eStation2_conversion'] = 'Phys = DN * scaling_factor + scaling_offset'
         sds_metadata['eStation2_nodata'] = 'my_nodata'
         sds_metadata['eStation2_subdir'] = 'my_subdir'
+        sds_metadata['eStation2_unit'] = 'my_unit'
 
     def write_to_ds(self, dataset):
     #
@@ -103,8 +103,7 @@ class SdsMetadata:
     def assign_subdir_from_fulldir(self, full_directory):
     #
     #   Assign subdir
-        subdirs =  full_directory.split(os.path.sep)
-        subdir = subdirs[-4]+os.path.sep+subdirs[-3]+os.path.sep+subdirs[-2]+os.path.sep
+        subdir = get_subdir_from_path_full(full_directory)
         sds_metadata['eStation2_subdir'] = str(subdir)
 
     def assign_input_files(self, input_files):
