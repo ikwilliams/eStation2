@@ -45,6 +45,7 @@ logger = log.my_logger(__name__)
 #   General definitions for this processing chain
 prod="FEWSNET_RFE"
 mapset='FEWSNET_Africa_8km'
+mapset='WGS84_Guinea2Nig_1km'
 ext='.tif'
 version='undefined'
 
@@ -71,372 +72,373 @@ activate_1mondiff_comput=1
 activate_1monperc_comput=1
 activate_1monnp_comput=1
 
-#   ---------------------------------------------------------------------
-#   Define input files
-starting_sprod='RFE'
-in_prod_ident = set_path_filename_no_date(prod, starting_sprod, mapset, ext)
-
-input_dir = locals.es2globals['data_dir']+ \
-            set_path_sub_directory(prod, starting_sprod, 'tif', version, mapset)
-
-starting_files = input_dir+"*"+in_prod_ident
-
-#   ---------------------------------------------------------------------
-#   Average
-output_sprod="10DAVG"
-out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
-
-formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
-
-@active_if(activate_fewsnet_rfe_comput, activate_10d_comput, activate_10davg_comput)
-@collate(starting_files, formatter(formatter_in),formatter_out)
-def fewsnet_10davg(input_file, output_file):
-
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
-    args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-    raster_image_math.do_avg_image(**args)
-    upsert_processed_ruffus(output_file)
-
-
-#   ---------------------------------------------------------------------
-#   Minimum
-output_sprod="10DMIN"
-out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
-
-formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
-
-@active_if(activate_fewsnet_rfe_comput, activate_10d_comput, activate_10dmin_comput)
-@collate(starting_files, formatter(formatter_in),formatter_out)
-def fewsnet_10dmin(input_file, output_file):
-
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
-    args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-    raster_image_math.do_min_image(**args)
-    upsert_processed_ruffus(output_file)
-
-#   ---------------------------------------------------------------------
-#   Maximum
-output_sprod="10DMAX"
-out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
-
-formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
-
-@active_if(activate_fewsnet_rfe_comput, activate_10d_comput, activate_10dmax_comput)
-@collate(starting_files, formatter(formatter_in),formatter_out)
-def fewsnet_10dmax(input_file, output_file):
-
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
-    args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-    raster_image_math.do_max_image(**args)
-    upsert_processed_ruffus(output_file)
-
-#   ---------------------------------------------------------------------
-#   10dDiff
-output_sprod="10DIFF"
-out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
-
-#   Starting files + avg
-formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
-
-ancillary_sprod = "10davg"
-ancillary_sprod_ident = set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
-ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived',version, mapset)
-ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
-
-@follows(fewsnet_10davg)
-@active_if(activate_fewsnet_rfe_comput, activate_10d_comput, activate_10ddiff_comput)
-@transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
-def fewsnet_10ddiff(input_file, output_file):
-
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
-    args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-    raster_image_math.do_oper_subtraction(**args)
-    upsert_processed_ruffus(output_file)
-
-#   ---------------------------------------------------------------------
-#   10dperc
-output_sprod="10DPERC"
-out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
-
-#   Starting files + avg
-formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
-
-ancillary_sprod = "10davg"
-ancillary_sprod_ident = set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
-ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived', version, mapset)
-ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
-
-@follows(fewsnet_10davg)
-@active_if(activate_fewsnet_rfe_comput, activate_10d_comput, activate_10dperc_comput)
-@transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
-def fewsnet_10dperc(input_file, output_file):
-
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
-    args = {"input_file": input_file[0], "avg_file": input_file[1], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-    raster_image_math.do_compute_perc_diff_vs_avg(**args)
-    upsert_processed_ruffus(output_file)
-
-#   ---------------------------------------------------------------------
-#   10dnp
-output_sprod="10DNP"
-out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
-
-#   Starting files + min + max
-formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
-
-ancillary_sprod_1 = "10DMIN"
-ancillary_sprod_ident_1 = set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
-ancillary_subdir_1      = set_path_sub_directory(prod, ancillary_sprod_1, 'derived',version, mapset)
-ancillary_input_1="{subpath[0][4]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
-
-ancillary_sprod_2 = "10DMAX"
-ancillary_sprod_ident_2 = set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
-ancillary_subdir_2      = set_path_sub_directory(prod, ancillary_sprod_2, 'derived',version, mapset)
-ancillary_input_2="{subpath[0][4]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
-
-@follows(fewsnet_10dmin, fewsnet_10dmax)
-@active_if(activate_fewsnet_rfe_comput, activate_10d_comput, activate_10dnp_comput)
-@transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input_1, ancillary_input_2), formatter_out)
-def fewsnet_10dnp(input_file, output_file):
-
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
-    args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-    raster_image_math.do_make_vci(**args)
-    upsert_processed_ruffus(output_file)
-
-#   ---------------------------------------------------------------------
-#   1moncum
-output_sprod="1MONCUM"
-out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
-
-# inputs: files from same months
-formatter_in="(?P<YYYYMM>[0-9]{6})(?P<DD>[0-9]{2})"+in_prod_ident
-formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYYMM[0]}"+'01'+out_prod_ident
-
-# @follows(fewsnet_10davg)
-@active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1moncum_comput)
-@collate(starting_files, formatter(formatter_in), formatter_out)
-def fewsnet_1moncum(input_file, output_file):
-
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
-    args = {"input_file": input_file,"output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-    raster_image_math.do_cumulate(**args)
-    upsert_processed_ruffus(output_file)
-
-#   ---------------------------------------------------------------------
-#   Monthly Average
-new_input_subprod='1MONCUM'
-in_prod_ident=set_path_filename_no_date(prod, new_input_subprod, mapset, ext)
-
-output_sprod="1MONAVG"
-out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
-
-formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
-
-@active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1monavg_comput)
-@collate(fewsnet_1moncum, formatter(formatter_in),formatter_out)
-def fewsnet_1monavg(input_file, output_file):
-
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
-    args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-    raster_image_math.do_avg_image(**args)
-    upsert_processed_ruffus(output_file)
-
-#   ---------------------------------------------------------------------
-#   Monthly Minimum
-output_sprod="1MONMIN"
-out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
-
-formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
-
-@active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1monmin_comput)
-@collate(fewsnet_1moncum, formatter(formatter_in),formatter_out)
-def fewsnet_1monmin(input_file, output_file):
-
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
-    args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-    raster_image_math.do_min_image(**args)
-    upsert_processed_ruffus(output_file)
-
-#   ---------------------------------------------------------------------
-#   Monthly Maximum
-output_sprod="1MONMAX"
-out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
-
-reg_ex_in="[0-9]{4}([0-9]{4})"+in_prod_ident
-
-formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
-
-@active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1monmax_comput)
-@collate(fewsnet_1moncum, formatter(formatter_in),formatter_out)
-def fewsnet_1monmax(input_file, output_file):
-
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
-    args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-    raster_image_math.do_max_image(**args)
-    upsert_processed_ruffus(output_file)
-
-#   ---------------------------------------------------------------------
-#   1monDiff
-output_sprod="1MONDIFF"
-out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
-
-# inputs
-#   Starting files + avg
-formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
-
-ancillary_sprod = "1monavg"
-ancillary_sprod_ident = set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
-ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived', version, mapset)
-ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
-
-@follows(fewsnet_1monavg)
-@active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1mondiff_comput)
-@transform(fewsnet_1moncum, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
-def fewsnet_1mondiff(input_file, output_file):
-
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
-    args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-    raster_image_math.do_oper_subtraction(**args)
-    upsert_processed_ruffus(output_file)
-
-#   ---------------------------------------------------------------------
-#   1monperc
-output_sprod="1MONPERC"
-out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
-
-# inputs
-#   Starting files + avg
-formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
-
-ancillary_sprod = "1MONAVG"
-ancillary_sprod_ident = set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
-ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived',version, mapset)
-ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
-
-@follows(fewsnet_1monavg)
-@active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1monperc_comput)
-@transform(fewsnet_1moncum, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
-def fewsnet_1monperc(input_file, output_file):
-
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
-    args = {"input_file": input_file[0], "avg_file": input_file[1], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-    raster_image_math.do_compute_perc_diff_vs_avg(**args)
-    upsert_processed_ruffus(output_file)
-
-#   ---------------------------------------------------------------------
-#   1monnp
-output_sprod="1MONNP"
-out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
-
-#   Starting files + min + max
-formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
-
-ancillary_sprod_1 = "1MONMIN"
-ancillary_sprod_ident_1 = set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
-ancillary_subdir_1      = set_path_sub_directory(prod, ancillary_sprod_1, 'derived',version, mapset)
-ancillary_input_1="{subpath[0][4]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
-
-ancillary_sprod_2 = "1MONMAX"
-ancillary_sprod_ident_2 = set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
-ancillary_subdir_2      = set_path_sub_directory(prod, ancillary_sprod_2, 'derived',version, mapset)
-ancillary_input_2="{subpath[0][4]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
-
-@follows(fewsnet_1monmin, fewsnet_1monmax)
-@active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1monnp_comput)
-@transform(fewsnet_1moncum, formatter(formatter_in), add_inputs(ancillary_input_1, ancillary_input_2), formatter_out)
-def fewsnet_1monnp(input_file, output_file):
-
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
-    args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-    raster_image_math.do_make_vci(**args)
-    upsert_processed_ruffus(output_file)
-
-#   ---------------------------------------------------------------------
-#   Upsert in the DB table a product generated by ruffus
-
-def upsert_processed_ruffus(file_fullpath):
-
-        # -------------------------------------------------------------------------
-        # Upsert into DB table 'products_data'
-        # -------------------------------------------------------------------------
-
-        filename = os.path.basename(file_fullpath)
-        dirname = os.path.dirname(file_fullpath)
-
-        # TODO-M.C.: add tests, try/except
-        [productcode, subproductcode, version, mapsetcode] = get_from_path_dir(dirname)
-        str_date = get_date_from_path_filename(filename)
-        [str_year, str_month, str_day, str_hour] = extract_from_date(str_date)
-
-        if str_year == '':
-            str_year='0'
-        cruddb = crud.CrudDB()
-        recordkey = {'productcode': productcode.lower(),
-                     'subproductcode': subproductcode.lower(),
-                     'version': 'undefined',
-                     'mapsetcode': mapsetcode,
-                     'product_datetime': str_date}
-
-
-        record = {'productcode': productcode.lower(),
-                  'subproductcode': subproductcode.lower(),
-                  'version': 'undefined',
-                  'mapsetcode': mapsetcode,
-                  'product_datetime': str_date,
-                  'directory': dirname,
-                  'filename': filename,
-                  'year': int(str_year),
-                  'month': int(str_month),
-                  'day': int(str_day),
-                  'hour': int(str_hour),
-                  'file_role': 'active',
-                  'file_type': 'GTiff'}
-
-        if len(cruddb.read('products.products_data', **recordkey)) > 0:
-            logger.debug('Updating products_data record: ' + str(recordkey))
-            cruddb.update('products.products_data', record)
-        else:
-            logger.debug('Creating products_data record: ' + str(recordkey))
-            cruddb.create('products.products_data', record)
+def create_pipeline(starting_sprod):
+    #   ---------------------------------------------------------------------
+    #   Define input files
+    #starting_sprod='RFE'
+    in_prod_ident = set_path_filename_no_date(prod, starting_sprod, mapset, ext)
+
+    input_dir = locals.es2globals['data_dir']+ \
+                set_path_sub_directory(prod, starting_sprod, 'tif', version, mapset)
+
+    starting_files = input_dir+"*"+in_prod_ident
+
+    #   ---------------------------------------------------------------------
+    #   Average
+    output_sprod="10DAVG"
+    out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+
+    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
+    formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+
+    @active_if(activate_fewsnet_rfe_comput, activate_10d_comput, activate_10davg_comput)
+    @collate(starting_files, formatter(formatter_in),formatter_out)
+    def fewsnet_10davg(input_file, output_file):
+
+        output_file = list_to_element(output_file)
+        check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
+        raster_image_math.do_avg_image(**args)
+        upsert_processed_ruffus(output_file)
+
+
+    #   ---------------------------------------------------------------------
+    #   Minimum
+    output_sprod="10DMIN"
+    out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+
+    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
+    formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+
+    @active_if(activate_fewsnet_rfe_comput, activate_10d_comput, activate_10dmin_comput)
+    @collate(starting_files, formatter(formatter_in),formatter_out)
+    def fewsnet_10dmin(input_file, output_file):
+
+        output_file = list_to_element(output_file)
+        check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
+        raster_image_math.do_min_image(**args)
+        upsert_processed_ruffus(output_file)
+
+    #   ---------------------------------------------------------------------
+    #   Maximum
+    output_sprod="10DMAX"
+    out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+
+    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
+    formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+
+    @active_if(activate_fewsnet_rfe_comput, activate_10d_comput, activate_10dmax_comput)
+    @collate(starting_files, formatter(formatter_in),formatter_out)
+    def fewsnet_10dmax(input_file, output_file):
+
+        output_file = list_to_element(output_file)
+        check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
+        raster_image_math.do_max_image(**args)
+        upsert_processed_ruffus(output_file)
+
+    #   ---------------------------------------------------------------------
+    #   10dDiff
+    output_sprod="10DIFF"
+    out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+
+    #   Starting files + avg
+    formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
+    formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+
+    ancillary_sprod = "10davg"
+    ancillary_sprod_ident = set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
+    ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived',version, mapset)
+    ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
+
+    @follows(fewsnet_10davg)
+    @active_if(activate_fewsnet_rfe_comput, activate_10d_comput, activate_10ddiff_comput)
+    @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
+    def fewsnet_10ddiff(input_file, output_file):
+
+        output_file = list_to_element(output_file)
+        check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
+        raster_image_math.do_oper_subtraction(**args)
+        upsert_processed_ruffus(output_file)
+
+    #   ---------------------------------------------------------------------
+    #   10dperc
+    output_sprod="10DPERC"
+    out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+
+    #   Starting files + avg
+    formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
+    formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+
+    ancillary_sprod = "10davg"
+    ancillary_sprod_ident = set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
+    ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived', version, mapset)
+    ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
+
+    @follows(fewsnet_10davg)
+    @active_if(activate_fewsnet_rfe_comput, activate_10d_comput, activate_10dperc_comput)
+    @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
+    def fewsnet_10dperc(input_file, output_file):
+
+        output_file = list_to_element(output_file)
+        check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_file[0], "avg_file": input_file[1], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
+        raster_image_math.do_compute_perc_diff_vs_avg(**args)
+        upsert_processed_ruffus(output_file)
+
+    #   ---------------------------------------------------------------------
+    #   10dnp
+    output_sprod="10DNP"
+    out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+
+    #   Starting files + min + max
+    formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
+    formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+
+    ancillary_sprod_1 = "10DMIN"
+    ancillary_sprod_ident_1 = set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
+    ancillary_subdir_1      = set_path_sub_directory(prod, ancillary_sprod_1, 'derived',version, mapset)
+    ancillary_input_1="{subpath[0][4]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
+
+    ancillary_sprod_2 = "10DMAX"
+    ancillary_sprod_ident_2 = set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
+    ancillary_subdir_2      = set_path_sub_directory(prod, ancillary_sprod_2, 'derived',version, mapset)
+    ancillary_input_2="{subpath[0][4]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
+
+    @follows(fewsnet_10dmin, fewsnet_10dmax)
+    @active_if(activate_fewsnet_rfe_comput, activate_10d_comput, activate_10dnp_comput)
+    @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input_1, ancillary_input_2), formatter_out)
+    def fewsnet_10dnp(input_file, output_file):
+
+        output_file = list_to_element(output_file)
+        check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
+        raster_image_math.do_make_vci(**args)
+        upsert_processed_ruffus(output_file)
+
+    #   ---------------------------------------------------------------------
+    #   1moncum
+    output_sprod="1MONCUM"
+    out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+
+    # inputs: files from same months
+    formatter_in="(?P<YYYYMM>[0-9]{6})(?P<DD>[0-9]{2})"+in_prod_ident
+    formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYYMM[0]}"+'01'+out_prod_ident
+
+    # @follows(fewsnet_10davg)
+    @active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1moncum_comput)
+    @collate(starting_files, formatter(formatter_in), formatter_out)
+    def fewsnet_1moncum(input_file, output_file):
+
+        output_file = list_to_element(output_file)
+        check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_file,"output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
+        raster_image_math.do_cumulate(**args)
+        upsert_processed_ruffus(output_file)
+
+    #   ---------------------------------------------------------------------
+    #   Monthly Average
+    new_input_subprod='1MONCUM'
+    in_prod_ident=set_path_filename_no_date(prod, new_input_subprod, mapset, ext)
+
+    output_sprod="1MONAVG"
+    out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+
+    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
+    formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+
+    @active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1monavg_comput)
+    @collate(fewsnet_1moncum, formatter(formatter_in),formatter_out)
+    def fewsnet_1monavg(input_file, output_file):
+
+        output_file = list_to_element(output_file)
+        check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
+        raster_image_math.do_avg_image(**args)
+        upsert_processed_ruffus(output_file)
+
+    #   ---------------------------------------------------------------------
+    #   Monthly Minimum
+    output_sprod="1MONMIN"
+    out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+
+    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
+    formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+
+    @active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1monmin_comput)
+    @collate(fewsnet_1moncum, formatter(formatter_in),formatter_out)
+    def fewsnet_1monmin(input_file, output_file):
+
+        output_file = list_to_element(output_file)
+        check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
+        raster_image_math.do_min_image(**args)
+        upsert_processed_ruffus(output_file)
+
+    #   ---------------------------------------------------------------------
+    #   Monthly Maximum
+    output_sprod="1MONMAX"
+    out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+
+    reg_ex_in="[0-9]{4}([0-9]{4})"+in_prod_ident
+
+    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
+    formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+
+    @active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1monmax_comput)
+    @collate(fewsnet_1moncum, formatter(formatter_in),formatter_out)
+    def fewsnet_1monmax(input_file, output_file):
+
+        output_file = list_to_element(output_file)
+        check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
+        raster_image_math.do_max_image(**args)
+        upsert_processed_ruffus(output_file)
+
+    #   ---------------------------------------------------------------------
+    #   1monDiff
+    output_sprod="1MONDIFF"
+    out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+
+    # inputs
+    #   Starting files + avg
+    formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
+    formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+
+    ancillary_sprod = "1monavg"
+    ancillary_sprod_ident = set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
+    ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived', version, mapset)
+    ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
+
+    @follows(fewsnet_1monavg)
+    @active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1mondiff_comput)
+    @transform(fewsnet_1moncum, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
+    def fewsnet_1mondiff(input_file, output_file):
+
+        output_file = list_to_element(output_file)
+        check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
+        raster_image_math.do_oper_subtraction(**args)
+        upsert_processed_ruffus(output_file)
+
+    #   ---------------------------------------------------------------------
+    #   1monperc
+    output_sprod="1MONPERC"
+    out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+
+    # inputs
+    #   Starting files + avg
+    formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
+    formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+
+    ancillary_sprod = "1MONAVG"
+    ancillary_sprod_ident = set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
+    ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived',version, mapset)
+    ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
+
+    @follows(fewsnet_1monavg)
+    @active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1monperc_comput)
+    @transform(fewsnet_1moncum, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
+    def fewsnet_1monperc(input_file, output_file):
+
+        output_file = list_to_element(output_file)
+        check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_file[0], "avg_file": input_file[1], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
+        raster_image_math.do_compute_perc_diff_vs_avg(**args)
+        upsert_processed_ruffus(output_file)
+
+    #   ---------------------------------------------------------------------
+    #   1monnp
+    output_sprod="1MONNP"
+    out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+
+    #   Starting files + min + max
+    formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
+    formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+
+    ancillary_sprod_1 = "1MONMIN"
+    ancillary_sprod_ident_1 = set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
+    ancillary_subdir_1      = set_path_sub_directory(prod, ancillary_sprod_1, 'derived',version, mapset)
+    ancillary_input_1="{subpath[0][4]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
+
+    ancillary_sprod_2 = "1MONMAX"
+    ancillary_sprod_ident_2 = set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
+    ancillary_subdir_2      = set_path_sub_directory(prod, ancillary_sprod_2, 'derived',version, mapset)
+    ancillary_input_2="{subpath[0][4]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
+
+    @follows(fewsnet_1monmin, fewsnet_1monmax)
+    @active_if(activate_fewsnet_rfe_comput, activate_1month_comput, activate_1monnp_comput)
+    @transform(fewsnet_1moncum, formatter(formatter_in), add_inputs(ancillary_input_1, ancillary_input_2), formatter_out)
+    def fewsnet_1monnp(input_file, output_file):
+
+        output_file = list_to_element(output_file)
+        check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
+        raster_image_math.do_make_vci(**args)
+        upsert_processed_ruffus(output_file)
+
+    #   ---------------------------------------------------------------------
+    #   Upsert in the DB table a product generated by ruffus
+
+    def upsert_processed_ruffus(file_fullpath):
+
+            # -------------------------------------------------------------------------
+            # Upsert into DB table 'products_data'
+            # -------------------------------------------------------------------------
+
+            filename = os.path.basename(file_fullpath)
+            dirname = os.path.dirname(file_fullpath)
+
+            # TODO-M.C.: add tests, try/except
+            [productcode, subproductcode, version, mapsetcode] = get_from_path_dir(dirname)
+            str_date = get_date_from_path_filename(filename)
+            [str_year, str_month, str_day, str_hour] = extract_from_date(str_date)
+
+            if str_year == '':
+                str_year='0'
+            cruddb = crud.CrudDB()
+            recordkey = {'productcode': productcode.lower(),
+                         'subproductcode': subproductcode.lower(),
+                         'version': 'undefined',
+                         'mapsetcode': mapsetcode,
+                         'product_datetime': str_date}
+
+
+            record = {'productcode': productcode.lower(),
+                      'subproductcode': subproductcode.lower(),
+                      'version': 'undefined',
+                      'mapsetcode': mapsetcode,
+                      'product_datetime': str_date,
+                      'directory': dirname,
+                      'filename': filename,
+                      'year': int(str_year),
+                      'month': int(str_month),
+                      'day': int(str_day),
+                      'hour': int(str_hour),
+                      'file_role': 'active',
+                      'file_type': 'GTiff'}
+
+            if len(cruddb.read('products.products_data', **recordkey)) > 0:
+                logger.debug('Updating products_data record: ' + str(recordkey))
+                cruddb.update('products.products_data', record)
+            else:
+                logger.debug('Creating products_data record: ' + str(recordkey))
+                cruddb.create('products.products_data', record)
 
 #   ---------------------------------------------------------------------
 #   Run the pipeline
@@ -444,12 +446,14 @@ def upsert_processed_ruffus(file_fullpath):
 def processing_fewsnet_rfe(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
                            pipeline_printout_graph_level=0):
 
+    create_pipeline(starting_sprod='RFE')
+
     logger.info("Entering routine %s" % 'processing_fewsnet_rfe')
     if pipeline_run_level > 0:
         pipeline_run(verbose=pipeline_run_level, touch_files_only=pipeline_run_touch_only)
 
     if pipeline_printout_level > 0:
-        pipeline_printout()
+        pipeline_printout(verbose=pipeline_printout_level)
 
     if pipeline_printout_graph_level > 0:
         pipeline_printout_graph('flowchart.jpg')
