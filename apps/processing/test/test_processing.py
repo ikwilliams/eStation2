@@ -12,7 +12,7 @@ args = {'pipeline_run_level':pipeline_run_level, \
         'pipeline_printout_graph_level':pipeline_printout_graph_level}
 
 from apps.processing.processing_fewsnet import *
-from apps.processing.processing_ndvi import *
+#from apps.processing.processing_ndvi import *
 
 start = time.clock()
 
@@ -20,4 +20,4 @@ start = time.clock()
 #   Run the pipeline
 
 processing_fewsnet_rfe(**args)
-processing_vgt_ndvi(**args)
+# processing_vgt_ndvi(**args)
