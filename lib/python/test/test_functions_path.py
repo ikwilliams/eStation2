@@ -15,13 +15,14 @@ class TestFunctionsPath(TestCase):
     str_sprod = str('my_subprod_code').upper()
     str_mapset= 'my_mapset'
     str_extension = '.tif'
-    str_type = 'tif'
+    product_type = 'Ingest'
+    str_type_subdir = dict_subprod_type_2_dir[product_type]
 
     # Rule for sub_dir is: <prod_code>/<mapset>/<type>/<sprod_code>
 
     sub_dir = str_prod+sep+\
                 str_mapset+sep+\
-                str_type+sep+\
+                str_type_subdir+sep+\
                 str_sprod+sep
 
     dir_name=sep+'base'+sep+'dir'+sep+'some'+sep+'where' + sep + sub_dir
@@ -95,7 +96,7 @@ class TestFunctionsPath(TestCase):
 
     def test_set_path_sub_directory(self):
 
-        my_sub_directory = set_path_sub_directory(self.str_prod, self.str_sprod, self.str_type,
+        my_sub_directory = set_path_sub_directory(self.str_prod, self.str_sprod, self.product_type,
                                         self.str_version, self.str_mapset)
 
         self.assertEqual(self.sub_dir,my_sub_directory)
