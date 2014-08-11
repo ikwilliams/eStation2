@@ -7,11 +7,10 @@
 
 from __future__ import absolute_import
 import datetime
-
-import locals
+from database import querydb
 
 from .exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
-        WrongFrequencyType, WrongFrequencyDateFormat)
+        WrongFrequencyType, WrongFrequencyDateFormat, NoProductFound)
 
 from .helpers import add_years, add_months, add_dekads
 
@@ -79,6 +78,13 @@ class Frequency(object):
     def format_filename(self, date, mapset):
         return self.format_date(date) + mapset
 
+    def check_date(self, date_datetime):
+        if type(date_datetime) is datetime.datetime and self.dateformat == self.DATEFORMAT.DATE:
+            return False
+        if type(date_datetime) is datetime.date and self.dateformat == self.DATEFORMAT.DATETIME:
+            return False
+        return True
+
     def next_filename(self, filename):
         date_parts = (int(filename[:4]), int(filename[4:6]), int(filename[6:8]))
         if self.dateformat == self.DATEFORMAT.DATE:
@@ -111,9 +117,13 @@ class Frequency(object):
 
 
 class Dataset(object):
-    def __init__(self, product, subproduct):
-        self.product = product
-        self.subproduct = subproduct
+    def __init__(self, productcode, subproductcode, version=None):
+        kwargs = {'productcode':productcode, 'subproductcode':subproductcode}
+        if not version is None:
+            kwargs['version'] = version
+        self._product = querydb.get_product_out_info(**kwargs)
+        if self._product is None:
+            raise NoProductFound(kwargs)
         self._path = None
 
 

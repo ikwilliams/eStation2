@@ -15,6 +15,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.sql import func
 from lib.python import es_logging as log
 from config.es_constants import *
+from crud import CrudDB
 
 logger = log.my_logger(__name__)
 
@@ -31,10 +32,7 @@ logger = log.my_logger(__name__)
 def connect_db():
 
     try:
-        sqlsoup_dns = "postgresql://%s:%s@%s/%s" % (dbglobals['dbUser'],
-                                                    dbglobals['dbPass'],
-                                                    dbglobals['host'],
-                                                    dbglobals['dbName'])
+        sqlsoup_dns = CrudDB.get_db_url()
 
         dbconn = sqlsoup.SQLSoup(sqlsoup_dns)
         dbconn.schema = dbglobals['schema_products']
