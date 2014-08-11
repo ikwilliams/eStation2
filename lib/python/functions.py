@@ -32,6 +32,7 @@ from lib.python import es_logging as log
 
 logger = log.my_logger(__name__)
 
+dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'derived'}
 
 ######################################################################################
 #                            DATE FUNCTIONS
@@ -484,19 +485,21 @@ def set_path_filename(date_str, product_code, sub_product_code, mapset_id, exten
 
 ######################################################################################
 #   set_path_sub_directory
-#   Purpose: From product_code, sub_product_code, type, version, mapset  -> sub_directory
+#   Purpose: From product_code, sub_product_code, product_type, version, mapset  -> sub_directory
 #   Author: Marco Clerici, JRC, European Commission
 #   Date: 2014/06/22
-#   Inputs: product_code, sub_product_code, type, version
+#   Inputs: product_code, sub_product_code, product_type, version
 #   Output: subdir, e.g. FEWSNET_RFE/FEWSNET_Africa_8km/tif/RFE/
 #   Description: creates filename
 #
 #
-def set_path_sub_directory(product_code, sub_product_code, type, version, mapset):
+def set_path_sub_directory(product_code, sub_product_code, product_type, version, mapset):
+
+    type_subdir = dict_subprod_type_2_dir[product_type]
 
     sub_directory = str(product_code.upper()) + os.path.sep + \
                     mapset + os.path.sep +\
-                    type + os.path.sep +\
+                    type_subdir + os.path.sep +\
                     str(sub_product_code.upper()) + os.path.sep
 
     return sub_directory
