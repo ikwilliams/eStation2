@@ -584,6 +584,25 @@ def get_date_from_path_full(full_path):
     return str_date
 
 ######################################################################################
+#   get_subdir_from_path_full
+#   Purpose: From full_path -> date
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: filename
+#   Output: date
+#   Description: returns subdir from the fullpath
+#
+#
+
+def get_subdir_from_path_full(full_path):
+
+    # Remove the directory
+    subdirs =  full_path.split(os.path.sep)
+    str_subdir = subdirs[-4]+os.path.sep+subdirs[-3]+os.path.sep+subdirs[-2]+os.path.sep+subdirs[-1]+os.path.sep
+
+    return str_subdir
+
+######################################################################################
 #   get_all_from_path_full
 #   Purpose: From full_path -> product_code, sub_product_code, date, mapset, (version)
 #   Author: Marco Clerici, JRC, European Commission
