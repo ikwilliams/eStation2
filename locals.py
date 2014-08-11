@@ -17,8 +17,8 @@ es2globals = {
     'dbName': 'estationdb',
     'schema': 'products',
     'base_dir': '/srv/www/eStation2/',
-    'data_dir': my_dir+'/TestFiles/',
-    'ingest_dir': my_dir+'/TestFiles/',
+    'data_dir': '',
+    'ingest_dir': '',
     'static_data_path': '',
     'temp_dir': '/tmp/eStation2/'
 }
