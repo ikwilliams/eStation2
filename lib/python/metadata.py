@@ -12,8 +12,6 @@ from lib.python import es_logging as log
 from lib.python.functions import get_subdir_from_path_full
 logger = log.my_logger(__name__)
 
-# Add:  Units, scaling factor, offset, nodata
-
 sds_metadata = { 'eStation2_product': '',
                  'eStation2_subProduct': '',
                  'eStation2_version': '',
@@ -27,7 +25,6 @@ sds_metadata = { 'eStation2_product': '',
                  'eStation2_unit': '',
                  'eStation2_nodata': '',
                  'eStation2_subdir': ''
-
 }
 
 class SdsMetadata:
@@ -123,6 +120,15 @@ class SdsMetadata:
         sds_metadata['eStation2_scaling_factor'] = str(scaling_factor)
         sds_metadata['eStation2_scaling_offset'] = str(scaling_offset)
         sds_metadata['eStation2_nodata'] = str(nodata)
+
+    def get_item(self, itemname):
+
+        try:
+            value = sds_metadata[itemname]
+        except:
+            pass
+
+        return value
 
     def print_out(self):
     #
