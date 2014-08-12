@@ -23,9 +23,9 @@ import database.crud as crud
 import database.querydb as querydb
 import lib.python.functions as func
 from lib.python import es_logging as log
-from config.es_constants import *
 from lib.python.mapset import *
 from lib.python.metadata import *
+from config.es_constants import *
 
 import pygrib
 from osgeo import gdal
@@ -598,9 +598,10 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 
     # Create temp output dir
     try:
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_files[0]), dir=base_tmp_dir)
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_files[0]),
+                                  dir=locals.es2globals['temp_dir'])
     except IOError:
-        logger.error('Cannot create temporary dir ' + base_tmp_dir + '. Exit')
+        logger.error('Cannot create temporary dir ' + locals.es2globals['temp_dir'] + '. Exit')
         return 1
 
     georef_already_done = False
@@ -805,7 +806,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         # Define output directory and make sure it exists
         output_directory = data_dir_out+ func.set_path_sub_directory(product['productcode'],subproducts[ii]['subproduct'],
-                                                                'tif', version_undef, mapset_id)
+                                                                'Ingest', version_undef, mapset_id)
         try:
             if not os.path.exists(output_directory):
                 os.makedirs(output_directory)
@@ -914,12 +915,15 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
             orig_ds = None
 
+        # -------------------------------------------------------------------------
         # Assign Metadata to the ingested file
-        sds_meta.assign_time_now()
+        # -------------------------------------------------------------------------
+
         sds_meta.assign_mapset(mapset_id)
-        sds_meta.assign_product(product['productcode'], subproducts[ii]['subproduct'], product['version'])
+        sds_meta.assign_from_product(product['productcode'], subproducts[ii]['subproduct'], product['version'])
+        sds_meta.assign_comput_time_now()
         sds_meta.assign_input_files(in_files)
-        sds_meta.assign_scaling(out_scale_factor, out_offset, out_nodata)
+
         sds_meta.write_to_ds(trg_ds)
 
         trg_ds = None
@@ -930,31 +934,32 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         filename = os.path.basename(output_filename)
 
-        cruddb = crud.CrudDB()
-        recordkey = {'productcode': product['productcode'],
-                     'subproductcode': subproducts[ii]['subproduct'],
-                     'version': product['version'],
-                     'mapsetcode': subproducts[ii]['mapsetcode'],
-                     'product_datetime': output_date_str}
-
-        record = {'productcode': product['productcode'],
-                  'subproductcode': subproducts[ii]['subproduct'],
-                  'version': product['version'],
-                  'mapsetcode': subproducts[ii]['mapsetcode'],
-                  'product_datetime': output_date_str,
-                  'directory': output_directory,
-                  'filename': filename,
-                  'year': year,
-                  'month': month,
-                  'day': day,
-                  'hour': hour,
-                  'file_role': 'active',
-                  'file_type': 'GTiff'}
-        if len(cruddb.read('products.products_data', **recordkey)) > 0:
-            logger.debug('Updating products_data record: ' + str(recordkey))
-            cruddb.update('products.products_data', record)
-        else:
-            cruddb.create('products.products_data', record)
+        # TODO-M.C.: completely remove ???
+        # cruddb = crud.CrudDB()
+        # recordkey = {'productcode': product['productcode'],
+        #              'subproductcode': subproducts[ii]['subproduct'],
+        #              'version': product['version'],
+        #              'mapsetcode': subproducts[ii]['mapsetcode'],
+        #              'product_datetime': output_date_str}
+        #
+        # record = {'productcode': product['productcode'],
+        #           'subproductcode': subproducts[ii]['subproduct'],
+        #           'version': product['version'],
+        #           'mapsetcode': subproducts[ii]['mapsetcode'],
+        #           'product_datetime': output_date_str,
+        #           'directory': output_directory,
+        #           'filename': filename,
+        #           'year': year,
+        #           'month': month,
+        #           'day': day,
+        #           'hour': hour,
+        #           'file_role': 'active',
+        #           'file_type': 'GTiff'}
+        # if len(cruddb.read('products.products_data', **recordkey)) > 0:
+        #     logger.debug('Updating products_data record: ' + str(recordkey))
+        #     cruddb.update('products.products_data', record)
+        # else:
+        #     cruddb.create('products.products_data', record)
 
         #,'creation_datetime': 'now()'
 
