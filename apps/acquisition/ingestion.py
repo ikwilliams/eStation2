@@ -54,7 +54,6 @@ def drive_ingestion():
                                                                              active_product_ingest[2]))
         productcode = active_product_ingest[0]
         productversion = active_product_ingest[1]
-        # total_subproducts = active_product_ingest[2]
 
         # For the current active product ingestion: get all
         product = {"productcode": productcode,
@@ -62,9 +61,9 @@ def drive_ingestion():
         logger.debug("Processing product: %s" % productcode)
 
         # Get the list of acquisition sources that are defined for this ingestion 'trigger'
-        # (i.e. prod/sprod/version/[mapset])
+        # (i.e. prod/version)
         # TODO-M.C.: test the case of more mapsets for the same prod/subprod/version -> pb. in file deletion ?
-        # NOTE: the following implies there 1 and only 1 '_native' subproduct associated to a 'subproduct';
+        # NOTE: the following implies there is 1 and only 1 '_native' subproduct associated to a 'subproduct';
         native_product = {"productcode": productcode,
                           "subproductcode": productcode + "_native",
                           "version": productversion}
@@ -75,13 +74,16 @@ def drive_ingestion():
 
         for source in sources_list:
 
-            logger.info("Processing Source type [%s] with id [%s]" % (source.type, source.data_source_id))
+            logger.debug("Processing Source type [%s] with id [%s]" % (source.type, source.data_source_id))
             # Get the 'filenaming' info (incl. 'area-type') from the acquisition source
             if source.type == 'EUMETCAST':
                 for eumetcast_filter, datasource_descr in querydb.get_datasource_descr(echo=echo_query,
                                                                                        source_type=source.type,
                                                                                        source_id=source.data_source_id):
-                    files = [f for f in os.listdir(ingest_dir_in) if re.match(eumetcast_filter, f)]
+
+                    # TODO-M.C.: replace with a glob function ? this loop can be very long ...
+                    files = [f for f in os.listdir(ingest_dir_in) if re.match(str(eumetcast_filter), f)]
+                    #files = glob.glob(ingest_dir_in+eumetcast_filter)
 
             if source.type == 'INTERNET':
                 # Implement file name filtering for INTERNET data source.
@@ -90,7 +92,9 @@ def drive_ingestion():
                                                                                       source_id=source.data_source_id):
                 # TODO-Jurvtk: complete/verified
                     temp_internet_filter = internet_filter.include_files_expression
+                    # TODO-M.C.: replace with a glob function ? this loop can be very long ...
                     files = [f for f in os.listdir(ingest_dir_in) if re.match(temp_internet_filter, f)]
+                    #files = glob.glob(ingest_dir_in+temp_internet_filter)
 
             logger.info("Number of files found for product [%s] is: %s" % (active_product_ingest[0], len(files)))
 
@@ -101,7 +105,8 @@ def drive_ingestion():
                 logger.debug(" --> processing subproduct: %s" % ingest.subproductcode)
                 args = {"productcode": product['productcode'],
                         "subproductcode": ingest.subproductcode,
-                        "datasource_descr_id": datasource_descr.datasource_descr_id}
+                        "datasource_descr_id": datasource_descr.datasource_descr_id,
+                        "version": product['version']}
                 product_in_info = querydb.get_product_in_info(echo=echo_query, **args)
                 re_process = product_in_info.re_process
                 re_extract = product_in_info.re_extract
@@ -127,7 +132,7 @@ def drive_ingestion():
 
             # Loop over dates and get list of files (considering mapset ?)
             for in_date in dates_list:
-                logger.debug("     --> processing date: %s" % in_date)
+                logger.debug("     --> processing date, in native format: %s" % in_date)
                 # Get the list of existing files for that date
                 regex = re.compile(".*(" + in_date + ").*")
                 date_fileslist = [ingest_dir_in + m.group(0) for l in files for m in [regex.search(l)] if m]
@@ -163,7 +168,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, echo
         do_preprocess = 1
 
     if do_preprocess == 1:
-        logger.info("Calling routine %s" % 'preprocess_files')
+        logger.debug("Calling routine %s" % 'preprocess_files')
         composed_file_list = pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files)
     else:
         composed_file_list = input_files
@@ -420,7 +425,7 @@ def pre_process_unzip (subproducts, tmpdir , input_files):
         else:
             input_file = input_files[0]
 
-    logger.info('Unzipping/processing: .zip case')
+    logger.debug('Unzipping/processing: .zip case')
     if zipfile.is_zipfile(input_file):
         zip_file = zipfile.ZipFile(input_file)              # Create ZipFile object
         zip_list = zip_file.namelist()                      # Get the list of its contents
@@ -564,6 +569,79 @@ def pre_process_georef_netcdf (native_mapset_code, tmpdir, input_files):
 
     return interm_files_list
 
+def pre_process_hdf5_zip (subproducts, tmpdir, input_files):
+# -------------------------------------------------------------------------------------------------------
+#   Pre-process HDF5 files zipped (g2_biopar products)
+#   First unzips (only 1 unzip h5 file expected), then extract relevant subdatasets (1+)
+#
+
+    # prepare the output as an empty list
+    interm_files_list = []
+
+    # Build a list of subdatasets to be extracted
+    sds_to_process = []
+    for sprod in subproducts:
+       # if sprod != 0:
+            sds_to_process.append(sprod['re_process'])
+    print sds_to_process
+    # Make sure input is a list (if only a string is received, it loops over chars)
+    if isinstance(input_files,list):
+        list_input_files = input_files
+    else:
+        list_input_files = []
+        list_input_files.append(input_files)
+
+    # Unzips the file
+    for input_file in list_input_files:
+
+        if zipfile.is_zipfile(input_file):
+            zip_file = zipfile.ZipFile(input_file)              # Create ZipFile object
+            zip_list = zip_file.namelist()                      # Get the list of its contents
+
+            # Loop over subproducts and extract associated files
+            for sprod in subproducts:
+
+                # Define the re_expr for extracting files
+                re_extract = '.*' + sprod['re_extract'] + '.*'
+                logger.debug('Re_expression: ' + re_extract + ' to match sprod ' + sprod['subproduct'])
+
+                for files in zip_list:
+                    logger.debug('File in the .zip archive is: ' + files)
+                    if re.match(re_extract, files):        # Check it matches one of sprods -> extract from zip
+                        filename = os.path.basename(files)
+                        data = zip_file.read(files)
+                        myfile_path = os.path.join(tmpdir, filename)
+                        myfile = open(myfile_path, "wb")
+                        myfile.write(data)
+                        myfile.close()
+                        my_unzip_file = myfile_path
+
+            zip_file.close()
+
+        else:
+            logger.error("File %s is not a valid zipfile. Exit", input_files)
+            return 1
+
+        # Test the hdf file and read list of datasets
+        hdf = gdal.Open(my_unzip_file)
+        sdsdict = hdf.GetMetadata('SUBDATASETS')
+        sdslist = [sdsdict[k] for k in sdsdict.keys() if '_NAME' in k]
+
+        # Loop over datasets and extract the one in the list
+        for subdataset in sdslist:
+            id_subdataset = subdataset.split(':')[-1]
+            id_subdataset=id_subdataset.replace('/','')
+            if id_subdataset in sds_to_process:
+                outputfile = tmpdir + os.path.sep + filename + "_" + id_subdataset + '.tif'
+                sds_tmp = gdal.Open(subdataset)
+                write_ds_to_geotiff(sds_tmp, outputfile)
+                sds_tmp = None
+
+                interm_files_list.append(outputfile)
+
+    return interm_files_list
+
+
 def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process one or more input files by:
@@ -586,6 +664,7 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 #           MODIS_SST_HDF4: MODIS SST files, in HDF4 (multi-SDS) b2zipped.
 #           BZIP2: .bz2 zipped files (containing 1 file only).
 #           GEOREF: only georeference, by assigning native mapset
+#           HDF5_UNZIP: zipped files containing HDF5 (see g2_BIOPAR)
 #
 #       native_mapset_code: id code of the native mapset (from datasource_descr)
 #       subproducts: list of subproducts to be extracted from the file. Contains dictionaries such as:
@@ -631,6 +710,9 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
     if preproc_type == 'BZ2_HDF4':
         interm_files = pre_process_bz2_hdf4 (subproducts, tmpdir, input_files)
 
+    if preproc_type == 'HDF5_ZIP':
+        interm_files = pre_process_hdf5_zip (subproducts, tmpdir, input_files)
+
     # Make sure it is a list (if only a string is returned, it loops over chars)
     if isinstance(interm_files,list):
         list_interm_files = interm_files
@@ -651,7 +733,7 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
             return 1
         # Loop over interm_files and assign mapset
         for intermFile in list_interm_files:
-            logger.info('Intermediate file: ' + intermFile)
+            logger.debug('Intermediate file: ' + intermFile)
 
             # Open input dataset in update mode
             orig_ds = gdal.Open(intermFile, GA_Update)
@@ -689,7 +771,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
     # TODO-M.C.: manage version
     version_undef='undefined'
-    logger.info("Entering routine %s for product %s - date %s" % ('ingest_file', product, in_date))
+    logger.info("Entering routine %s for product %s - date %s" % ('ingest_file', product['productcode'], in_date))
 
     # Test the file/files exists
     for infile in interm_files_list:
@@ -724,7 +806,8 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # Get information about the dataset
         args = {"productcode": product['productcode'],
                 "subproductcode": subproducts[ii]['subproduct'],
-                "datasource_descr_id": datasource_descr.datasource_descr_id}
+                "datasource_descr_id": datasource_descr.datasource_descr_id,
+                "version": product['version']}
 
         # Get information from sub_dataset_source table
         product_in_info = querydb.get_product_in_info(echo=echo_query, **args)
@@ -737,7 +820,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         in_data_type = product_in_info.data_type_id
 
         # Get information from 'product' table
-        args = {"productcode": product['productcode'], "subproductcode": subproducts[ii]['subproduct']}
+        args = {"productcode": product['productcode'], "subproductcode": subproducts[ii]['subproduct'], "version":product['version']}
         product_info = querydb.get_product_out_info(echo=echo_query, **args)
         out_data_type = product_info.data_type_id
         out_scale_factor = product_info.scale_factor
@@ -862,7 +945,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         if reprojection == 1:
 
-            logger.info('Doing re-projection to target mapset: %s' % mapset.short_name)
+            logger.debug('Doing re-projection to target mapset: %s' % mapset.short_name)
             # Get target SRS from mapset
             out_cs = mapset.spatial_ref
             out_size_x = mapset.size_x
@@ -894,11 +977,11 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             trg_ds.GetRasterBand(1).WriteArray(scaled_data)
 
         else:
-            logger.info('Doing only rescaling/format conversion')
+            logger.debug('Doing only rescaling/format conversion')
 
             # Read from input file
             band = orig_ds.GetRasterBand(1)
-            logger.info('Band Type='+gdal.GetDataTypeName(band.DataType))
+            logger.debug('Band Type='+gdal.GetDataTypeName(band.DataType))
             out_data = band.ReadAsArray(0, 0, orig_size_x, orig_size_y)
 
             # No reprojection, only format-conversion
@@ -919,8 +1002,11 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # Assign Metadata to the ingested file
         # -------------------------------------------------------------------------
 
+        sds_meta.assign_es2_version()
         sds_meta.assign_mapset(mapset_id)
         sds_meta.assign_from_product(product['productcode'], subproducts[ii]['subproduct'], product['version'])
+        sds_meta.assign_date(output_date_str)
+        sds_meta.assign_subdir_from_fulldir(output_directory)
         sds_meta.assign_comput_time_now()
         sds_meta.assign_input_files(in_files)
 
@@ -987,7 +1073,6 @@ def write_ds_to_geotiff(dataset, output_file):
     data = band.ReadAsArray(0, 0, orig_size_x, orig_size_y)
     # Read the native data type of the band
     in_data_type = band.DataType
-    print 'Band Type=',gdal.GetDataTypeName(in_data_type)
     gdt_type = conv_data_type_to_gdal(in_data_type)
 
     # Create and write output file
