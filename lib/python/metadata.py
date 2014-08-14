@@ -6,6 +6,7 @@
 #
 import os
 import datetime
+import config.es_constants
 
 # Import eStation2 modules
 from lib.python import es_logging as log
@@ -23,7 +24,7 @@ sds_metadata = { 'eStation2_es2_version': '',               # 0. eStation 2 vers
                                                             # ------------------  As in the 'product' table ----------------------
                  'eStation2_product': '',                   # 2. productcode
                  'eStation2_subProduct': '',                # 3. subproductcode
-                 'eStation2_version': '',                   # 4. product version (e.g. MODIS Collection 4 or 5; by default is undefined -> '')
+                 'eStation2_product_version': '',           # 4. product version (e.g. MODIS Collection 4 or 5; by default is undefined -> '')
 
                  'eStation2_defined_by': '',                # 5. JRC or User
                  'eStation2_category': '',                  # 6. Product category (TODO-M.C.: double-check wrt INSPIRE)
@@ -38,7 +39,7 @@ sds_metadata = { 'eStation2_es2_version': '',               # 0. eStation 2 vers
                  'eStation2_scaling_offset': '',            # 13. Scaling offset
                  'eStation2_unit': '',                      # 14. physical unit (none for pure numbers, e.g. NDVI)
                  'eStation2_nodata': '',                    # 15. nodata value
-                 'eStation2_subdir': '',                    # 16. subdir in the eStation data tree (redundant ??)
+                 'eStation2_subdir': '',                    # 16. subdir in the eStation data tree (redundant - to be removed ??)
 
                                                             # ------------------  File Specific ----------------------
                  'eStation2_date': '',                      # 17. Date of the product
@@ -62,7 +63,7 @@ class SdsMetadata:
 
         sds_metadata['eStation2_product'] = 'my_product'
         sds_metadata['eStation2_subProduct'] = 'my_sub_product'
-        sds_metadata['eStation2_version'] = 'my_product_version'
+        sds_metadata['eStation2_product_version'] = 'my_product_version'
 
         sds_metadata['eStation2_defined_by'] = 'JRC'
         sds_metadata['eStation2_category'] = 'my_product_category'
@@ -80,9 +81,9 @@ class SdsMetadata:
         sds_metadata['eStation2_nodata'] = 'my_nodata'
         sds_metadata['eStation2_subdir'] = 'my_subdir'
 
-        sds_metadata['eStation2_date'] = '201001011200'
+        sds_metadata['eStation2_date'] = 'my_date'
         sds_metadata['eStation2_input_files'] = '/my/path/to/file/and/filename1'
-        sds_metadata['eStation2_comp_time'] = '2014-01-01 12:00:00'
+        sds_metadata['eStation2_comp_time'] = 'my_comp_time'
 
     def write_to_ds(self, dataset):
     #
@@ -96,7 +97,6 @@ class SdsMetadata:
 
         # Go through the metadata list and write to sds
         for key, value in sds_metadata.iteritems():
-            print key, value
             dataset.SetMetadataItem(key, str(value))
 
     def read_from_ds(self, dataset):
@@ -113,6 +113,11 @@ class SdsMetadata:
             except:
                 logger.error('Error in reading metadata item %s' % key)
 
+    def assign_es2_version(self):
+    #
+    #   Assign the es2_version
+        sds_metadata['eStation2_es2_version'] = config.es_constants.es2_version
+
     def assign_comput_time_now(self):
     #
     #   Assign current time to 'comp_time'
@@ -123,15 +128,15 @@ class SdsMetadata:
 
     def assign_from_product(self, product, subproduct, version):
     #
-        product_out_info = get_product_out_info(productcode=product,subproductcode=subproduct,version=version, echo=True)
+        product_out_info = get_product_out_info(productcode=product,subproductcode=subproduct,version=version, echo=False)
 
     #   Assign prod/subprod/version
         sds_metadata['eStation2_product'] = str(product)
         sds_metadata['eStation2_subProduct'] = str(subproduct)
         if isinstance(version, str):
-            sds_metadata['eStation2_version'] = version
+            sds_metadata['eStation2_product_version'] = version
         else:
-            sds_metadata['eStation2_version'] = 'undefined'
+            sds_metadata['eStation2_product_version'] = 'undefined'
 
         sds_metadata['eStation2_defined_by'] = product_out_info.defined_by
         sds_metadata['eStation2_category'] = product_out_info.category_id
@@ -145,11 +150,9 @@ class SdsMetadata:
         sds_metadata['eStation2_unit'] = product_out_info.unit
         sds_metadata['eStation2_nodata'] = product_out_info.nodata
 
-
-    def assign_date(self, date_format, date):
+    def assign_date(self, date):
     #
-    #   Assign prod/subprod/version
-        sds_metadata['eStation2_date_format'] = str(date_format)
+    #   Assign date of the product
         sds_metadata['eStation2_date'] = str(date)
 
     def assign_mapset(self, mapset_code):
