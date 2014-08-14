@@ -601,7 +601,7 @@ def get_subdir_from_path_full(full_path):
 
     # Remove the directory
     subdirs =  full_path.split(os.path.sep)
-    str_subdir = subdirs[-4]+os.path.sep+subdirs[-3]+os.path.sep+subdirs[-2]+os.path.sep+subdirs[-1]+os.path.sep
+    str_subdir = subdirs[-5]+os.path.sep+subdirs[-4]+os.path.sep+subdirs[-3]+os.path.sep+subdirs[-2]+os.path.sep
 
     return str_subdir
 
