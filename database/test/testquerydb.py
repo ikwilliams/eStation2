@@ -9,6 +9,10 @@ result = querydb.get_dataacquisitions(echo=True)
 print result
 
 
+#result = querydb.get_products(echo=True)
+#print result
+
+
 #product = 'vgt_ndvi'
 #subproduct = 'ndv'
 #pkey = {"productcode": product, "subproductcode": subproduct}

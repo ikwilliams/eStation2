@@ -3,23 +3,10 @@
 #   Indeed, this is not to be synchronized through machines
 #
 
-
-
 import os, sys
-this_dir=os.path.abspath(os.path.dirname(__file__))
+
+this_dir = os.path.abspath(os.path.dirname(__file__))
 #sys.path.append(this_dir)
-
-oth_dir = '/srv/www/MarcoDev/eStation2/'
-my_dir = '/srv/www/JurDev/eStation2/'
-
-list_syspath = sys.path
-
-if my_dir not in list_syspath:
-    sys.path.append(my_dir)
-
-if oth_dir in list_syspath:
-    sys.path.remove(oth_dir)
-
 
 es2globals = {
     'host': 'localhost',

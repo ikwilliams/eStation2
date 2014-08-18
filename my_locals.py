@@ -6,6 +6,17 @@
 import os, sys
 from locals import *
 
+oth_dir = '/srv/www/MarcoDev/eStation2/'
+my_dir = '/srv/www/JurDev/eStation2/'
+
+list_syspath = sys.path
+
+if my_dir not in list_syspath:
+    sys.path.append(my_dir)
+
+if oth_dir in list_syspath:
+    sys.path.remove(oth_dir)
+
 dir()
 
 es2globals = {

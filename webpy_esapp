@@ -5,7 +5,8 @@
 #    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 import sys, os
-my_path='/srv/www/JurDev/eStation2'
+
+my_path = '/srv/www/JurDev/eStation2'
 #abspath = os.path.dirname()
 #sys.path.append(abspath)
 os.chdir(my_path)
@@ -15,6 +16,7 @@ if my_path not in sys.path:
 
 import web
 import locals
+
 import database.querydb as querydb
 
 #sys.path.remove('/srv/www/MarcoDev/eStation2')
@@ -24,19 +26,20 @@ import database.querydb as querydb
 WEBPY_COOKIE_NAME = "webpy_session_id"
 
 urls = (
+    "/ingestion", "Ingestion",
     "/dataacquisition", "DataAcquisition",
     "/pa", "ProductAcquisition",
     "/template", "TemplatePage",
-    #"/(.+)/(.+)", "esapp",
-    #"/(.+)/", "esapp",
-    "/", "esapp")
+    #"/(.+)/(.+)", "EsApp",
+    #"/(.+)/", "EsApp",
+    "/", "EsApp")
 
 app = web.application(urls, globals(), autoreload=True)
 application = app.wsgifunc()
 #session = web.session.Session(app, web.session.DiskStore('../logs/mstmp/webpySessions'))
 
 
-class esapp:
+class EsApp:
     def __init__(self):
         self.lang = "en"
 
@@ -48,13 +51,23 @@ class esapp:
         #return render.index(getparam.lang)
 
 
+class Ingestion:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self):
+        #return web.ctx
+        ingestion = querydb.get_ingestions(echo=False)
+        return ingestion
+
+
 class DataAcquisition:
     def __init__(self):
         self.lang = "en"
 
     def GET(self):
 
-        datacq = querydb.get_dataacquisitions(echo=True)
+        datacq = querydb.get_dataacquisitions(echo=False)
         return datacq
 
 
@@ -64,7 +77,7 @@ class ProductAcquisition:
 
     def GET(self):
         #return sys.path
-        products = querydb.get_products(echo=True)
+        products = querydb.get_products(echo=False)
         return products
 
 
