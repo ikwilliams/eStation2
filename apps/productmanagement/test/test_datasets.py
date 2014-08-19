@@ -19,10 +19,10 @@ from ..exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
 
 class TestDatasets(unittest.TestCase):
     def test_class(self):
-        self.assertIsInstance(Dataset(productcode="fewsnet_rfe", subproductcode="rfe"), Dataset)
+        kwargs = {'product_code':"fewsnet_rfe", 'sub_product_code': "rfe", 'mapset': 'Africa_8km'}
+        self.assertIsInstance(Dataset(**kwargs), Dataset)
 
     def test_class_no_product(self):
-        kwargs = {'productcode':"---prod---", 'subproductcode': "---subprod---"}
-        self.assertRaisesRegexp(NoProductFound,
-                ".*%s.*" % (",".join("%s='%s'" % (key, value) for key, value in kwargs.items())),
+        kwargs = {'product_code':"---prod---", 'sub_product_code': "---subprod---", 'mapset': '---mapset---'}
+        self.assertRaisesRegexp(NoProductFound, "(?i).*found.*product.*",
                 Dataset, **kwargs)
