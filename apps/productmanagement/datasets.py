@@ -7,12 +7,16 @@
 
 from __future__ import absolute_import
 import datetime
+import os
+
+from lib.python import functions
 from database import querydb
+import locals
 
 from .exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
         WrongFrequencyType, WrongFrequencyDateFormat, NoProductFound)
-
 from .helpers import add_years, add_months, add_dekads
+
 
 class Frequency(object):
     class UNIT:
@@ -117,13 +121,21 @@ class Frequency(object):
 
 
 class Dataset(object):
-    def __init__(self, productcode, subproductcode, version=None):
-        kwargs = {'productcode':productcode, 'subproductcode':subproductcode}
+    def __init__(self, product_code, sub_product_code, mapset, version=None):
+        kwargs = {'productcode':product_code, 'subproductcode':sub_product_code}
         if not version is None:
             kwargs['version'] = version
         self._product = querydb.get_product_out_info(**kwargs)
         if self._product is None:
             raise NoProductFound(kwargs)
-        self._path = None
+        self._path = functions.set_path_sub_directory(product_code, sub_product_code,
+                self._product.product_type, version, mapset)
+        self._fullpath = os.path.join(locals.es2globals['data_dir'], self._path)
+        print (locals.es2globals['data_dir'], self._path)
+
+        print self._fullpath
+
+
+        print self._path
 
 

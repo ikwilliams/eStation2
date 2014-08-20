@@ -15,7 +15,7 @@ class CrudDB(object):
     @staticmethod
     def is_testing():
         if getattr(CrudDB, "_testing", None) is None:
-            setattr(CrudDB, "_testing", sys.argv[0].endswith('nosetests'))
+            setattr(CrudDB, "_testing", sys.argv[0].lower() == 'nosetests')
         return CrudDB._testing
 
     @staticmethod
