@@ -6,7 +6,10 @@
 #
 import os
 import datetime
+import os.path
 import config.es_constants
+from osgeo import gdal
+from osgeo.gdalconst import *
 
 # Import eStation2 modules
 from lib.python import es_logging as log
@@ -52,6 +55,8 @@ sds_metadata = { 'eStation2_es2_version': '',               # 0. eStation 2 vers
                  'eStation2_conversion': ''                 # 20. Rule for converting DN to physical values (free text)
 
 }
+# TODO-M.C.: Is it possible to write to a specific domain (e.g. 'eStation2' ???)
+#            FTTB we use the 'eStation2_' prefix
 
 class SdsMetadata:
 
@@ -85,38 +90,76 @@ class SdsMetadata:
         sds_metadata['eStation2_input_files'] = '/my/path/to/file/and/filename1'
         sds_metadata['eStation2_comp_time'] = 'my_comp_time'
 
+
     def write_to_ds(self, dataset):
+    #
+    #   Writes  metadata to a target dataset (already opened gdal dataset)
+    #   Args:
+    #       dataset: osgeo.gdal dataset (open and georeferenced)
+
+        # Check argument ok
+        if not isinstance(dataset,gdal.Dataset):
+            logger.error('The argument should be an open GDAL Dataset. Exit')
+        else:
+            # Go through the metadata list and write to sds
+            for key, value in sds_metadata.iteritems():
+                dataset.SetMetadataItem(key, str(value))
+
+    def write_to_file(self, filepath):
     #
     #   Writes  metadata to a target file (already opened gdal dataset)
     #   Args:
     #       dataset: osgeo.gdal dataset (open and georeferenced)
 
-        # TODO-M.C.: Check dataset is open
-        # TODO-M.C.: Is it possible to write to a specific domain (e.g. 'eStation2' ???)
-        #            FTTB we use the 'eStation2_' prefix
-
-        # Go through the metadata list and write to sds
-        for key, value in sds_metadata.iteritems():
-            dataset.SetMetadataItem(key, str(value))
+        # Check the output file exist
+        if not os.path.isfile(filepath):
+             logger.error('Output file does not exist %s' % filepath)
+        else:
+            # Open output file
+            sds = gdal.Open(filepath, GA_Update)
+            self.write_to_ds(sds)
 
     def read_from_ds(self, dataset):
     #
-    #   Read metadata structure from a source file
+    #   Read metadata structure from an opened file
     #   Args:
     #       dataset: osgeo.gdal dataset (open and georeferenced)
 
-        # Go through the metadata list and write to sds
-        for key, value in sds_metadata.iteritems():
-            try:
-                value = dataset.GetMetadataItem(key)
-                sds_metadata[key] = value
-            except:
-                logger.error('Error in reading metadata item %s' % key)
+        # Check argument ok
+        if not isinstance(dataset,gdal.Dataset):
+            logger.error('The argument should be an open GDAL Dataset. Exit')
+        else:
+
+            # Go through the metadata list and write to sds
+            for key, value in sds_metadata.iteritems():
+                try:
+                    value = dataset.GetMetadataItem(key)
+                    sds_metadata[key] = value
+                except:
+                    sds_metadata[key] = 'Not found in file'
+                    logger.error('Error in reading metadata item %s' % key)
+
+    def read_from_file(self, filepath):
+    #
+    #   Read metadata structure from a source file
+    #   Args:
+    #       filepath: full file path (dir+name)
+
+        # Check the file exists
+        if not os.path.isfile(filepath):
+            logger.error('Input file does not exist %s' % filepath)
+        else:
+            # Open it and read metadata
+            infile=gdal.Open(filepath)
+            self.read_from_ds(infile)
+
+            # Close the file
+            infile= None
 
     def assign_es2_version(self):
     #
     #   Assign the es2_version
-        sds_metadata['eStation2_es2_version'] = config.es_constants.es2_version
+        sds_metadata['eStation2_es2_version'] = config.es_constants.ES2_SW_VERSION
 
     def assign_comput_time_now(self):
     #
@@ -160,7 +203,7 @@ class SdsMetadata:
     #   Assign mapset
         sds_metadata['eStation2_mapset'] = str(mapset_code)
 
-    def assign_subdir_from_fulldir(self, full_directory):
+    def assign_subdir_from_fullpath(self, full_directory):
     #
     #   Assign subdir
         subdir = get_subdir_from_path_full(full_directory)
@@ -187,6 +230,7 @@ class SdsMetadata:
 
     def get_item(self, itemname):
 
+        value='metadata item not found'
         try:
             value = sds_metadata[itemname]
         except:
@@ -201,3 +245,5 @@ class SdsMetadata:
         # Go through the metadata list and write to sds
         for key, value in sds_metadata.iteritems():
             print key, value
+
+
