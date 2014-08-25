@@ -631,7 +631,7 @@ INSERT INTO eumetcast_source (eumetcast_id, filter_expression_jrc, collection_na
 -- Data for Name: frequency; Type: TABLE DATA; Schema: products; Owner: estation
 --
 
-INSERT INTO frequency (frequency_id, time_unit, frequency, frequency_type, description) VALUES ('undefined', 'E', 1, 'E', NULL);
+INSERT INTO frequency (frequency_id, time_unit, frequency, frequency_type, description) VALUES ('undefined', 'DEKAD', 1, 'E', NULL);
 
 
 --

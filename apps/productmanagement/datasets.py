@@ -8,14 +8,16 @@
 from __future__ import absolute_import
 import datetime
 import os
+import glob
 
 from lib.python import functions
 from database import querydb
 import locals
 
 from .exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
-        WrongFrequencyType, WrongFrequencyDateFormat, NoProductFound)
-from .helpers import add_years, add_months, add_dekads
+        WrongFrequencyType, WrongFrequencyDateFormat,
+        NoProductFound, NoFrequencyFound )
+from .helpers import add_years, add_months, add_dekads, find_gaps, cast_to_int
 
 
 class Frequency(object):
@@ -106,6 +108,11 @@ class Frequency(object):
         return self.format_filename(date, self.get_mapset(filename))
 
     def __init__(self, value, unit, type_, dateformat=None):
+        value = cast_to_int(value)
+        unit = unit.lower()
+        type_ = type_.lower()
+        if dateformat:
+            dateformat = dateformat.upper()
         if not isinstance(value, int):
             raise WrongFrequencyValue(value)
         if not self._check_constant('UNIT', unit):
@@ -125,17 +132,28 @@ class Dataset(object):
         kwargs = {'productcode':product_code, 'subproductcode':sub_product_code}
         if not version is None:
             kwargs['version'] = version
-        self._product = querydb.get_product_out_info(**kwargs)
-        if self._product is None:
+        self._db_product = querydb.get_product_out_info(**kwargs)
+        if self._db_product is None:
             raise NoProductFound(kwargs)
         self._path = functions.set_path_sub_directory(product_code, sub_product_code,
-                self._product.product_type, version, mapset)
+                self._db_product.product_type, version, mapset)
         self._fullpath = os.path.join(locals.es2globals['data_dir'], self._path)
-        print (locals.es2globals['data_dir'], self._path)
+        self._db_frequency = querydb.db.frequency.get(self._db_product.frequency_id)
+        if self._db_frequency is None:
+            raise NoFrequencyFound(self._db_product)
+        self._frequency = Frequency(value=self._db_frequency.frequency, 
+                                    unit=self._db_frequency.time_unit, 
+                                    type_=self._db_frequency.frequency_type)
 
-        print self._fullpath
 
+    def get_filenames(self):
+        return glob.glob(os.path.join(self._fullpath, "*"))
 
-        print self._path
+    def get_basenames(self):
+        return list(os.path.basename(filename) for filename in self.get_filenames())
 
+    def find_intervals(self, from_date=None, to_date=None):
+       return find_gaps(self.get_basenames(), self._frequency, only_intervals=True, from_date=from_date, to_date=to_date)
 
+    def find_gaps(self, from_date=None, to_date=None):
+       return find_gaps(self.get_basenames(), self._frequency, only_intervals=False, from_date=from_date, to_date=to_date)
