@@ -54,7 +54,7 @@ class CrudDB(object):
         if schema == '':
             schema = dbglobals['schema_products']
 
-        db = CrudDB.create_engine()
+        db = self.get_db_engine()
         self.schema = schema
         db.echo = echo
         self.table_map = {}

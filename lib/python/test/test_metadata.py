@@ -18,19 +18,26 @@ file=input_dir+'20140601_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif'
 
 class TestMapSet(TestCase):
 
+    def create_temp_file(self):
+        tf = tempfile.NamedTemporaryFile()
+        filename = tf.name
+        tf.close()
+        return filename
+
     def test_writing_reading_an_item(self):
 
         my_item='Test_Metadata_Item'
         my_value='Test_Metadata_Value'
 
         # Create a tmp Tiff file
-        try:
-            tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_test_writing_an_item', dir=locals.es2globals['temp_dir'])
-        except IOError:
-            logger.error('Cannot create temporary dir ' + locals.es2globals['temp_dir'] + '. Exit')
-            return 1
+        #try:
+        #    tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_test_writing_an_item', dir=locals.es2globals['temp_dir'])
+        #except IOError:
+        #    logger.error('Cannot create temporary dir ' + locals.es2globals['temp_dir'] + '. Exit')
+        #    return 1
+        #filename = tmpdir+'/temp_target.tif'
 
-        filename = tmpdir+'/temp_target.tif'
+        filename = self.create_temp_file()
 
         gtiff_driver = gdal.GetDriverByName('GTiff')
         out_ds = gtiff_driver.Create(filename, 1, 1, 1, 1)
@@ -46,22 +53,12 @@ class TestMapSet(TestCase):
 
         self.assertEqual(my_value, read_value)
 
-        # Remove the tmp dir
-        shutil.rmtree(tmpdir)
-
     def test_writing_meta_to_new_file(self):
 
         sds_meta = SdsMetadata()
 
-        # Create a dummy output File
-        try:
-            tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_writing_meta_to_new_file', dir=locals.es2globals['temp_dir'])
-        except IOError:
-            logger.error('Cannot create temporary dir ' + locals.es2globals['temp_dir'] + '. Exit')
-            return 1
-
         # Dummy output File
-        filename = tmpdir+'/temp_target.tif'
+        filename = self.create_temp_file()
         gtiff_driver = gdal.GetDriverByName('GTiff')
         out_ds = gtiff_driver.Create(filename, 1, 1, 1, 1)
 
@@ -71,21 +68,12 @@ class TestMapSet(TestCase):
         out_ds = None
         gtiff_driver = None
 
-        self.assertTrue(os.path.isfile(filename))
-
     def test_writing_meta_to_existing_file(self):
 
         sds_meta = SdsMetadata()
 
         # Create a dummy output File
-        try:
-            tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_writing_meta_to_new_file', dir=locals.es2globals['temp_dir'])
-        except IOError:
-            logger.error('Cannot create temporary dir ' + locals.es2globals['temp_dir'] + '. Exit')
-            return 1
-
-        # Dummy output File
-        filename = tmpdir+'/temp_target.tif'
+        filename = self.create_temp_file()
         gtiff_driver = gdal.GetDriverByName('GTiff')
         out_ds = gtiff_driver.Create(filename, 1, 1, 1, 1)
 
@@ -96,7 +84,6 @@ class TestMapSet(TestCase):
         sds_meta.write_to_file(filename)
 
         self.assertTrue(os.path.isfile(filename))
-
 
     def test_reading_meta_items_from_ds(self):
 
