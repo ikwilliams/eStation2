@@ -1,6 +1,7 @@
 __author__ = "Jurriaan van 't Klooster"
 
 import database.crud as crudDB
+import lib.python.es_logging as log
 
 #dbglobals = {
 #    'host': 'h05-dev-vm19',
@@ -21,7 +22,7 @@ import database.crud as crudDB
 logger = log.my_logger(__name__)
 
 crud = crudDB.CrudDB()
-
+#
 ######################################################################################
 #   TEST CRUD FOR TABLE products.datetype
 ######################################################################################
