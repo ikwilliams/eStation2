@@ -24,9 +24,6 @@ class TestFrequency(unittest.TestCase):
     def test_wrong_value_1(self):
         self.assertRaises(WrongFrequencyValue, Frequency, *('a', Frequency.UNIT.DEKAD, Frequency.TYPE.PER))
 
-    def test_wrong_value_2(self):
-        self.assertRaises(WrongFrequencyValue, Frequency, *(1.1, Frequency.UNIT.DEKAD, Frequency.TYPE.PER))
-
     def test_wrong_unit(self):
         self.assertRaises(WrongFrequencyUnit, Frequency, *(1, '-' + Frequency.UNIT.DEKAD, Frequency.TYPE.PER))
 

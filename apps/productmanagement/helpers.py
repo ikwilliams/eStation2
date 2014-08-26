@@ -12,6 +12,18 @@ import datetime
 from .exceptions import WrongSequence, WrongDateParameter
 
 
+def cast_to_int(value):
+    if isinstance(value, int):
+        return value
+    try:
+        if isinstance(value, float):
+            return int(value)
+        if isinstance(value, str) or isinstance(value, unicode):
+            return int(value.split(".")[0])
+    except ValueError:
+        pass
+    return value
+
 def find_gaps(unsorted_filenames, frequency, only_intervals=False, from_date=None, to_date=None):
     for date_parameter in (from_date, to_date):
         if date_parameter and not frequency.check_date(date_parameter):

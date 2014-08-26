@@ -15,7 +15,7 @@ class CrudDB(object):
     @staticmethod
     def is_testing():
         if getattr(CrudDB, "_testing", None) is None:
-            setattr(CrudDB, "_testing", sys.argv[0].lower() == 'nosetests')
+            setattr(CrudDB, "_testing", sys.argv[0].lower().endswith('nosetests'))
         return CrudDB._testing
 
     @staticmethod
@@ -54,7 +54,7 @@ class CrudDB(object):
         if schema == '':
             schema = dbglobals['schema_products']
 
-        db = CrudDB.create_engine()
+        db = self.get_db_engine()
         self.schema = schema
         db.echo = echo
         self.table_map = {}

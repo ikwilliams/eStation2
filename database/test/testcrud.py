@@ -1,5 +1,6 @@
 __author__ = "Jurriaan van 't Klooster"
 
+from lib.python import es_logging as log
 import database.crud as crudDB
 import lib.python.es_logging as log
 
