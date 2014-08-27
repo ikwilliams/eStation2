@@ -28,7 +28,7 @@ WEBPY_COOKIE_NAME = "webpy_session_id"
 urls = (
     "/ingestion", "Ingestion",
     "/dataacquisition", "DataAcquisition",
-    "/pa", "ProductAcquisition",
+    "/pa(.*)", "ProductAcquisition",
     "/template", "TemplatePage",
     #"/(.+)/(.+)", "EsApp",
     #"/(.+)/", "EsApp",
@@ -75,9 +75,13 @@ class ProductAcquisition:
     def __init__(self):
         self.lang = "en"
 
-    def GET(self):
-        #return sys.path
-        products = querydb.get_products(echo=False)
+    def GET(self, params):
+        #return web.ctx
+        #if not activated:
+        #    activated = True
+        getparams = web.input()
+        #return getparams.activated
+        products = querydb.get_products(echo=False, activated=getparams.activated)
         return products
 
 

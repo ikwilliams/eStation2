@@ -8,11 +8,16 @@
 import locals
 import sys
 import traceback
+import json
 import sqlsoup
-#from sqlsoup import Session
-from sqlalchemy.sql import or_, and_, desc, asc
+#import datetime
+#import JsonSerializer
+#import anyjson
+
+from sqlalchemy import engine
+from sqlalchemy.sql import func, select, or_, and_, desc, asc, expression
 from sqlalchemy.orm import aliased
-from sqlalchemy.sql import func
+
 from lib.python import es_logging as log
 from config.es_constants import *
 from crud import CrudDB
@@ -29,7 +34,7 @@ logger = log.my_logger(__name__)
 #   Date: 2014/05/16
 #   Input: None
 #   Output: Return connection handler to the database
-def connect_db():
+def connect_db_sqlsoup():
 
     try:
         sqlsoup_dns = CrudDB.get_db_url()
@@ -44,7 +49,267 @@ def connect_db():
         logger.error("Database connection failed!\n -> {}".format(exceptionvalue))
         #raise Exception("Database connection failed!\n ->%s" % exceptionvalue)
 
-db = connect_db()
+
+def connect_db():
+
+    try:
+        schema = dbglobals['schema_products']
+
+        db_url = "postgresql://%s:%s@%s/%s" % (dbglobals['dbUser'],
+                                               dbglobals['dbPass'],
+                                               dbglobals['host'],
+                                               dbglobals['dbName'])
+        dbconn = engine.create_engine(db_url)
+        dbconn.schema = schema
+        return dbconn
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        #print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("Database connection failed!\n -> {}".format(exceptionvalue))
+        #raise Exception("Database connection failed!\n ->%s" % exceptionvalue)
+
+db = connect_db_sqlsoup()
+
+
+def row2dict(row):
+    d = {}
+    for column in row.c._all_cols:
+        d[column.name] = str(getattr(row, column.name))
+
+    return d
+
+
+def toJson(queryResult):
+    tojson = ''
+    for row in queryResult:
+        da = row2dict(row)
+        tojson = tojson + json.dumps(da, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': ')) + ', '
+    tojson = tojson[:-2]
+    return tojson
+
+
+######################################################################################
+#   get_ingestions(echo=False)
+#   Purpose: Query the database to get the product ingestion list of all products.
+#            Mainly used in the GUI Acquisition tab.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2014/07/31
+#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
+#
+#   Output: Return the product ingestion list of all products ordered by productcode.
+#
+#    SELECT productcode, subproductcode, version, mapsetcode, defined_by,  activated
+#    FROM products.product_acquisition_data_source;
+#
+def get_ingestions(echo=False):
+    try:
+        # session = db.session
+        # i = aliased(db.ingestion)
+        # ingestions = session.query(func.CONCAT(i.productcode, '_', i.subproductcode, '_', i.version, '_', i.mapsetcode).label('ingestionID'),
+        #                            i.productcode,
+        #                            i.subproductcode,
+        #                            i.version,
+        #                            i.mapsetcode,
+        #                            i.defined_by,
+        #                            i.activated).order_by(desc(i.productcode)).first()
+
+        i = db.ingestion._table
+        s = select([func.CONCAT(i.c.productcode, '_', i.c.version).label('productID'),
+                    i.c.productcode,
+                    i.c.subproductcode,
+                    i.c.version,
+                    i.c.mapsetcode,
+                    i.c.defined_by,
+                    func.CONCAT('tristate', ' chart widget').label('completeness'),
+                    i.c.activated], from_obj=[i])
+
+        s = s.alias('ingest')
+        i = db.map(s, primary_key=[s.c.productID, i.c.subproductcode, i.c.mapsetcode])
+        ingestions = i.order_by(desc(i.productcode)).all()
+
+        if ingestions.__len__() > 0:
+            ingestions_json = toJson(ingestions)
+            # ingestions_json = json.dumps(ingestions,  ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': '))
+            ingestions_json = '{"success":true, "total":'+str(ingestions.__len__())+',"ingestions":['+ingestions_json+']}'
+            # ingestions_json = '{"success":true, "total":1,"ingestions":'+ingestions_json+'}'
+
+        else:
+            ingestions_json = '{"success":false, "error":"No data acquisitions defined!"}'
+
+        if echo:
+            for row in ingestions:
+                print row
+
+        return ingestions_json
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and log the error telling what happened.
+        logger.error("get_ingestions: Database query error!\n -> {}".format(exceptionvalue))
+
+
+######################################################################################
+#   get_dataacquisitions(echo=False)
+#   Purpose: Query the database to get the product data acquisition list of all products.
+#            Mainly used in the GUI Acquisition tab.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2014/07/15
+#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
+#
+#   Output: Return the product data acquisition list of all products ordered by productcode.
+#
+#    SELECT productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data
+#    FROM products.product_acquisition_data_source;
+#
+def get_dataacquisitions(echo=False):
+    try:
+
+        pa = db.product_acquisition_data_source._table
+        s = select([ func.CONCAT(pa.c.productcode, '_', pa.c.version).label('productID'),
+                     pa.c.productcode,
+                     pa.c.subproductcode,
+                     pa.c.version,
+                     pa.c.data_source_id,
+                     pa.c.defined_by,
+                     pa.c.type,
+                     pa.c.activated,
+                     pa.c.store_original_data,
+                     expression.literal("05/06/2014").label('latest')], from_obj=[pa])
+
+        s = s.alias('mypa')
+        pa = db.map(s, primary_key=[s.c.productID])
+        dataacquisitions = pa.order_by(desc(pa.productcode)).all()
+
+        # session = db.session
+        # pa = aliased(db.product_acquisition_data_source)
+        #
+        # dataacquisitions = session.query(func.CONCAT(pa.productcode, '_', pa.subproductcode, '_', pa.version).label('productID'),
+        #                                  pa.productcode,
+        #                                  pa.subproductcode,
+        #                                  pa.version,
+        #                                  pa.data_source_id,
+        #                                  pa.defined_by,
+        #                                  pa.type,
+        #                                  pa.activated,
+        #                                  pa.store_original_data,
+        #                                  expression.literal("05/06/2014").label('latest')).order_by(desc(pa.productcode)).first()
+
+        if dataacquisitions.__len__() > 0:
+            dataacquisitions_json = toJson(dataacquisitions)
+            # dataacquisitions_json = json.dumps(dataacquisitions, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': '))
+            dataacquisitions_json = '{"success":true, "total":'+str(dataacquisitions.__len__())+',"dataacquisitions":['+dataacquisitions_json+']}'
+            # dataacquisitions_json = '{"success":true, "total":1,"dataacquisitions":['+dataacquisitions_json+']}'
+
+        else:
+            dataacquisitions_json = '{"success":false, "error":"No data acquisitions defined!"}'
+
+        if echo:
+            for row in dataacquisitions:
+                print row
+
+        return dataacquisitions_json
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and log the error telling what happened.
+        logger.error("get_dataacquisitions: Database query error!\n -> {}".format(exceptionvalue))
+
+
+######################################################################################
+#   get_products(echo=False)
+#   Purpose: Query the database to get the (Native) product list with their product category.
+#            Mainly used in the GUI Acquisition tab.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2014/07/08
+#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
+#
+#   Output: Return the (Native) product list with their product category
+#           ordered by product category order_index and productcode.
+
+#   SELECT p.productcode, p.version, p.activated, pc.category_id, pc.descriptive_name, pc.order_index
+#   FROM products.product p inner join products.product_category pc on p.category_id = pc.category_id
+#   WHERE p.product_type = 'Native'
+#   ORDER BY pc.order_index, productcode
+#
+def get_products(echo=False, activated=True):
+    try:
+        session = db.session
+
+        #pc = session.query(db.product_category.category_id,
+        #                   db.product_category.descriptive_name,
+        #                   db.product_category.order_index).subquery()
+        #pc = aliased(db.product_category)
+        #p = aliased(db.product)
+
+        #if activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+        #    where = and_(p.product_type == 'Native', p.activated)
+        #else:
+        #    where = and_(p.product_type == 'Native', p.activated != 't')
+
+        # The columns on the subquery "pc" are accessible through an attribute called "c"
+        # e.g. product.c.descriptive_name
+        #productslist = session.query(func.CONCAT(p.productcode, '_', p.version).label('productID'),
+        #                             p.productcode,
+        #                             p.subproductcode,
+        #                             p.version,
+        #                             p.activated,
+        #                             p.descriptive_name.label('prod_descriptive_name'),
+        #                             p.description,
+        #                             pc.category_id,
+        #                             pc.descriptive_name.label('cat_descr_name'),
+        #                             pc.order_index).\
+        #    outerjoin(pc, p.category_id == pc.category_id).\
+        #    filter(where).\
+        #    order_by(asc(pc.order_index), asc(p.productcode)).all()
+
+        pc = db.product_category._table
+        p = db.product._table
+
+        s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productID'),
+                    p.c.productcode,
+                    p.c.subproductcode,
+                    p.c.version,
+                    p.c.activated,
+                    p.c.product_type,
+                    p.c.descriptive_name.label('prod_descriptive_name'),
+                    p.c.description,
+                    pc.c.category_id,
+                    pc.c.descriptive_name.label('cat_descr_name'),
+                    pc.c.order_index]).select_from(p.outerjoin(pc, p.c.category_id == pc.c.category_id))
+
+        s = s.alias('pl')
+        pl = db.map(s, primary_key=[s.c.productID])
+
+        if activated or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+            where = and_(pl.c.product_type == 'Native', pl.c.activated)
+        else:
+            where = and_(pl.c.product_type == 'Native', pl.c.activated != 't')
+
+        productslist = pl.filter(where).order_by(asc(pl.c.order_index), asc(pl.c.productcode)).all()
+        #productslist.filter(where).order_by(asc(productslist.c.order_index), asc(productslist.c.productcode)).all()
+        productslist_json = toJson(productslist)
+
+        #productslist_json = json.dumps(productslist, sort_keys=True, indent=4, separators=(',', ': '))
+        productslist_json = '{"success":true, "total":'+str(productslist.__len__())+',"products":['+productslist_json+']}'
+
+        #echo '{"success":false,"error":"' . 'No records found!' . '"}';
+        if echo:
+            for row in productslist:
+                print row
+
+        return productslist_json
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and log the error telling what happened.
+        logger.error("get_products: Database query error!\n -> {}".format(exceptionvalue))
 
 
 ######################################################################################
@@ -70,7 +335,7 @@ def get_product_out_info(allrecs=False, echo=False, productcode='', subproductco
             where = and_(db.product.productcode == productcode,
                          db.product.subproductcode == subproductcode,
                          db.product.version == version)
-            product_out_info = db.product.filter(where).one()
+            product_out_info = db.product.filter(where).all()
             if echo:
                 print product_out_info
         return product_out_info

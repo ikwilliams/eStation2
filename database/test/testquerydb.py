@@ -4,12 +4,15 @@ import database.querydb as querydb
 
 db = querydb.connect_db()
 
-
-result = querydb.get_dataacquisitions(echo=True)
+result = querydb.get_ingestions(echo=True)
 print result
 
 
-#result = querydb.get_products(echo=True)
+#result = querydb.get_dataacquisitions(echo=True)
+#print result
+#
+#
+#result = querydb.get_products(echo=True, activated=False)
 #print result
 
 
