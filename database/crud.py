@@ -5,24 +5,56 @@ import sys
 from lib.python import es_logging as log
 from config.es_constants import *
 
+
 from sqlalchemy import *
 from sqlalchemy.orm import *
 
 logger = log.my_logger(__name__)
 
+class CrudDB(object):
+    @staticmethod
+    def is_testing():
+        if getattr(CrudDB, "_testing", None) is None:
+            setattr(CrudDB, "_testing", sys.argv[0].endswith('nosetests'))
+        return CrudDB._testing
 
-class CrudDB:
+    @staticmethod
+    def get_db_url():
+        if CrudDB.is_testing():
+            if getattr(CrudDB, '_db_url', None) is None:
+                import sqlite3, os
+                # SQL Alchemy cound not execute full sql scripts
+                # so we use a regular file to import fixtures
+                #CrudDB._db_url = "sqlite://"
+                #con = sqlite3.connect(":memory:")
+                import tempfile
+                tf = tempfile.NamedTemporaryFile()
+                tmp_name = tf.name
+                tf.close()
+                CrudDB._db_url = "sqlite:///%s" % tmp_name
+                con = sqlite3.connect(tmp_name)
+                con.executescript(file(os.path.join(os.path.dirname(__file__), "fixtures", "sqlite.sql")).read())
+                con.close()
+                dbglobals['schema_products'] = None
+            db_url = CrudDB._db_url
+        else:
+            db_url = "postgresql://%s:%s@%s/%s" % (dbglobals['dbUser'],
+                                             dbglobals['dbPass'],
+                                             dbglobals['host'],
+                                             dbglobals['dbName'])
+        return db_url
+
+    @staticmethod
+    def get_db_engine():
+        return create_engine(CrudDB.get_db_url())
 
     # Initialize the DB
     def __init__(self, schema='products', echo=False):
+
         if schema == '':
             schema = dbglobals['schema_products']
 
-        db_url = "postgresql://%s:%s@%s/%s" % (dbglobals['dbUser'],
-                                               dbglobals['dbPass'],
-                                               dbglobals['host'],
-                                               dbglobals['dbName'])
-        db = create_engine(db_url)
+        db = CrudDB.create_engine()
         self.schema = schema
         db.echo = echo
         self.table_map = {}
@@ -48,7 +80,6 @@ class CrudDB:
                 #exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
                 #print "could not map table ", table_name
                 # Exit the script and print an error telling what happened.
-
                 logger.error("CrudDB: could not map table %s!" % table_name)
 
         #create a Session template that requires commit to be called explicit
@@ -70,7 +101,6 @@ class CrudDB:
             return status
         except:
             exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-
             # Exit the script and print an error telling what happened.
             logger.error("CrudDB: create record error in table {}!\n {}".format(table_name, exceptionvalue))
         finally:

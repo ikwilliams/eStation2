@@ -10,6 +10,10 @@ import os
 import locals
 from osgeo.gdalconst import *
 
+# Software version
+
+ES2_SW_VERSION = '2.0.0'
+
 # Get base dir
 try:
     base_dir = locals.es2globals['base_dir']
