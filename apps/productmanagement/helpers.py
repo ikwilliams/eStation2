@@ -118,18 +118,3 @@ def add_days(date, period, days):
             new_date = datetime.date(new_date.year, 1, 1)
         date = new_date
     return date
-
-def add_dekads(date, dekads=1):
-    dekad = datetime.timedelta(days=10)
-    for count_dekad in range(dekads):
-        new_date = date + dekad
-        if new_date.day == 31:
-            new_date += datetime.timedelta(1)
-        elif new_date.month != date.month:
-            new_date = date - dekad
-            new_date = add_months(new_date, 1)
-            while new_date.month != date.month:
-                new_date -= dekad
-            new_date += dekad
-        date = new_date
-    return date
