@@ -17,7 +17,7 @@ import locals
 from .exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
         WrongFrequencyType, WrongFrequencyDateFormat,
         NoProductFound, NoFrequencyFound )
-from .helpers import add_years, add_months, add_dekads, find_gaps, cast_to_int
+from .helpers import add_years, add_months, add_dekads, add_pentads, add_days, find_gaps, cast_to_int
 
 
 class Frequency(object):
@@ -25,6 +25,9 @@ class Frequency(object):
         YEAR = 'year'
         MONTH = 'month'
         DEKAD = 'dekad'
+        DAYS8 = '8days'
+        DAYS16 = '16days'
+        PENTAD = 'pentad'
         DAY = 'day'
         HOUR = 'hour'
 
@@ -46,9 +49,9 @@ class Frequency(object):
 
     @classmethod
     def dateformat_default(class_, unit):
-        if unit in (class_.UNIT.DEKAD, class_.UNIT.MONTH, class_.UNIT.DAY):
-            return class_.DATEFORMAT.DATE
-        return class_.DATEFORMAT.DATETIME
+        if unit in (class_.UNIT.HOUR,):
+            return class_.DATEFORMAT.DATETIME
+        return class_.DATEFORMAT.DATE
 
     def filename_mask_ok(self, filename):
         if len(filename) > len(self.dateformat) + 1:
@@ -69,8 +72,14 @@ class Frequency(object):
             return add_years(date, value)
         elif unit == self.UNIT.MONTH:
             return add_months(date, value)
+        elif unit == self.UNIT.DAYS8:
+            return add_days(date, value, 8)
+        elif unit == self.UNIT.DAYS16:
+            return add_days(date, value, 16)
         elif unit == self.UNIT.DEKAD:
             return add_dekads(date, value)
+        elif unit == self.UNIT.PENTAD:
+            return add_pentads(date, value)
         elif unit == self.UNIT.DAY:
             return date + datetime.timedelta(days=value)
         elif unit == self.UNIT.HOUR:
