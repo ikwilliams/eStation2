@@ -35,6 +35,7 @@ class CrudDB(object):
                 con = sqlite3.connect(tmp_name)
                 con.executescript(file(os.path.join(os.path.dirname(__file__), "fixtures", "sqlite.sql")).read())
                 con.close()
+                # Used in querydb
                 dbglobals['schema_products'] = None
             db_url = CrudDB._db_url
         else:
@@ -50,12 +51,12 @@ class CrudDB(object):
 
     # Initialize the DB
     def __init__(self, schema='products', echo=False):
-
-        if schema == '':
-            schema = dbglobals['schema_products']
-
+        self.schema = schema or dbglobals['schema_products']
         db = self.get_db_engine()
-        self.schema = schema
+
+        if self.is_testing():
+            self.schema = None
+
         db.echo = echo
         self.table_map = {}
         self.session = None

@@ -23,7 +23,6 @@ CREATE TABLE datasource_description (
     release_position character varying,
     release_length integer,
     native_mapset character varying,
-    -- CONSTRAINT check_mapset_chk CHECK (check_mapset(native_mapset))
     PRIMARY KEY (datasource_descr_id)
 );
 
@@ -42,7 +41,8 @@ CREATE TABLE dependencies (
     output_mapsetcode character varying NOT NULL,
     input_productcode character varying NOT NULL,
     input_subproductcode character varying NOT NULL,
-    input_version character varying NOT NULL
+    input_version character varying NOT NULL,
+    PRIMARY KEY (output_productcode, output_subproductcode, output_version, output_mapsetcode, input_productcode, input_subproductcode, input_version)
 );
 
 
@@ -88,7 +88,8 @@ CREATE TABLE eumetcast_source (
     legal_constraints_data_policy character varying,
     entry_date date,
     reference_file character varying,
-    datasource_descr_id character varying
+    datasource_descr_id character varying,
+    PRIMARY KEY (eumetcast_id)
 );
 
 
@@ -110,7 +111,8 @@ CREATE TABLE ingestion (
     defined_by character varying NOT NULL,
     activated boolean DEFAULT false NOT NULL,
     wait_for_all_files boolean NOT NULL,
-    input_to_process_re character varying
+    input_to_process_re character varying,
+    PRIMARY KEY (productcode, subproductcode, version, mapsetcode)
 );
 
 
@@ -131,7 +133,8 @@ CREATE TABLE internet_source (
     exclude_files_expression character varying,
     status boolean DEFAULT false NOT NULL,
     pull_frequency integer,
-    datasource_descr_id character varying
+    datasource_descr_id character varying,
+    PRIMARY KEY (internet_id)
 );
 
 
@@ -149,7 +152,8 @@ CREATE TABLE mapset (
     rotation_factor_lat double precision,
     pixel_size_x integer,
     pixel_size_y integer,
-    footprint_image text
+    footprint_image text,
+    PRIMARY KEY (mapsetcode)
 );
 
 
@@ -162,7 +166,8 @@ CREATE TABLE processing (
     activated boolean DEFAULT false NOT NULL,
     derivation_method character varying NOT NULL,
     algorithm character varying NOT NULL,
-    priority character varying NOT NULL
+    priority character varying NOT NULL,
+    PRIMARY KEY (productcode, subproductcode, version, mapsetcode)
 );
 
 
@@ -199,14 +204,16 @@ CREATE TABLE product_acquisition_data_source (
     defined_by character varying NOT NULL,
     type character varying,
     activated boolean DEFAULT false NOT NULL,
-    store_original_data boolean DEFAULT false NOT NULL
+    store_original_data boolean DEFAULT false NOT NULL,
+    PRIMARY KEY (productcode, subproductcode, version, data_source_id)
 );
 
 
 CREATE TABLE product_category (
     category_id character varying NOT NULL,
     descriptive_name character varying,
-    order_index integer
+    order_index integer,
+    PRIMARY KEY (category_id)
 );
 
 
@@ -222,7 +229,8 @@ CREATE TABLE sub_datasource_description (
     mask_min double precision,
     mask_max double precision,
     re_process character varying,
-    re_extract character varying
+    re_extract character varying,
+    PRIMARY KEY (productcode, subproductcode, version, datasource_descr_id)
 );
 
 
