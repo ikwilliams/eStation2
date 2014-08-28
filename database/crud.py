@@ -14,6 +14,7 @@ logger = log.my_logger(__name__)
 class CrudDB(object):
     @staticmethod
     def is_testing():
+        # return False
         if getattr(CrudDB, "_testing", None) is None:
             setattr(CrudDB, "_testing", sys.argv[0].lower().endswith('nosetests'))
         return CrudDB._testing
