@@ -11,7 +11,8 @@ from __future__ import absolute_import
 import unittest
 import datetime
 
-from ..datasets import Dataset, Interval
+from ..helpers import INTERVAL_TYPE
+from ..datasets import Dataset
 from ..exceptions import (WrongDateType, NoProductFound )
 
 
@@ -20,7 +21,7 @@ class TestDatasets(unittest.TestCase):
         self.kwargs = {'product_code':"fewsnet_rfe", 'sub_product_code': "rfe", 'mapset': 'FEWSNET_Africa_8km'}
         self.files_dekad = [
                 "20140101_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-                "20140111_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.missing",
+                "20140111_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
                 "20140121_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
                 "20140201_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
                 "20140211_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
@@ -69,12 +70,14 @@ class TestDatasets(unittest.TestCase):
                 Dataset, **kwargs)
 
     def test_intervals(self):
-        dataset = Dataset(**self.kwargs)
+        kwargs = self.kwargs.copy()
+        kwargs.update({'to_date': datetime.date(2014, 12, 31)})
+        dataset = Dataset(**kwargs)
         dataset.get_filenames = lambda: self.files_dekad
         intervals = dataset.intervals
         self.assertEquals(len(intervals), 5)
-        self.assertEquals(intervals[0].type, Interval.TYPE.PRESENT)
-        self.assertEquals(intervals[1].type, Interval.TYPE.PERMANENT_MISSING)
-        self.assertEquals(intervals[2].type, Interval.TYPE.PRESENT)
-        self.assertEquals(intervals[1].type, Interval.TYPE.MISSING)
-        self.assertEquals(intervals[2].type, Interval.TYPE.PRESENT)
+        self.assertEquals(intervals[0].interval_type, INTERVAL_TYPE.PRESENT)
+        self.assertEquals(intervals[1].interval_type, INTERVAL_TYPE.PERMANENT_MISSING)
+        self.assertEquals(intervals[2].interval_type, INTERVAL_TYPE.PRESENT)
+        self.assertEquals(intervals[3].interval_type, INTERVAL_TYPE.MISSING)
+        self.assertEquals(intervals[4].interval_type, INTERVAL_TYPE.PRESENT)

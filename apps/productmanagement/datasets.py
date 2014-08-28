@@ -101,47 +101,51 @@ class Frequency(object):
         return True
 
     def extract_date(self, filename):
-        return filename[:len(self.dateformat)]
-
-    def next_filename(self, filename):
         date_parts = (int(filename[:4]), int(filename[4:6]), int(filename[6:8]))
         if self.dateformat == self.DATEFORMAT.DATE:
             date = datetime.date(*date_parts)
         else:
             date_parts += (int(filename[8:10]), int(filename[10:12]))
             date = datetime.datetime(*date_parts)
-        if self.type_ == self.TYPE.EVERY or self.value == 1:
+        return date
+
+    def next_date(self, date):
+        if self.frequency_type == self.TYPE.EVERY or self.value == 1:
             date = self.get_next_date(date, self.unit, self.value)
-        elif self.type_ == self.TYPE.PER:
+        elif self.frequency_type == self.TYPE.PER:
             new_date = self.get_next_date(date, self.unit, 1)
             date = date + (new_date - date)/self.value
         else:
             raise Exception("Dateformat not managed: %s" % self.dateformat)
+        return date
+        
+    def next_filename(self, filename):
+        date = self.next_date(self.extract_date(filename))
         return self.format_filename(date, self.get_mapset(filename))
 
-    def __init__(self, value, unit, type_, dateformat=None):
+    def __init__(self, value, unit, frequency_type, dateformat=None):
         value = cast_to_int(value)
         unit = unit.lower()
-        type_ = type_.lower()
+        frequency_type = frequency_type.lower()
         if dateformat:
             dateformat = dateformat.upper()
         if not isinstance(value, int):
             raise WrongFrequencyValue(value)
         if not _check_constant(self, 'UNIT', unit):
             raise WrongFrequencyUnit(unit)
-        if not _check_constant(self, 'TYPE', type_):
-            raise WrongFrequencyType(type_)
+        if not _check_constant(self, 'TYPE', frequency_type):
+            raise WrongFrequencyType(frequency_type)
         if dateformat and not _check_constant(self, 'DATEFORMAT', dateformat):
             raise WrongFrequencyDateFormat(dateformat)
         self.value = value
         self.unit = unit
-        self.type_ = type_
+        self.frequency_type = frequency_type
         self.dateformat = dateformat or self.dateformat_default(unit)
 
 
 class Interval(object):
-    def __init__(self, type, from_date, to_date):
-        self.type = type
+    def __init__(self, interval_type, from_date, to_date):
+        self.interval_type = interval_type
         self.from_date = from_date
         self.to_date = to_date
 
@@ -172,7 +176,7 @@ class Dataset(object):
             raise NoFrequencyFound(self._db_product)
         self._frequency = Frequency(value=self._db_frequency.frequency, 
                                     unit=self._db_frequency.time_unit, 
-                                    type_=self._db_frequency.frequency_type)
+                                    frequency_type=self._db_frequency.frequency_type)
 
     def get_filenames(self):
         return glob.glob(os.path.join(self._fullpath, "*"))
@@ -188,9 +192,9 @@ class Dataset(object):
 
     def _extract_kwargs(self, interval):
         return {
-            "from_date": self._frequency.extract_date(interval[0]),
-            "to_date": self._frequency.extract_date(interval[1]),
-            "type": interval[2],
+            "from_date": interval[0],
+            "to_date": interval[1],
+            "interval_type": interval[2],
             }
 
     @property
