@@ -16,9 +16,17 @@ import locals
 
 from .exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
         WrongFrequencyType, WrongFrequencyDateFormat,
-        NoProductFound, NoFrequencyFound )
+        NoProductFound, NoFrequencyFound,
+        WrongDateType)
 from .helpers import add_years, add_months, add_dekads, add_pentads, add_days, find_gaps, cast_to_int
 
+
+def _check_constant(class_, constant_name, value):
+    for k, v in getattr(getattr(class_, constant_name, None),
+            '__dict__', {}).items():
+        if k.isupper() and v == value:
+            return True
+    return False
 
 class Frequency(object):
     class UNIT:
@@ -38,14 +46,6 @@ class Frequency(object):
     class DATEFORMAT:
         DATETIME = 'YYYYMMDDHHMM'
         DATE = 'YYYYMMDD'
-
-    @classmethod
-    def _check_constant(class_, constant_name, value):
-        for k, v in getattr(getattr(class_, constant_name, None),
-                '__dict__', {}).items():
-            if k.isupper() and v == value:
-                return True
-        return False
 
     @classmethod
     def dateformat_default(class_, unit):
@@ -100,6 +100,9 @@ class Frequency(object):
             return False
         return True
 
+    def extract_date(self, filename):
+        return filename[:len(self.dateformat)]
+
     def next_filename(self, filename):
         date_parts = (int(filename[:4]), int(filename[4:6]), int(filename[6:8]))
         if self.dateformat == self.DATEFORMAT.DATE:
@@ -124,11 +127,11 @@ class Frequency(object):
             dateformat = dateformat.upper()
         if not isinstance(value, int):
             raise WrongFrequencyValue(value)
-        if not self._check_constant('UNIT', unit):
+        if not _check_constant(self, 'UNIT', unit):
             raise WrongFrequencyUnit(unit)
-        if not self._check_constant('TYPE', type_):
+        if not _check_constant(self, 'TYPE', type_):
             raise WrongFrequencyType(type_)
-        if dateformat and not self._check_constant('DATEFORMAT', dateformat):
+        if dateformat and not _check_constant(self, 'DATEFORMAT', dateformat):
             raise WrongFrequencyDateFormat(dateformat)
         self.value = value
         self.unit = unit
@@ -136,11 +139,28 @@ class Frequency(object):
         self.dateformat = dateformat or self.dateformat_default(unit)
 
 
+class Interval(object):
+    def __init__(self, type, from_date, to_date):
+        self.type = type
+        self.from_date = from_date
+        self.to_date = to_date
+
+
 class Dataset(object):
-    def __init__(self, product_code, sub_product_code, mapset, version=None):
+    def _check_date(self, date):
+        if not isinstance(date, datetime.date):
+            raise WrongDateType(date, datetime.date)
+
+    def __init__(self, product_code, sub_product_code, mapset, version=None, from_date=None, to_date=None):
         kwargs = {'productcode':product_code, 'subproductcode':sub_product_code}
         if not version is None:
             kwargs['version'] = version
+        if from_date:
+            self._check_date(from_date)
+        if to_date:
+            self._check_date(to_date)
+        self.from_date = from_date or None
+        self.to_date = to_date or datetime.date.today()
         self._db_product = querydb.get_product_out_info(**kwargs)
         if self._db_product is None:
             raise NoProductFound(kwargs)
@@ -154,7 +174,6 @@ class Dataset(object):
                                     unit=self._db_frequency.time_unit, 
                                     type_=self._db_frequency.frequency_type)
 
-
     def get_filenames(self):
         return glob.glob(os.path.join(self._fullpath, "*"))
 
@@ -162,7 +181,18 @@ class Dataset(object):
         return list(os.path.basename(filename) for filename in self.get_filenames())
 
     def find_intervals(self, from_date=None, to_date=None):
-       return find_gaps(self.get_basenames(), self._frequency, only_intervals=True, from_date=from_date, to_date=to_date)
+       return find_gaps(self.get_basenames(), self._frequency, only_intervals=True, from_date=from_date or self.from_date, to_date=to_date or self.to_date)
 
     def find_gaps(self, from_date=None, to_date=None):
-       return find_gaps(self.get_basenames(), self._frequency, only_intervals=False, from_date=from_date, to_date=to_date)
+       return find_gaps(self.get_basenames(), self._frequency, only_intervals=False, from_date=from_date or self.from_date, to_date=to_date or self.to_date)
+
+    def _extract_kwargs(self, interval):
+        return {
+            "from_date": self._frequency.extract_date(interval[0]),
+            "to_date": self._frequency.extract_date(interval[1]),
+            "type": interval[2],
+            }
+
+    @property
+    def intervals(self):
+        return [Interval(**self._extract_kwargs(interval)) for interval in self.find_intervals()]

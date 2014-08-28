@@ -176,7 +176,8 @@ class TestHelpersGap(unittest.TestCase):
                 unit=Frequency.UNIT.DEKAD, type_=Frequency.TYPE.EVERY),
             only_intervals=True)
         self.assertEqual(len(intervals), 1)
-        self.assertEqual(intervals[0], [self.files_dekad[10], self.files_dekad[13]])
+        self.assertEqual(intervals[0][0], self.files_dekad[10])
+        self.assertEqual(intervals[0][1], self.files_dekad[13])
 
     def test_find_gap_dekad_with_gap_per(self):
         gap = find_gaps(self.files_dekad[:10] + self.files_dekad[12:], 

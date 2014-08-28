@@ -9,10 +9,8 @@
 from __future__ import absolute_import
 
 import unittest
-import datetime
 
-from ..datasets import Dataset, Frequency
-from ..helpers import find_gaps, add_years, add_months, add_dekads
+from ..datasets import Frequency
 from ..exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
         WrongFrequencyType, WrongFrequencyDateFormat )
 
