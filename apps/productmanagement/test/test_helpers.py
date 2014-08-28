@@ -11,10 +11,9 @@ from __future__ import absolute_import
 import unittest
 import datetime
 
-from ..datasets import Dataset, Frequency
-from ..helpers import find_gaps, add_years, add_months, add_dekads, cast_to_int
-from ..exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
-        WrongFrequencyType, WrongFrequencyDateFormat, WrongDateParameter)
+from ..datasets import Frequency
+from ..helpers import find_gaps, add_years, add_months, add_days, add_dekads, add_pentads, cast_to_int
+from ..exceptions import WrongDateParameter
 
 
 class TestCasters(unittest.TestCase):
@@ -60,6 +59,30 @@ class TestHelpersDate(unittest.TestCase):
 
     def test_add_dekad_3(self):
         self.assertEquals(add_dekads(datetime.date(2000, 1, 30), 3), datetime.date(2000, 3, 10))
+
+    def test_add_pentad_1(self):
+        self.assertEquals(add_pentads(datetime.date(2000, 1, 1), 2), datetime.date(2000, 1, 11))
+
+    def test_add_pentad_2(self):
+        self.assertEquals(add_pentads(datetime.date(2000, 1, 28), 1), datetime.date(2000, 2, 3))
+
+    def test_add_pentad_3(self):
+        self.assertEquals(add_pentads(datetime.date(2000, 1, 30), 3), datetime.date(2000, 2, 15))
+
+    def test_add_days8_1(self):
+        self.assertEquals(add_days(datetime.date(2000, 1, 1), 2, 8), datetime.date(2000, 1, 17))
+
+    def test_add_days8_2(self):
+        self.assertEquals(add_days(datetime.date(2000, 2, 26), 1, 8), datetime.date(2000, 3, 5))
+
+    def test_add_days8_3(self):
+        self.assertEquals(add_days(datetime.date(2001, 2, 26), 1, 8), datetime.date(2001, 3, 6))
+
+    def test_add_days8_4(self):
+        self.assertEquals(add_days(datetime.date(2000, 12, 25), 1, 8), datetime.date(2001, 1, 1))
+
+    def test_add_days16_1(self):
+        self.assertEquals(add_days(datetime.date(2000, 12, 25), 1, 16), datetime.date(2001, 1, 1))
 
 
 class TestHelpersGap(unittest.TestCase):

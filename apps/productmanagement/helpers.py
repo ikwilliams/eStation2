@@ -86,17 +86,35 @@ def add_months(date, months=1):
     return date
 
 
-def add_dekads(date, dekads=1):
-    dekad = datetime.timedelta(days=10)
-    for count_dekad in range(dekads):
-        new_date = date + dekad
+def add_xkads(date, xkads, days=10):
+    delta = datetime.timedelta(days)
+    for count_dekad in range(xkads):
+        new_date = date + delta
         if new_date.day == 31:
             new_date += datetime.timedelta(1)
         elif new_date.month != date.month:
-            new_date = date - dekad
+            new_date = date - delta
             new_date = add_months(new_date, 1)
             while new_date.month != date.month:
-                new_date -= dekad
-            new_date += dekad
+                new_date -= delta
+            new_date += delta
+        date = new_date
+    return date
+
+
+def add_dekads(date, dekads=1):
+    return add_xkads(date, dekads, 10)
+
+
+def add_pentads(date, pentads=1):
+    return add_xkads(date, pentads, 5)
+
+
+def add_days(date, period, days):
+    delta = datetime.timedelta(days)
+    for count_dekad in range(period):
+        new_date = date + delta
+        if new_date.year > date.year:
+            new_date = datetime.date(new_date.year, 1, 1)
         date = new_date
     return date
