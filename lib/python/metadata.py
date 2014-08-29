@@ -109,7 +109,7 @@ class SdsMetadata:
 
     def write_to_file(self, filepath):
     #
-    #   Writes  metadata to a target file (already opened gdal dataset)
+    #   Writes  metadata to a target file
     #   Args:
     #       dataset: osgeo.gdal dataset (open and georeferenced)
 
