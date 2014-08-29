@@ -11,10 +11,10 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #   Test iteration on remote ftp (e.g. MODIS)
     #   ---------------------------------------------------------------------------
-    def TestIterFilesystem(self):
+    def TestIterRemoteFtp(self):
         base_dir='Collect51111'
         full_regex='ssssss'
-        remote_url='http://oceandata.sci.gsfc.nasa.gov/'
+        remote_url='ftp://something'
         UserPwd='anonymous:anonymous'
         list = get_list_matching_files_dir_ftp(base_dir, full_regex)
         logger.info('Returned list is: '+list[0])
