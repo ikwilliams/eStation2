@@ -16,9 +16,8 @@ class TestGetInternet(unittest.TestCase):
         full_regex='ssssss'
         remote_url='http://oceandata.sci.gsfc.nasa.gov/'
         UserPwd='anonymous:anonymous'
-        list = get_list_matching_files_dir(base_dir, full_regex)
-        print 1
-        #logger.info('Returned list is: '+list[0])
+        list = get_list_matching_files_dir_ftp(base_dir, full_regex)
+        logger.info('Returned list is: '+list[0])
         self.assertEqual(1,1)
 
     #   ---------------------------------------------------------------------------
@@ -26,10 +25,10 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def TestIterFilesystem(self):
         base_dir='/data/tmp/get_internet_tree/'
-        full_regex='2012/win0./file01'
+        full_regex='201./win02/file01'
         #remote_url='http://oceandata.sci.gsfc.nasa.gov/'
         #UserPwd='anonymous:anonymous'
-        list = get_list_matching_files_dir(base_dir, full_regex)
+        list = get_list_matching_files_dir_local(base_dir, full_regex)
         print 1
         #logger.info('Returned list is: '+list[0])
         self.assertEqual(1,1)
