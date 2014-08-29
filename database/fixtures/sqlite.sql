@@ -1,3 +1,4 @@
+BEGIN;
 CREATE TABLE data_type (
     data_type_id character varying NOT NULL,
     description character varying NOT NULL,
@@ -796,3 +797,4 @@ INSERT INTO sub_datasource_description VALUES ('modis_ba', 'firedate', 'undefine
 INSERT INTO sub_datasource_description VALUES ('pml_modis_chl', 'chl_3day', 'undefined', 'EO:EUM:DAT:MULT:CPMAD', 1, 0, NULL, 'Int16', NULL, NULL, NULL, 'chlor_a');
 INSERT INTO sub_datasource_description VALUES ('modis_sst', 'sst_8d', 'undefined', 'GSFC:OCEAN:MODIS:SST:8D', 0.000717184999999999958, -2, 65535, 'UInt16', NULL, NULL, 'l3m_data', '0');
 INSERT INTO sub_datasource_description VALUES ('vgt_fapar', 'fapar', 'V1.3', 'EO:EUM:DAT:PROBA-V:FAPAR', 0.00400000000000000008, 0, 255, 'Byte', NULL, NULL, 'FAPAR', '.h5');
+END;
