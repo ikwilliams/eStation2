@@ -109,7 +109,7 @@ def get_list_matching_files_dir_local(remote_url_dir, full_regex):
     # Local implementation (filesystem, not http/ftp remote server)
     list_matches=[]
     level = 1
-    maxlevel=3
+    maxlevel=len(full_regex.split('/'))
     toprint=''
     get_list_matching_files_subdir_local(list_matches, remote_url_dir, full_regex, level, maxlevel,'')
     for elem in list_matches:
