@@ -10,7 +10,7 @@ import os.path
 import config.es_constants
 from osgeo import gdal
 from osgeo.gdalconst import *
-
+from functions import *
 # Import eStation2 modules
 from lib.python import es_logging as log
 from lib.python.functions import get_subdir_from_path_full
@@ -50,9 +50,11 @@ sds_metadata = { 'eStation2_es2_version': '',               # 0. eStation 2 vers
                                                             # ------------------  File/Machine Specific ----------------------
                  'eStation2_input_files': '',               # 18. Input files used for computation
                  'eStation2_comp_time': '',                 # 19. Time of computation
+                 'eStation2_mac_address': '',               # 20. Machine MAC address
 
                                                             # ------------------  Fixed         ----------------------
-                 'eStation2_conversion': ''                 # 20. Rule for converting DN to physical values (free text)
+                 'eStation2_conversion': ''                 # 21. Rule for converting DN to physical values (free text)
+
 
 }
 # TODO-M.C.: Is it possible to write to a specific domain (e.g. 'eStation2' ???)
@@ -89,7 +91,7 @@ class SdsMetadata:
         sds_metadata['eStation2_date'] = 'my_date'
         sds_metadata['eStation2_input_files'] = '/my/path/to/file/and/filename1'
         sds_metadata['eStation2_comp_time'] = 'my_comp_time'
-
+        sds_metadata['eStation2_mac_address'] = get_machine_mac_address()
 
     def write_to_ds(self, dataset):
     #
@@ -107,7 +109,7 @@ class SdsMetadata:
 
     def write_to_file(self, filepath):
     #
-    #   Writes  metadata to a target file (already opened gdal dataset)
+    #   Writes  metadata to a target file
     #   Args:
     #       dataset: osgeo.gdal dataset (open and georeferenced)
 
@@ -176,7 +178,7 @@ class SdsMetadata:
     #   Assign prod/subprod/version
         sds_metadata['eStation2_product'] = str(product)
         sds_metadata['eStation2_subProduct'] = str(subproduct)
-        if isinstance(version, str):
+        if isinstance(version, str) or isinstance(version, unicode):
             sds_metadata['eStation2_product_version'] = version
         else:
             sds_metadata['eStation2_product_version'] = 'undefined'

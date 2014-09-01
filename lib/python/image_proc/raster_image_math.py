@@ -173,9 +173,12 @@ def do_avg_image(input_file='', output_file='', input_nodata=None, output_nodata
             outband.WriteArray(N.array(outData), 0, il)
 
     #   ----------------------------------------------------------------------------------------------------
+    #   Close outputs
+    outDrv = None
+    outDS = None
+
     #   Writes metadata to output
     assign_metadata_processing(input_list, output_file)
-
 
 # _____________________________
 def do_min_image(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
@@ -288,6 +291,9 @@ def do_min_image(input_file='', output_file='', input_nodata=None, output_nodata
                 indexBand.WriteArray(N.array(indexData), 0, il)
 
     #   ----------------------------------------------------------------------------------------------------
+    #   Close outputs
+    outDrv = None
+    outDS = None
     #   Writes metadata to output
     assign_metadata_processing(input_list, output_file)
 
@@ -410,7 +416,10 @@ def do_max_image(input_file='', output_file='', input_nodata=None, output_nodata
                 indexBand.WriteArray(N.array(indexData), 0, il)
 
     #   ----------------------------------------------------------------------------------------------------
-    #   Writes metadata to output
+    #   Close outputs
+    outDrv = None
+    outDS = None
+   #   Writes metadata to output
     assign_metadata_processing(input_list, output_file)
 
 #   _____________________________
@@ -495,6 +504,9 @@ def do_med_image(input_file='', output_file='', input_nodata=None, output_nodata
             outband.WriteArray(N.array(medianOut),0,il)
 
     #   ----------------------------------------------------------------------------------------------------
+    #   Close outputs
+    outDrv = None
+    outDS = None
     #   Writes metadata to output
     assign_metadata_processing(input_list, output_file)
 
@@ -564,6 +576,9 @@ def do_oper_subtraction(input_file='', output_file='', input_nodata=None, output
             outDS.GetRasterBand(ib+1).WriteArray(N.array(dataout), 0, il)
 
     #   ----------------------------------------------------------------------------------------------------
+    #   Close outputs
+    outDrv = None
+    outDS = None
     #   Writes metadata to output
     assign_metadata_processing(input_file, output_file)
 
@@ -635,6 +650,9 @@ def do_oper_division(input_file='', output_file='', input_nodata=None, output_no
             outDS.GetRasterBand(ib+1).WriteArray(N.array(dataout), 0, il)
 
     #   ----------------------------------------------------------------------------------------------------
+    #   Close outputs
+    outDrv = None
+    outDS = None
     #   Writes metadata to output
     assign_metadata_processing(input_file, output_file)
 
@@ -700,6 +718,9 @@ def do_oper_scalar_multiplication(input_file='', output_file='', scalar=1, input
             outDS.GetRasterBand(ib+1).WriteArray(N.array(dataout), 0, il)
 
     #   ----------------------------------------------------------------------------------------------------
+    #   Close outputs
+    outDrv = None
+    outDS = None
     #   Writes metadata to output
     assign_metadata_processing(input_file, output_file)
 
@@ -789,6 +810,9 @@ def do_make_vci(input_file='', min_file='', max_file='', output_file='', input_n
     input_list.append(input_file)
     input_list.append(min_file)
     input_list.append(max_file)
+    #   Close outputs
+    outDrv = None
+    outDS = None
     assign_metadata_processing(input_list, output_file)
 
 # _____________________________
@@ -974,6 +998,9 @@ def do_mask_image(input_file='', mask_file='', output_file='',output_format=None
     input_list = []
     input_list.append(input_file)
     input_list.append(mask_file)
+    #   Close outputs
+    outDrv = None
+    outDS = None
     assign_metadata_processing(input_list, output_file)
 
 
@@ -1097,6 +1124,9 @@ def do_cumulate(input_file='', output_file='', input_nodata=None, output_nodata=
                 outband.WriteArray(N.array(outData), 0, il)
 
     #   ----------------------------------------------------------------------------------------------------
+    #   Close outputs
+    outDrv = None
+    outDS = None
     #   Writes metadata to output
     assign_metadata_processing(input_file, output_file)
 
@@ -1181,6 +1211,9 @@ def do_compute_perc_diff_vs_avg(input_file='', avg_file='', output_file='', inpu
     input_list = []
     input_list.append(input_file)
     input_list.append(avg_file)
+    #   Close outputs
+    outDrv = None
+    outDS = None
     assign_metadata_processing(input_list, output_file)
 
 # _____________________________
@@ -1264,6 +1297,10 @@ def do_ts_linear_filter(input_file='', before_file='', after_file='', output_fil
     input_list.append(before_file)
     input_list.append(input_file)
     input_list.append(after_file)
+    #   Close outputs
+    outDrv = None
+    outDS = None
+
     assign_metadata_processing(input_list, output_file)
 
 # _____________________________

@@ -25,7 +25,7 @@ import datetime
 import re
 import resource
 from datetime import date
-
+import uuid
 
 # Import eStation2 modules
 from lib.python import es_logging as log
@@ -756,7 +756,6 @@ def list_to_element(input_arg):
 #   Inputs:
 #   Output: none
 #
-
 def files_temp_ajacent(file_t0, step='dekad', extension='.tif'):
 
     # Checks t0 exists
@@ -800,3 +799,17 @@ def files_temp_ajacent(file_t0, step='dekad', extension='.tif'):
     else:
         logger.warning('Time step (%s) not yet foreseen. Exit. ' % step)
         return None
+
+######################################################################################
+#
+#   Purpose: return the machine address
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/07/09
+#   Inputs:
+#   Output: none
+#
+
+def get_machine_mac_address():
+
+    return ':'.join(re.findall('..', '%012x' % uuid.getnode()))
+
