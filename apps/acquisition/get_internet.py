@@ -12,6 +12,7 @@ import locals
 # Import standard modules
 import pycurl
 from StringIO import StringIO
+import cStringIO
 import tempfile
 import os
 import unittest
@@ -35,43 +36,68 @@ tmpdir = tempfile.mkdtemp(prefix=__name__, dir=locals.es2globals['temp_dir'])
 #   Functions
 #   ---------------------------------------------------------------------------
 
-def get_list_matching_files_dir_ftp(remote_url_dir, full_regex):
+def get_list_current_subdirs_ftp(remote_url, usr_pwd):
+
+    d = pycurl.Curl()
+    response = cStringIO.StringIO()
+    d.setopt(pycurl.URL, remote_url)
+    d.setopt(pycurl.USERPWD, usr_pwd)
+    d.setopt(pycurl.FOLLOWLOCATION, 1)
+    d.setopt(pycurl.WRITEFUNCTION, response.write)
+    d.perform()
+    d.close()
+    current_list = []
+    content=response.getvalue()
+    lines = content.split('\n')
+    for line in lines:
+        check_line = len(str(line))
+        if check_line is not 0:
+            line_dir=line.split()[-1]
+            current_list.append(line_dir)
+    
+    return current_list
+
+def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex):
 
     # Local implementation (filesystem, not http/ftp remote server)
     list_matches=[]
     level = 1
-    maxlevel=3
+    maxlevel= len(re.findall("/",full_regex))
     toprint=''
-    get_list_matching_files_subdir_ftp(list_matches, remote_url_dir, full_regex, level, maxlevel,'')
+    get_list_matching_files_subdir_ftp(list_matches, remote_url, usr_pwd, base_dir, full_regex, level, maxlevel,'')
     for elem in list_matches:
         toprint+=elem+','
     logger.info(toprint)
+    return list_matches 
 
 #   Returns the list of objects(files or dirs) located in a remote subdir and
 #   matching 'regex' (single 'regex' - not tree structure). Can be called iteratively.
-def get_list_matching_files_subdir_ftp(list, remote_url_dir, regex, level, max_level, sub_dir):
+def get_list_matching_files_subdir_ftp(list, remote_url, usr_pwd, base_dir, regex, level, max_level, sub_dir):
 
     # split the regex
     tokens=regex.split('/')
     regex_my_level=''
     # regex for this level
-    regex_my_level+=tokens[level-1]
-
-    my_list = os.listdir(remote_url_dir)
+    regex_my_level+=tokens[level]
+    #my_list=[]
+    my_list = get_list_current_subdirs_ftp(remote_url, usr_pwd)
     for element in my_list:
         if re.match(regex_my_level,element) is not None:
             # Is it already the file ?
             if max_level == level:
+                print sub_dir
+                print element
                 #logger.info(element)
                 list.append(sub_dir+element)
             else:
                 # Enter the subdir
+                print sub_dir
                 new_level=level+1
                 new_sub_dir=sub_dir+element+'/'
-                get_list_matching_files_subdir_ftp(list, remote_url_dir+'/'+element, regex, new_level, max_level, new_sub_dir)
-
+                new_remote_url=remote_url+'/'+element+'/'
+                get_list_matching_files_subdir_ftp(list, new_remote_url, usr_pwd, base_dir, regex, new_level, max_level, new_sub_dir)   
     return 0
-
+   
 #   Target dir is created as 'tmpdir' if not passed
 #   Full pathname is returned (or positive number for error)
 
