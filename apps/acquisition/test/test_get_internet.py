@@ -7,18 +7,20 @@ import unittest
 
 class TestGetInternet(unittest.TestCase):
 
-
+    
     #   ---------------------------------------------------------------------------
     #   Test iteration on remote ftp (e.g. MODIS)
     #   ---------------------------------------------------------------------------
-    # def TestIterRemoteFtp(self):
-    #     base_dir='Collect51111'
-    #     full_regex='ssssss'
-    #     remote_url='ftp://something'
-    #     UserPwd='anonymous:anonymous'
-    #     list = get_list_matching_files_dir_ftp(base_dir, full_regex)
-    #     logger.info('Returned list is: '+list[0])
-    #     self.assertEqual(1,1)
+    def TestIterRemoteFtp(self):
+
+        base_dir='/Collection51/TIFF/'
+        #full_regex='/Collection51/TIFF/Win[0-2][0-9]/20.*/MCD45monthly.A20.*burndate.tif.gz'
+        full_regex='/Collection51/TIFF/Win1[0-1]/201[1-2]/MCD45monthly.A20.*burndate.tif.gz'
+        remote_url='ftp://ba1.geog.umd.edu'
+        usr_pwd='user:burnt_data'
+        list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, base_dir, full_regex)
+        logger.info('Returned list is: '+list[0])
+        self.assertEqual(1,1)
 
     #   ---------------------------------------------------------------------------
     #   Test iteration on the filesystem
@@ -80,12 +82,3 @@ class TestGetInternet(unittest.TestCase):
         Password='FIRE@data1'
         UserPwd=Username+':'+Password
         get_file_from_url(remote_url, target_file=filename, userpwd=UserPwd)
-
-#   ---------------------------------------------------------------------------
-    #   Get a file from FTP (list_from_template=FALSE, User/psw) -> FIRMS_NASA
-    #   ---------------------------------------------------------------------------
-    def TestMODISFtpList(test):
-        remote_url='ftp://ba1.geog.umd.edu'
-        UserPwd='user:burnt_data'
-        filename='modis_ftp_list.txt'
-        get_dir_contents_from_url(remote_url, target_file=filename, userpwd=UserPwd)
