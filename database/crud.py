@@ -14,8 +14,9 @@ logger = log.my_logger(__name__)
 class CrudDB(object):
     @staticmethod
     def is_testing():
+        # return False
         if getattr(CrudDB, "_testing", None) is None:
-            setattr(CrudDB, "_testing", sys.argv[0].endswith('nosetests'))
+            setattr(CrudDB, "_testing", sys.argv[0].lower().endswith('nosetests'))
         return CrudDB._testing
 
     @staticmethod
@@ -35,6 +36,7 @@ class CrudDB(object):
                 con = sqlite3.connect(tmp_name)
                 con.executescript(file(os.path.join(os.path.dirname(__file__), "fixtures", "sqlite.sql")).read())
                 con.close()
+                # Used in querydb
                 dbglobals['schema_products'] = None
             db_url = CrudDB._db_url
         else:
@@ -50,12 +52,12 @@ class CrudDB(object):
 
     # Initialize the DB
     def __init__(self, schema='products', echo=False):
+        self.schema = schema or dbglobals['schema_products']
+        db = self.get_db_engine()
 
-        if schema == '':
-            schema = dbglobals['schema_products']
+        if self.is_testing():
+            self.schema = None
 
-        db = CrudDB.create_engine()
-        self.schema = schema
         db.echo = echo
         self.table_map = {}
         self.session = None

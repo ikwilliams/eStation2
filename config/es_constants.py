@@ -10,9 +10,6 @@ import os
 import locals
 from osgeo.gdalconst import *
 
-# Software version
-
-ES2_SW_VERSION = '2.0.0'
 
 # Get base dir
 try:
@@ -26,6 +23,9 @@ try:
 except EnvironmentError:
     print 'Error - data_dir not defined in locals.  Exit'
     exit(1)
+
+# Software version
+ES2_SW_VERSION = '2.0.0'
 
 # Application paths
 install_path = base_dir

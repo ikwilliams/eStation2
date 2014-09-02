@@ -6,19 +6,16 @@
 #	history: 1.0
 #
 #   Still to be done
-#   TODO-M.C.test: upsert to DB
 #   TODO-M.C.ok: Add metadata to the output
 #   TODO-M.C.test: functions to avoid repetitions
 #   TODO-M.C.: more checks on the IN/OUT
-#   TODO-M.C.ok: NODATA management -> not for RFE !!
-#   TODO-M.C.ok: Check and create output dir
 #   TODO-M.C.test: Activate/deactivate according to DB settings
 #   TODO-M.C.test: Add a mechanism to extract/visualize the 'status' -> pipeline_printout(verbose=3)+grep-like function ?
 #   TODO-M.C.: create unittest-like functions for validating the chain
 #   TODO-M.C.: multiprocessing does not work -> VM issue ?
 #   TODO-M.C.test: add the Np anomalies
 #   TODO-M.C.test: find a robust method to solve the tuple/string issue in filename (fttb: return_as_element_of_list() ?)
-#   TODO-M.C,: add management of 'version' !!
+#   TODO-M.C.: add management of 'version' !!
 #
 
 # Source my definitions
@@ -43,9 +40,9 @@ logger = log.my_logger(__name__)
 # Delete a file for re-creating
 
 #   General definitions for this processing chain
-prod="FEWSNET_RFE"
+prod="fewsnet_rfe"
 mapset='FEWSNET_Africa_8km'
-mapset='WGS84_Guinea2Nig_1km'
+#mapset='WGS84_Guinea2Nig_1km'
 ext='.tif'
 version='undefined'
 
@@ -53,8 +50,8 @@ version='undefined'
 #activate_fewsnet_rfe_comput=0
 
 #   switch wrt temporal resolution
-activate_10d_comput=1
-activate_1month_comput=0
+activate_10d_comput=0
+activate_1month_comput=1
 
 #   specific switch for each subproduct
 activate_10davg_comput=1
@@ -75,19 +72,18 @@ activate_1monnp_comput=1
 def create_pipeline(starting_sprod):
     #   ---------------------------------------------------------------------
     #   Define input files
-    #starting_sprod='RFE'
     in_prod_ident = set_path_filename_no_date(prod, starting_sprod, mapset, ext)
 
     input_dir = locals.es2globals['data_dir']+ \
-                set_path_sub_directory(prod, starting_sprod, 'tif', version, mapset)
+                set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
 
     starting_files = input_dir+"*"+in_prod_ident
 
     #   ---------------------------------------------------------------------
     #   Average
-    output_sprod="10DAVG"
+    output_sprod="10davg"
     out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
     formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
@@ -100,14 +96,14 @@ def create_pipeline(starting_sprod):
         check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_avg_image(**args)
-        upsert_processed_ruffus(output_file)
+        # upsert_processed_ruffus(output_file)
 
 
     #   ---------------------------------------------------------------------
     #   Minimum
-    output_sprod="10DMIN"
+    output_sprod="10dmin"
     out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
     formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
@@ -120,13 +116,13 @@ def create_pipeline(starting_sprod):
         check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_min_image(**args)
-        upsert_processed_ruffus(output_file)
+        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   Maximum
-    output_sprod="10DMAX"
+    output_sprod="10dmax"
     out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
     formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
@@ -139,13 +135,13 @@ def create_pipeline(starting_sprod):
         check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_max_image(**args)
-        upsert_processed_ruffus(output_file)
+        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   10dDiff
-    output_sprod="10DIFF"
+    output_sprod="10ddiff"
     out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     #   Starting files + avg
     formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
@@ -153,7 +149,7 @@ def create_pipeline(starting_sprod):
 
     ancillary_sprod = "10davg"
     ancillary_sprod_ident = set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
-    ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived',version, mapset)
+    ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'Derived',version, mapset)
     ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
     @follows(fewsnet_10davg)
@@ -165,13 +161,13 @@ def create_pipeline(starting_sprod):
         check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_oper_subtraction(**args)
-        upsert_processed_ruffus(output_file)
+        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   10dperc
-    output_sprod="10DPERC"
+    output_sprod="10dperc"
     out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     #   Starting files + avg
     formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
@@ -179,7 +175,7 @@ def create_pipeline(starting_sprod):
 
     ancillary_sprod = "10davg"
     ancillary_sprod_ident = set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
-    ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived', version, mapset)
+    ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'Derived', version, mapset)
     ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
     @follows(fewsnet_10davg)
@@ -191,26 +187,26 @@ def create_pipeline(starting_sprod):
         check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file[0], "avg_file": input_file[1], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_compute_perc_diff_vs_avg(**args)
-        upsert_processed_ruffus(output_file)
+        # _processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   10dnp
-    output_sprod="10DNP"
+    output_sprod="10dnp"
     out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     #   Starting files + min + max
     formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
     formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
 
-    ancillary_sprod_1 = "10DMIN"
+    ancillary_sprod_1 = "10dmin"
     ancillary_sprod_ident_1 = set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
-    ancillary_subdir_1      = set_path_sub_directory(prod, ancillary_sprod_1, 'derived',version, mapset)
+    ancillary_subdir_1      = set_path_sub_directory(prod, ancillary_sprod_1, 'Derived',version, mapset)
     ancillary_input_1="{subpath[0][4]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
 
-    ancillary_sprod_2 = "10DMAX"
+    ancillary_sprod_2 = "10dmax"
     ancillary_sprod_ident_2 = set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
-    ancillary_subdir_2      = set_path_sub_directory(prod, ancillary_sprod_2, 'derived',version, mapset)
+    ancillary_subdir_2      = set_path_sub_directory(prod, ancillary_sprod_2, 'Derived',version, mapset)
     ancillary_input_2="{subpath[0][4]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
 
     @follows(fewsnet_10dmin, fewsnet_10dmax)
@@ -222,13 +218,13 @@ def create_pipeline(starting_sprod):
         check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_make_vci(**args)
-        upsert_processed_ruffus(output_file)
+        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   1moncum
-    output_sprod="1MONCUM"
+    output_sprod="1moncum"
     out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     # inputs: files from same months
     formatter_in="(?P<YYYYMM>[0-9]{6})(?P<DD>[0-9]{2})"+in_prod_ident
@@ -243,16 +239,16 @@ def create_pipeline(starting_sprod):
         check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file,"output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_cumulate(**args)
-        upsert_processed_ruffus(output_file)
+        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   Monthly Average
-    new_input_subprod='1MONCUM'
+    new_input_subprod='1moncum'
     in_prod_ident=set_path_filename_no_date(prod, new_input_subprod, mapset, ext)
 
-    output_sprod="1MONAVG"
+    output_sprod='1monavg'
     out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
     formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
@@ -265,13 +261,13 @@ def create_pipeline(starting_sprod):
         check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_avg_image(**args)
-        upsert_processed_ruffus(output_file)
+        #upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   Monthly Minimum
-    output_sprod="1MONMIN"
+    output_sprod="1monmin"
     out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
     formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
@@ -284,13 +280,13 @@ def create_pipeline(starting_sprod):
         check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_min_image(**args)
-        upsert_processed_ruffus(output_file)
+        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   Monthly Maximum
-    output_sprod="1MONMAX"
+    output_sprod="1monmax"
     out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     reg_ex_in="[0-9]{4}([0-9]{4})"+in_prod_ident
 
@@ -305,13 +301,13 @@ def create_pipeline(starting_sprod):
         check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_max_image(**args)
-        upsert_processed_ruffus(output_file)
+        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   1monDiff
-    output_sprod="1MONDIFF"
+    output_sprod="1mondiff"
     out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     # inputs
     #   Starting files + avg
@@ -320,7 +316,7 @@ def create_pipeline(starting_sprod):
 
     ancillary_sprod = "1monavg"
     ancillary_sprod_ident = set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
-    ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived', version, mapset)
+    ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'Derived', version, mapset)
     ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
     @follows(fewsnet_1monavg)
@@ -332,22 +328,22 @@ def create_pipeline(starting_sprod):
         check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_oper_subtraction(**args)
-        upsert_processed_ruffus(output_file)
+        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   1monperc
-    output_sprod="1MONPERC"
+    output_sprod="1monperc"
     out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     # inputs
     #   Starting files + avg
     formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
     formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
 
-    ancillary_sprod = "1MONAVG"
+    ancillary_sprod = "1monavg"
     ancillary_sprod_ident = set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
-    ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived',version, mapset)
+    ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'Derived',version, mapset)
     ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
     @follows(fewsnet_1monavg)
@@ -359,26 +355,26 @@ def create_pipeline(starting_sprod):
         check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file[0], "avg_file": input_file[1], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_compute_perc_diff_vs_avg(**args)
-        upsert_processed_ruffus(output_file)
+        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   1monnp
-    output_sprod="1MONNP"
+    output_sprod="1monnp"
     out_prod_ident = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'derived', version, mapset)
+    output_subdir  = set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     #   Starting files + min + max
     formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
     formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
 
-    ancillary_sprod_1 = "1MONMIN"
+    ancillary_sprod_1 = "1monmin"
     ancillary_sprod_ident_1 = set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
-    ancillary_subdir_1      = set_path_sub_directory(prod, ancillary_sprod_1, 'derived',version, mapset)
+    ancillary_subdir_1      = set_path_sub_directory(prod, ancillary_sprod_1, 'Derived',version, mapset)
     ancillary_input_1="{subpath[0][4]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
 
-    ancillary_sprod_2 = "1MONMAX"
+    ancillary_sprod_2 = "1monmax"
     ancillary_sprod_ident_2 = set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
-    ancillary_subdir_2      = set_path_sub_directory(prod, ancillary_sprod_2, 'derived',version, mapset)
+    ancillary_subdir_2      = set_path_sub_directory(prod, ancillary_sprod_2, 'Derived',version, mapset)
     ancillary_input_2="{subpath[0][4]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
 
     @follows(fewsnet_1monmin, fewsnet_1monmax)
@@ -390,7 +386,7 @@ def create_pipeline(starting_sprod):
         check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_make_vci(**args)
-        upsert_processed_ruffus(output_file)
+        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   Upsert in the DB table a product generated by ruffus
@@ -446,7 +442,7 @@ def create_pipeline(starting_sprod):
 def processing_fewsnet_rfe(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
                            pipeline_printout_graph_level=0):
 
-    create_pipeline(starting_sprod='RFE')
+    create_pipeline(starting_sprod='rfe')
 
     logger.info("Entering routine %s" % 'processing_fewsnet_rfe')
     if pipeline_run_level > 0:

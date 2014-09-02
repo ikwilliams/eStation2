@@ -25,7 +25,7 @@ import datetime
 import re
 import resource
 from datetime import date
-
+import uuid
 
 # Import eStation2 modules
 from lib.python import es_logging as log
@@ -440,15 +440,15 @@ def extract_from_date(str_date):
 #
 #   General rules:
 #       dir is always
-#                       ['data_dir']+<product_code>+[derived/tif]+<sub_product_code>
-#       e.g.            /data/processing/FEWSNET_RFE/derived/10davg
+#                       ['data_dir']+<product_code>+<mapset>+[derived/tif]+<sub_product_code>
+#       e.g.            /data/processing/FEWSNET_RFE/FEWSNET_Africa_8km/derived/10davg
 #
 #       filename is always
 #                       <datefield>'_'<product_code>['_'<version>]'_'<sub_product_code>'_'<mapset>'_'<ext>
 #       e.g.            0611_FEWSNET_RFE_10davg_FEWSNET_Africa_8km.tif
 #
-#   Conventions: product_code : UPPERCASE, 1+ '_" separators
-#                sub_product_code : UPPERCASE, 0+ '_" separators
+#   Conventions: product_code :  1+ '_" separators
+#                sub_product_code : 0+ '_" separators
 #
 ######################################################################################
 #   set_path_filename_nodate
@@ -462,8 +462,8 @@ def extract_from_date(str_date):
 #
 def set_path_filename_no_date(product_code, sub_product_code, mapset_id, extension):
 
-    filename_nodate =     "_" + str(product_code.upper()) + '_' \
-                              + str(sub_product_code.upper()) + "_" \
+    filename_nodate =     "_" + str(product_code) + '_' \
+                              + str(sub_product_code) + "_" \
                               + mapset_id + extension
 
     return filename_nodate
@@ -497,10 +497,10 @@ def set_path_sub_directory(product_code, sub_product_code, product_type, version
 
     type_subdir = dict_subprod_type_2_dir[product_type]
 
-    sub_directory = str(product_code.upper()) + os.path.sep + \
+    sub_directory = str(product_code) + os.path.sep + \
                     mapset + os.path.sep +\
                     type_subdir + os.path.sep +\
-                    str(sub_product_code.upper()) + os.path.sep
+                    str(sub_product_code) + os.path.sep
 
     return sub_directory
 
@@ -549,20 +549,10 @@ def get_date_from_path_filename(filename, extension=None):
     if extension is None:
         extension = '.tif'
 
-    # Remove the extension
-    #filename_noext = filename.replace(extension,'')
 
     # Get the date string
     str_date = filename.split('_')[0]
 
-    # Remove date
-    #str_remain=filename_noext.replace(str_date+'_','')
-
-    # Remove the product_code
-    #str_remain1=str_remain.replace(product_code+'_','')
-    #str_remain =str_remain1.replace(sub_product_code+'_','')
-
-    #mapset = str_remain
     return str_date
 
 ######################################################################################
@@ -588,7 +578,7 @@ def get_date_from_path_full(full_path):
 
 ######################################################################################
 #   get_subdir_from_path_full
-#   Purpose: From full_path -> date
+#   Purpose: From full_path -> subdir
 #   Author: Marco Clerici, JRC, European Commission
 #   Date: 2014/06/22
 #   Inputs: filename
@@ -658,6 +648,25 @@ def check_output_dir(output_dir):
 
         logger.debug("Output directory %s already exists" % my_dir)
 
+######################################################################################
+#   ensure_sep_present
+#   Purpose: Check output directory exists, otherwise create it.
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/09/01
+#   Inputs: output_dir, or list of dirs
+#   Output: none
+#
+
+def ensure_sep_present(path, position):
+
+    if position=='begin':
+        if not path.startswith("/"):
+            path='/'+path
+    elif position=='end':
+        if not path.endswith("/"):
+            path=path+'/'
+
+    return path
 
 ######################################################################################
 #                            MISCELLANEOUS
@@ -766,7 +775,6 @@ def list_to_element(input_arg):
 #   Inputs:
 #   Output: none
 #
-
 def files_temp_ajacent(file_t0, step='dekad', extension='.tif'):
 
     # Checks t0 exists
@@ -810,3 +818,17 @@ def files_temp_ajacent(file_t0, step='dekad', extension='.tif'):
     else:
         logger.warning('Time step (%s) not yet foreseen. Exit. ' % step)
         return None
+
+######################################################################################
+#
+#   Purpose: return the machine address
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/07/09
+#   Inputs:
+#   Output: none
+#
+
+def get_machine_mac_address():
+
+    return ':'.join(re.findall('..', '%012x' % uuid.getnode()))
+

@@ -6,7 +6,6 @@
 #
 #   TODO-M.C.: optimize (replace loops)
 
-
 # source eStation2 base definitions
 import locals
 

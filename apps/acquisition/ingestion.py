@@ -1006,7 +1006,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         sds_meta.assign_mapset(mapset_id)
         sds_meta.assign_from_product(product['productcode'], subproducts[ii]['subproduct'], product['version'])
         sds_meta.assign_date(output_date_str)
-        sds_meta.assign_subdir_from_fulldir(output_directory)
+        sds_meta.assign_subdir_from_fullpath(output_directory)
         sds_meta.assign_comput_time_now()
         sds_meta.assign_input_files(in_files)
 
