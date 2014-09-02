@@ -64,7 +64,7 @@ def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex):
     level = 1
     maxlevel= len(re.findall("/",full_regex))
     toprint=''
-    get_list_matching_files_subdir_ftp(list_matches, remote_url, usr_pwd, base_dir, full_regex, level, maxlevel,'')
+    get_list_matching_files_subdir_ftp(list_matches, remote_url, usr_pwd, full_regex, level, maxlevel,'')
     for elem in list_matches:
         toprint+=elem+','
     logger.info(toprint)
@@ -72,7 +72,7 @@ def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex):
 
 #   Returns the list of objects(files or dirs) located in a remote subdir and
 #   matching 'regex' (single 'regex' - not tree structure). Can be called iteratively.
-def get_list_matching_files_subdir_ftp(list, remote_url, usr_pwd, base_dir, regex, level, max_level, sub_dir):
+def get_list_matching_files_subdir_ftp(list, remote_url, usr_pwd, regex, level, max_level, sub_dir):
 
     # split the regex
     tokens=regex.split('/')
@@ -85,17 +85,14 @@ def get_list_matching_files_subdir_ftp(list, remote_url, usr_pwd, base_dir, rege
         if re.match(regex_my_level,element) is not None:
             # Is it already the file ?
             if max_level == level:
-                print sub_dir
-                print element
                 #logger.info(element)
                 list.append(sub_dir+element)
             else:
                 # Enter the subdir
-                print sub_dir
                 new_level=level+1
                 new_sub_dir=sub_dir+element+'/'
                 new_remote_url=remote_url+'/'+element+'/'
-                get_list_matching_files_subdir_ftp(list, new_remote_url, usr_pwd, base_dir, regex, new_level, max_level, new_sub_dir)   
+                get_list_matching_files_subdir_ftp(list, new_remote_url, usr_pwd, regex, new_level, max_level, new_sub_dir)   
     return 0
    
 #   Target dir is created as 'tmpdir' if not passed
