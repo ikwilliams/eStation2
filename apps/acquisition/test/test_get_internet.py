@@ -7,22 +7,21 @@ import unittest
 
 class TestGetInternet(unittest.TestCase):
 
-    
+
     #   ---------------------------------------------------------------------------
     #   Test iteration on remote ftp (e.g. MODIS)
     #   ---------------------------------------------------------------------------
     def TestRemoteFtp_MODIS(self):
 
-        #check if the base_dir full_regex and remote_url starts with '/' and finish with '/' except full_regex
-        #base_dir='/Collection51/TIFF/'
-
+        # Retrieve a list of MODIS burndate file .. check only one present
         remote_url='ftp://ba1.geog.umd.edu'
-        full_regex='Collection51/TIFF/Win11/2011/MCD45monthly.A20.*burndate.tif.gz'
-
         usr_pwd='user:burnt_data'
+        full_regex   ='Collection51/TIFF/Win11/2011/MCD45monthly.A20.*burndate.tif.gz'
+        file_to_check='Collection51/TIFF/Win11/2011/MCD45monthly.A2011001.Win11.051.burndate.tif.gz'
+
         list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
-        logger.info('Returned list is: '+list[0])
-        self.assertEqual(1,1)
+
+        self.assertTrue(file_to_check in list)
 
     #   ---------------------------------------------------------------------------
     #   Test iteration on the filesystem
