@@ -236,7 +236,8 @@ def get_dataacquisitions(echo=False):
 #   WHERE p.product_type = 'Native'
 #   ORDER BY pc.order_index, productcode
 #
-def get_products(echo=False, activated=True):
+#def get_products(echo=False, activated=True):
+def get_products(echo=False):
     try:
         session = db.session
 
@@ -285,10 +286,12 @@ def get_products(echo=False, activated=True):
         s = s.alias('pl')
         pl = db.map(s, primary_key=[s.c.productID])
 
-        if activated or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
-            where = and_(pl.c.product_type == 'Native', pl.c.activated)
-        else:
-            where = and_(pl.c.product_type == 'Native', pl.c.activated != 't')
+        where = and_(pl.c.product_type == 'Native')
+
+        #if activated or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+        #    where = and_(pl.c.product_type == 'Native', pl.c.activated)
+        #else:
+        #    where = and_(pl.c.product_type == 'Native', pl.c.activated != 't')
 
         productslist = pl.filter(where).order_by(asc(pl.c.order_index), asc(pl.c.productcode)).all()
         #productslist.filter(where).order_by(asc(productslist.c.order_index), asc(productslist.c.productcode)).all()
