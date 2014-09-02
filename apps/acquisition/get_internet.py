@@ -18,6 +18,7 @@ import os
 import unittest
 import glob
 import re
+import pickle
 
 # Import eStation2 modules
 from lib.python import es_logging as log
@@ -35,6 +36,15 @@ tmpdir = tempfile.mkdtemp(prefix=__name__, dir=locals.es2globals['temp_dir'])
 #   ---------------------------------------------------------------------------
 #   Functions
 #   ---------------------------------------------------------------------------
+
+######################################################################################
+#   get_list_current_subdirs_ftp
+#   Purpose: read a remote ftp directory and return contents
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/09/01
+#   Inputs: output_dir, or list of dirs
+#   Output: list of dirs
+#
 
 def get_list_current_subdirs_ftp(remote_url, usr_pwd):
 
@@ -57,6 +67,17 @@ def get_list_current_subdirs_ftp(remote_url, usr_pwd):
     
     return current_list
 
+######################################################################################
+#   get_list_matching_files_dir_ftp
+#   Purpose: get the files matching a full_regex on a remote ftp
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/09/01
+#   Inputs: remote_url: ftp address (might incl. sub_dirs)
+#           usr_pwd: credentials (username:password)
+#           full_regex: re including subdirs (e.g. 'Collection51/TIFF/Win1[01]/201[1-3]/MCD45monthly.A20.*burndate.tif.gz'
+#   Output: list of matched files
+#
+
 def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex):
 
     # Check the arguments (remote_url must end with os.sep and full_regex should begin with os.sep)
@@ -65,38 +86,54 @@ def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex):
 
     # Get list from a remote ftp
     list_matches=[]
-    level = 1
-    maxlevel= len(re.findall("/",full_regex))
+    init_level = 1
+    get_list_matching_files_subdir_ftp(list_matches, remote_url, usr_pwd, full_regex, init_level, '')
+
+    # Debug
     toprint=''
-    get_list_matching_files_subdir_ftp(list_matches, remote_url, usr_pwd, full_regex, level, maxlevel,'')
     for elem in list_matches:
         toprint+=elem+','
     logger.info(toprint)
-    return list_matches 
+
+    return list_matches
+
+######################################################################################
+#   get_list_matching_files_subdir_ftp
+#   Purpose: return the list of matching files, or iterate the search
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/09/01
+#   Inputs: list_matches: list of matching files, find so far
+#           remote_url: ftp address (might incl. sub_dirs)
+#           usr_pwd: credentials (username:password)
+#           full_regex: re including subdirs (e.g. 'Collection51/TIFF/Win1[01]/201[1-3]/MCD45monthly.A20.*burndate.tif.gz'
+#           level: position in the full_regex tree (increasing from 1 ON .. )
+#           sub_dir: current subdir searched on the site (appended to remote_url)
+#
+#   Output: list of matched files (incremented)
+#
 
 #   Returns the list of objects(files or dirs) located in a remote subdir and
 #   matching 'regex' (single 'regex' - not tree structure). Can be called iteratively.
-def get_list_matching_files_subdir_ftp(list, remote_url, usr_pwd, regex, level, max_level, sub_dir):
+def get_list_matching_files_subdir_ftp(list, remote_url, usr_pwd, full_regex, level, sub_dir):
 
     # split the regex
-    tokens=regex.split('/')
-    regex_my_level=''
+    tokens=full_regex.split('/')
     # regex for this level
-    regex_my_level+=tokens[level]
-    #my_list=[]
+    regex_my_level=tokens[level]
+    max_level= len(re.findall("/",full_regex))
+
     my_list = get_list_current_subdirs_ftp(remote_url, usr_pwd)
     for element in my_list:
         if re.match(regex_my_level,element) is not None:
             # Is it already the file ?
             if max_level == level:
-                #logger.info(element)
                 list.append(sub_dir+element)
             else:
                 # Enter the subdir
                 new_level=level+1
                 new_sub_dir=sub_dir+element+'/'
                 new_remote_url=remote_url+'/'+element+'/'
-                get_list_matching_files_subdir_ftp(list, new_remote_url, usr_pwd, regex, new_level, max_level, new_sub_dir)   
+                get_list_matching_files_subdir_ftp(list, new_remote_url, usr_pwd, full_regex, new_level, new_sub_dir)
     return 0
    
 #   Target dir is created as 'tmpdir' if not passed
