@@ -59,7 +59,11 @@ def get_list_current_subdirs_ftp(remote_url, usr_pwd):
 
 def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex):
 
-    # Local implementation (filesystem, not http/ftp remote server)
+    # Check the arguments (remote_url must end with os.sep and full_regex should begin with os.sep)
+    remote_url=ensure_sep_present(remote_url,'end')
+    full_regex=ensure_sep_present(full_regex,'begin')
+
+    # Get list from a remote ftp
     list_matches=[]
     level = 1
     maxlevel= len(re.findall("/",full_regex))

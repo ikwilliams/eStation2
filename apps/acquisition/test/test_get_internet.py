@@ -11,34 +11,14 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #   Test iteration on remote ftp (e.g. MODIS)
     #   ---------------------------------------------------------------------------
-    def TestIterRemoteFtp(self):
+    def TestRemoteFtp_MODIS(self):
 
         #check if the base_dir full_regex and remote_url starts with '/' and finish with '/' except full_regex
-        base_dir='/Collection51/TIFF/'
-        if base_dir.startswith("/"):
-            base_dir=base_dir
-            if base_dir.endswith("/"):
-                base_dir=base_dir
-            else:
-                base_dir=base_dir+'/'                            
-        else:
-            base_dir='/'+base_dir
-            if base_dir.endswith("/"):
-                base_dir=base_dir
-            else:
-                base_dir=base_dir+'/'                            
-        #full_regex='/Collection51/TIFF/Win[0-2][0-9]/20.*/MCD45monthly.A20.*burndate.tif.gz'        
-        full_regex='/Collection51/TIFF/Win1[0-1]/201[1-2]/MCD45monthly.A20.*burndate.tif.gz'
-        if full_regex.startswith("/"):
-            full_regex=full_regex
-        else:
-            full_regex='/'+full_regex
+        #base_dir='/Collection51/TIFF/'
 
-        remote_url='ftp://ba1.geog.umd.edu/'
-        if remote_url.endswith("/"):
-            remote_url=remote_url
-        else:
-            remote_url=remote_url+'/'
+        remote_url='ftp://ba1.geog.umd.edu'
+        full_regex='Collection51/TIFF/Win11/2011/MCD45monthly.A20.*burndate.tif.gz'
+
         usr_pwd='user:burnt_data'
         list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
         logger.info('Returned list is: '+list[0])
