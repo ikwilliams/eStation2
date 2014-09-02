@@ -648,6 +648,25 @@ def check_output_dir(output_dir):
 
         logger.debug("Output directory %s already exists" % my_dir)
 
+######################################################################################
+#   ensure_sep_present
+#   Purpose: Check output directory exists, otherwise create it.
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/09/01
+#   Inputs: output_dir, or list of dirs
+#   Output: none
+#
+
+def ensure_sep_present(path, position):
+
+    if position=='begin':
+        if not path.startswith("/"):
+            path='/'+path
+    elif position=='end':
+        if not path.endswith("/"):
+            path=path+'/'
+
+    return path
 
 ######################################################################################
 #                            MISCELLANEOUS
