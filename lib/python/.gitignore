@@ -5,4 +5,3 @@
 *.tar
 tmp
 clean.sh
-image_proc
