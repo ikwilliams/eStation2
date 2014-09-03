@@ -67,6 +67,8 @@ def signal_handler(signal, frame):
 
 def drive_eumetcast():
 
+    my_info={'Number_files_on_PC1':200, 'Number_acquired_files':121, 'Date_of_Latest': '11-11-2010'}
+
     global processed_list
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
@@ -84,8 +86,11 @@ def drive_eumetcast():
         # TODO Jurvtk: Create the Ingest Server output directory if it doesn't exist!
         exit(1)
 
-    if not os.path.exists(processed_list_dir):
-        os.mkdir(processed_list_dir)
+    if not os.path.exists(processed_list_base_dir):
+        os.mkdir(processed_list_base_dir)
+
+    if not os.path.exists(processed_list_eum_dir):
+        os.mkdir(processed_list_eum_dir)
 
     logger.debug("Loading the processed file list.")
     if os.path.exists(processlist):
