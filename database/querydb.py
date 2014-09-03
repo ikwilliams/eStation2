@@ -737,3 +737,58 @@ def get_eumetcast_sources(echo=False):
         logger.error("get_eumetcast_sources: Database query error!\n -> {}".format(exceptionvalue))
         #raise Exception("get_ingestion: Database query error!\n ->%s" % exceptionvalue)
 
+######################################################################################
+#   get_active_internet_sources(echo=False)
+#   Purpose: Query the database to get the internet_id of all the active product INTERNET data sources.
+#            Mainly used in get_internet.py
+#   Author: Marco Clerici
+#   Date: 2014/09/03
+#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
+#
+#   Output: Return the internet of all the active product INTERNET data sources.
+def get_active_internet_sources(echo=False):
+    try:
+        session = db.session
+
+        es = session.query(db.internet_source).subquery()
+        pads = aliased(db.product_acquisition_data_source)
+
+        # The columns on the subquery "es" are accessible through an attribute called "c"
+        # e.g. es.c.filter_expression_jrc
+
+        internet_sources = session.query( pads,
+                                          es.c.internet_id,
+                                          es.c.defined_by ,
+                                          es.c.descriptive_name ,
+                                          es.c.description,
+                                          es.c.modified_by,
+                                          es.c.update_datetime,
+                                          es.c.url,
+                                          es.c.user_name,
+                                          es.c.password,
+                                          es.c.list,
+                                          es.c.period ,
+                                          es.c.scope ,
+                                          es.c.include_files_expression ,
+                                          es.c.exclude_files_expression,
+                                          es.c.status ,
+                                          es.c.pull_frequency ,
+                                          es.c.datasource_descr_id ).\
+            outerjoin(es, pads.data_source_id == es.c.internet_id).\
+            filter(and_(pads.type == 'INTERNET', pads.activated == True)).all()
+
+        if echo:
+            for row in internet_sources:
+                print row
+
+        return internet_sources
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_internet_sources: Database query error!\n -> {}".format(exceptionvalue))
+        #raise Exception("get_ingestion: Database query error!\n ->%s" % exceptionvalue)
+
+
