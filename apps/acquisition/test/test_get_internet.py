@@ -11,7 +11,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #   Test iteration on remote ftp (e.g. MODIS)
     #   ---------------------------------------------------------------------------
-    def TestRemoteFtp_MODIS(self):
+    def TestRemoteFtp_MODIS_BA_monthly(self):
 
         # Retrieve a list of MODIS burndate file .. check only one present
         remote_url='ftp://ba1.geog.umd.edu'
