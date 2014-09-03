@@ -41,9 +41,14 @@ base_tmp_dir = os.path.sep+'tmp'+os.path.sep+'eStation2'+os.path.sep
 eumetcast_files_dir = data_dir+'my_eumetcast_dir/'
 ingest_server_in_dir = data_dir+'my_data_ingest_dir/'
 
-processed_list_dir = base_tmp_dir + 'processed' +os.path.sep
-get_eumetcast_processed_list = processed_list_dir + 'get_eum_processed_list'
-poll_frequency = 2
+processed_list_base_dir = base_tmp_dir + 'get_lists' +os.path.sep
+processed_list_eum_dir = processed_list_base_dir+'get_eumetcast'+os.path.sep
+processed_list_int_dir = processed_list_base_dir+'get_internet'+os.path.sep
+
+get_eumetcast_processed_list = processed_list_eum_dir+'get_eum_processed_list'
+get_internet_processed_list_prefix = processed_list_int_dir + 'get_internet_processed_list_'
+
+poll_frequency = 5
 
 #umask 0002
 # Python libs paths
