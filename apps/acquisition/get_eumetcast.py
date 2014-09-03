@@ -115,17 +115,20 @@ def drive_eumetcast():
             for eumetcast_source in eumetcast_sources_list:
                 logger.debug("Create current list of file to process for trigger %s.", eumetcast_source.eumetcast_id)
                 current_list = find_files(input_dir, eumetcast_source.filter_expression_jrc)
+                logger.debug("Number of files currently on PC1 for trigger %s is %i", eumetcast_source.eumetcast_id, len(current_list))
                 if len(current_list) > 0:
                     myprocesslst = match_curlst(processed_list, eumetcast_source.filter_expression_jrc)
+                    logger.debug("Number of files already copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(myprocesslst))
                     listtoprocess = []
-                    listtoprocess = set(current_list).symmetric_difference(set(myprocesslst))
+                    listtoprocess = set(current_list) - set(myprocesslst)
+                    logger.debug("Number of files to be copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(listtoprocess))
                     if listtoprocess != set([]):
                         logger.debug("Loop on the found files.")
                         for filename in list(listtoprocess):
                             if os.path.isfile(os.path.join(input_dir, filename)):
                                 if os.stat(os.path.join(input_dir, filename)).st_mtime < int(time.time()):
                                     logger.debug("Processing file: "+os.path.basename(filename))
-                                    if commands.getstatusoutput("cp " + filename + " " + output_dir + '/' + os.path.basename(filename))[0] == 0:
+                                    if commands.getstatusoutput("cp " + filename + " " + output_dir + os.sep + os.path.basename(filename))[0] == 0:
                                         logger.info("File %s copied.", filename)
                                         processed_list.append(filename)
                                     else:
