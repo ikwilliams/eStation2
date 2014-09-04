@@ -708,6 +708,26 @@ def restore_obj_from_pickle(object, filename):
 
     return object
 
+#  Load an object from a file (pickle serialization), if the file exist
+
+def load_obj_from_pickle(filename):
+
+    object = None
+
+    # Restore/Create Info
+    if os.path.exists(filename):
+        try:
+            dump_file_info = open(filename, 'r')
+            object = pickle.load(dump_file_info)
+
+        except:
+            logger.warning("Dump file %s can't be loaded, the file will be removed.", filename)
+    else:
+        # Raise warning
+        logger.warning("Dump file %s does not exist.", filename)
+
+    return object
+
 
 ######################################################################################
 #   modis_latlon_to_hv_tile
