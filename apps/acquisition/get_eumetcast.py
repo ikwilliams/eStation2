@@ -51,6 +51,12 @@ def match_curlst(lst, pattern):
             currentlst.append(entry)
     return currentlst
 
+def get_eumetcast_info(eumetcast_id):
+
+    filename = get_eumetcast_processed_list_prefix+str(eumetcast_id)+'.info'
+    info = load_obj_from_pickle(filename)
+    return info
+
 #   It will ensure backup of the ongoing list
 def signal_handler(signal, frame):
 
