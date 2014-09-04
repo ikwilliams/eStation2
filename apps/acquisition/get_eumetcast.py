@@ -23,6 +23,7 @@ import database.querydb as querydb
 from lib.python.mapset import *
 from lib.python.functions import *
 from lib.python.metadata import *
+import datetime
 
 logger = log.my_logger(__name__)
 
@@ -30,10 +31,6 @@ logger = log.my_logger(__name__)
 input_dir = eumetcast_files_dir
 output_dir = ingest_server_in_dir
 user_def_sleep = poll_frequency
-processlist = get_eumetcast_processed_list
-
-# Global argument
-processed_list = []
 
 echo_query = False
 
@@ -54,22 +51,26 @@ def match_curlst(lst, pattern):
             currentlst.append(entry)
     return currentlst
 
+#   It will ensure backup of the ongoing list
 def signal_handler(signal, frame):
-    global processed_list
-    process_files = open(processlist, 'wb')
+
+    global processed_list_filename, processed_list
+    global processed_info_filename, processed_info
+
     logger.info("Len of proc list is %i" % len(processed_list))
 
-    pickle.dump(processed_list, process_files)
-    process_files.close()
+    dump_obj_to_pickle(processed_list, processed_list_filename)
+    dump_obj_to_pickle(processed_info, processed_info_filename)
+
     print 'Exit ' + sys.argv[0]
     logger.info("Stopping the service.")
     sys.exit(0)
 
 def drive_eumetcast():
 
-    my_info={'Number_files_on_PC1':200, 'Number_acquired_files':121, 'Date_of_Latest': '11-11-2010'}
+    global processed_list_filename, processed_list
+    global processed_info_filename, processed_info
 
-    global processed_list
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGILL, signal_handler)
@@ -86,25 +87,14 @@ def drive_eumetcast():
         # TODO Jurvtk: Create the Ingest Server output directory if it doesn't exist!
         exit(1)
 
+    if not os.path.exists(base_tmp_dir):
+        os.mkdir(base_tmp_dir)
+
     if not os.path.exists(processed_list_base_dir):
         os.mkdir(processed_list_base_dir)
 
     if not os.path.exists(processed_list_eum_dir):
         os.mkdir(processed_list_eum_dir)
-
-    logger.debug("Loading the processed file list.")
-    if os.path.exists(processlist):
-        try:
-            process_file = open(processlist, 'r')
-            processed_list = pickle.load(process_file)
-            logger.debug("Processed file list loaded.")
-        except:
-            logger.warning("Processed file can't be loaded, the file will be removed.")
-            os.remove(processlist)
-    else:
-        # Create an empty file in the tmp dir
-        open(processlist, 'a').close()
-
 
     while 1:
         try:
@@ -114,47 +104,75 @@ def drive_eumetcast():
             logger.warning("Sleep time not defined. Setting to default=1min. Continue.")
             time_sleep = 60
 
-        try:
-            logger.debug("Reading active EUMETCAST data sources from database")
-            eumetcast_sources_list = querydb.get_eumetcast_sources(echo=echo_query)
-            for eumetcast_source in eumetcast_sources_list:
-                logger.debug("Create current list of file to process for trigger %s.", eumetcast_source.eumetcast_id)
-                current_list = find_files(input_dir, eumetcast_source.filter_expression_jrc)
-                logger.debug("Number of files currently on PC1 for trigger %s is %i", eumetcast_source.eumetcast_id, len(current_list))
-                if len(current_list) > 0:
-                    myprocesslst = match_curlst(processed_list, eumetcast_source.filter_expression_jrc)
-                    logger.debug("Number of files already copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(myprocesslst))
-                    listtoprocess = []
-                    listtoprocess = set(current_list) - set(myprocesslst)
-                    logger.debug("Number of files to be copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(listtoprocess))
-                    if listtoprocess != set([]):
-                        logger.debug("Loop on the found files.")
-                        for filename in list(listtoprocess):
-                            if os.path.isfile(os.path.join(input_dir, filename)):
-                                if os.stat(os.path.join(input_dir, filename)).st_mtime < int(time.time()):
-                                    logger.debug("Processing file: "+os.path.basename(filename))
-                                    if commands.getstatusoutput("cp " + filename + " " + output_dir + os.sep + os.path.basename(filename))[0] == 0:
-                                        logger.info("File %s copied.", filename)
-                                        processed_list.append(filename)
-                                    else:
-                                        logger.warning("Problem while copying file: %s.", filename)
-                            else:
-                                logger.error("File %s removed by the system before being processed.", filename)
-                    else:
-                        logger.debug("Nothing to process - go to next trigger.")
-                        pass
+        # try:
+        logger.debug("Reading active EUMETCAST data sources from database")
+        eumetcast_sources_list = querydb.get_eumetcast_sources(echo=echo_query)
+        logger.debug("N. %i active EUMETCAST data sources found", len(eumetcast_sources_list))
+
+        # Loop over active triggers
+        for eumetcast_source in eumetcast_sources_list:
+
+            logger.debug("Processing eumetcast source  %s.", eumetcast_source.eumetcast_id)
+
+            processed_list_filename = get_eumetcast_processed_list_prefix+str(eumetcast_source.eumetcast_id)+'.list'
+            processed_info_filename = get_eumetcast_processed_list_prefix+str(eumetcast_source.eumetcast_id)+'.info'
+
+            # Create objects for list and info
+            processed_list = []
+            processed_info = {'lenght_proc_list': 0,
+                              'time_latest_exec': datetime.datetime.now(),
+                              'time_latest_copy': datetime.datetime.now()}
+
+            logger.debug("Loading the processed file list for source %s ", eumetcast_source.eumetcast_id)
+
+            # Restore/Create List
+            processed_list=restore_obj_from_pickle(processed_list, processed_list_filename)
+            # Restore/Create Info
+            processed_info=restore_obj_from_pickle(processed_info, processed_info_filename)
+            # Update processing time (in case it is restored)
+            processed_info['time_latest_exec']=datetime.datetime.now()
+
+            logger.debug("Create current list of file to process for trigger %s.", eumetcast_source.eumetcast_id)
+            current_list = find_files(input_dir, eumetcast_source.filter_expression_jrc)
+            logger.debug("Number of files currently on PC1 for trigger %s is %i", eumetcast_source.eumetcast_id, len(current_list))
+            if len(current_list) > 0:
+
+                logger.debug("Number of files already copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(processed_list))
+                listtoprocess = []
+                listtoprocess = set(current_list) - set(processed_list)
+                logger.debug("Number of files to be copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(listtoprocess))
+                if listtoprocess != set([]):
+                    logger.debug("Loop on the found files.")
+                    for filename in list(listtoprocess):
+                        if os.path.isfile(os.path.join(input_dir, filename)):
+                            if os.stat(os.path.join(input_dir, filename)).st_mtime < int(time.time()):
+                                logger.debug("Processing file: "+os.path.basename(filename))
+                                if commands.getstatusoutput("cp " + filename + " " + output_dir + os.sep + os.path.basename(filename))[0] == 0:
+                                    logger.info("File %s copied.", filename)
+                                    processed_list.append(filename)
+                                    # Update processing info
+                                    processed_info['time_latest_copy']=datetime.datetime.now()
+                                    processed_info['lenght_proc_list']=len(processed_list)
+                                else:
+                                    logger.warning("Problem while copying file: %s.", filename)
+                        else:
+                            logger.error("File %s removed by the system before being processed.", filename)
+                else:
+                    logger.debug("Nothing to process - go to next trigger.")
+                    pass
 
             for infile in processed_list:
-                if not os.path.exists(infile):
-                    processed_list.remove(infile)
+                   if not os.path.exists(infile):
+                       processed_list.remove(infile)
 
-            process_file = open(processlist, 'wb')
-            pickle.dump(processed_list, process_file)
-            process_file.close()
-            sleep(float(user_def_sleep))
-        except Exception, e:
-            logger.fatal(str(e))
-            exit(1)
+            dump_obj_to_pickle(processed_list, processed_list_filename)
+            dump_obj_to_pickle(processed_info, processed_info_filename)
+
+        sleep(float(user_def_sleep))
+
+        # except Exception, e:
+        #     logger.fatal(str(e))
+        #     exit(1)
     exit(0)
 
 
