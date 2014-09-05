@@ -9,6 +9,7 @@ from __future__ import absolute_import
 import datetime
 import os
 import glob
+import sys
 
 from lib.python import functions
 from database import querydb
@@ -201,6 +202,37 @@ class Dataset(object):
             "to_date": interval[1],
             "interval_type": interval[2],
             }
+    def get_dataset_normalized_info(self, from_date=None, to_date=None):
+
+        intervals =[Interval(**self._extract_kwargs(interval)) for interval in self.find_intervals()]
+        tot_time_extension = intervals[-1].to_date-intervals[0].from_date
+
+        segment_list=[]
+        total_duration = 0.0
+        # Assign first as duration in secs (and cumulate to total)
+        for ii in range(0,len(intervals)):
+            if ii is 0:
+                delta = intervals[1].from_date - intervals[0].from_date
+            else:
+                delta = intervals[ii].to_date - intervals[ii-1].to_date
+
+            segm_duration = delta.total_seconds()
+
+            segment = {'from_date':intervals[ii].from_date,
+                       'to_date':intervals[ii].to_date,
+                       'type': intervals[ii].interval_type,
+                       'perc_duration':segm_duration}
+
+            total_duration+=segm_duration
+            segment_list.append(segment)
+        total_perc = 0
+
+        for ii in range(0,len(intervals)):
+            perc_duration = segment_list[ii]['perc_duration']/total_duration*100.
+            segment_list[ii]['perc_duration'] = perc_duration
+            total_perc+=perc_duration
+
+        return segment_list
 
     @property
     def intervals(self):
