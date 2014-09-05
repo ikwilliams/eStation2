@@ -168,10 +168,12 @@ class Dataset(object):
         self._db_product = querydb.get_product_out_info(**kwargs)
         if self._db_product is None:
             raise NoProductFound(kwargs)
+        # M.C. 03.09.2014 Modified to _db_product[0] !! otherwise goes in error
         self._path = functions.set_path_sub_directory(product_code, sub_product_code,
-                self._db_product.product_type, version, mapset)
+                self._db_product[0].product_type, version, mapset)
         self._fullpath = os.path.join(locals.es2globals['data_dir'], self._path)
-        self._db_frequency = querydb.db.frequency.get(self._db_product.frequency_id)
+        # M.C. 03.09.2014 Modified to _db_product[0] !! otherwise goes in error
+        self._db_frequency = querydb.db.frequency.get(self._db_product[0].frequency_id)
         if self._db_frequency is None:
             raise NoFrequencyFound(self._db_product)
         self._frequency = Frequency(value=self._db_frequency.frequency, 
@@ -180,6 +182,9 @@ class Dataset(object):
 
     def get_filenames(self):
         return glob.glob(os.path.join(self._fullpath, "*"))
+
+    def get_number_files(self):
+        return len(self.get_filenames())
 
     def get_basenames(self):
         return list(os.path.basename(filename) for filename in self.get_filenames())

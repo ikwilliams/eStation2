@@ -739,200 +739,58 @@ def get_eumetcast_sources(echo=False):
         logger.error("get_eumetcast_sources: Database query error!\n -> {}".format(exceptionvalue))
         #raise Exception("get_ingestion: Database query error!\n ->%s" % exceptionvalue)
 
-# ######################################################################################
-# #   get_processing_product(allrecs=False, echo=False, productcode_in='', version_in='')
-# #   Purpose: Query the database to get the list of all product processing definitions or one specific
-# #            product ingestion definition at product level from the table processing.
-# #   Author: Marco Clerici and Jurriaan van 't Klooster
-# #   Date: 2014/06/04
-# #   Input: allrecs          - If True return all products. Default=False
-# #          echo             - If True echo the query result in the console for debugging purposes. Default=False
-# #          productcode      - The productcode of the specific product ingestion definition requested. Default=''
-# #          version          - The version of the specific product ingestion definition requested. Default='undefined'
-# #   Output: Return the productcode, version and the list of dependency products of all [or a specific product ingestion definition]
-# #           from the table processing.
-# #   TODO-M.C.: complete the functions (Jur)
-# def get_processing_product(allrecs=False, echo=False, productcode='', version='undefined'):
-#     # try:
-#     #     session = db.session
-#     #     ingest = aliased(db.ingestion)
-#     #
-#     #     # Get all defined ingestion definitions with the amount of subproducts per product/version (count).
-#     #     ingestion_product = session.query(ingest.productcode,
-#     #                                       ingest.version,
-#     #                                       func.count(ingest.subproductcode), ). \
-#     #         group_by(ingest.productcode, ingest.version)
-#     #
-#         active_processing = []
-#         active_1 = {"productcode": "fewsnet_rfe",
-#                     "version": "undefined",
-#                     "dep_product_code_1": "fewsnet_rfe",
-#                     "dep_product_version_1": "undefined"
-#                     }
-#         active_processing.append(active_1)
-#         active_2 = {"productcode": "vgt_ndvi",
-#                     "version": "undefined",
-#                     "dep_product_code_1": "vgt_ndvi",
-#                     "dep_product_version_1": "undefined"
-#                     }
-#         active_processing.append(active_2)
-#         active_3 = {"productcode": "vgt_vhi",
-#                     "version": "undefined",
-#                     "dep_product_code_1": "vgt_ndvi",
-#                     "dep_product_version_1": "undefined",
-#                     "dep_product_code_2": "fewsnet_rfe",
-#                     "dep_product_version_2": "undefined"
-#                     }
-#         active_processing.append(active_3)
+######################################################################################
+#   get_active_internet_sources(echo=False)
+#   Purpose: Query the database to get the internet_id of all the active product INTERNET data sources.
+#            Mainly used in get_internet.py
+#   Author: Marco Clerici
+#   Date: 2014/09/03
+#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
 #
-#
-#     #     if allrecs:
-#     #         ingestion_product = ingestion_product.filter(ingest.activated == True)
-#     #
-#     #         if ingestion_product.count() >= 1:      # At least 1 product ingestion definition has to exist.
-#     #             active_ingestions = ingestion_product.all()
-#     #             if echo:
-#     #                 for row in active_ingestions:
-#     #                     print row
-#     #     else:
-#     #         where = and_(ingest.productcode == productcode,
-#     #                      ingest.activated == True,
-#     #                      ingest.version == version)
-#     #         if ingestion_product.filter(where).count() == 1:    # Exactly 1 product ingestion definition has to exist.
-#     #             active_ingestions = ingestion_product.filter(where).one()
-#     #             if echo:
-#     #                 print active_ingestions
-#
-#         return active_processing
-#     # except:
-#     #     exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-#     #     if echo:
-#     #         print traceback.format_exc()
-#     #     # Exit the script and print an error telling what happened.
-#     #     logger.error("get_processing_product: Database query error!\n -> {}".format(exceptionvalue))
-#
-# ######################################################################################
-# #   get_processing_product_subproducts(allrecs=False, echo=False, productcode_in='', version_in='')
-# #   Purpose: Query the database to get the list of all sub-product derived for a specific product.
-# #   Author: Marco Clerici and Jurriaan van 't Klooster
-# #   Date: 2014/06/04
-# #   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
-# #          productcode      - The productcode of the specific product ingestion definition requested. Default=''
-# #          version          - The version of the specific product ingestion definition requested. Default='undefined'
-# #   Output: Return the list of productcode, subproductcode, version and the list of dependency products of all subproducts
-# #   TODO-M.C.: complete the functions (Jur)
-#
-# def get_processing_product_subproducts(False, echo=False, productcode='', version='undefined'):
-#     # try:
-#     #     session = db.session
-#     #     ingest = aliased(db.ingestion)
-#     #
-#     #     # Get all defined ingestion definitions with the amount of subproducts per product/version (count).
-#     #     ingestion_product = session.query(ingest.productcode,
-#     #                                       ingest.version,
-#     #                                       func.count(ingest.subproductcode), ). \
-#     #         group_by(ingest.productcode, ingest.version)
-#     #
-#         active_processing_subproducts = []
-#
-#         # 10d statistics
-#         active_1 = {"product_code": "fewsnet_rfe",
-#                     "subproduct_code": "10dmax",
-#                     #"version": "undefined",
-#                     "dep_product_code_1": "fewsnet_rfe",
-#                     "dep_subproduct_code_1": "rfe"
-#                     #"dep_product_version_1": "undefined"
-#                     }
-#         active_processing_subproducts.append(active_1)
-#         active_2 = {"product_code": "fewsnet_rfe",
-#                     "subproduct_code": "10dmin",
-#                     #"version": "undefined",
-#                     "dep_product_code_1": "fewsnet_rfe",
-#                     "dep_subproduct_code_1": "rfe"
-#                     #"dep_product_version_1": "undefined"
-#                     }
-#         active_processing_subproducts.append(active_2)
-#         active_3 = {"product_code": "fewsnet_rfe",
-#                     "subproduct_code": "10dstd",
-#                     #"version": "undefined",
-#                     "dep_product_code_1": "fewsnet_rfe",
-#                     "dep_subproduct_code_1": "rfe"
-#                     #"dep_product_version_1": "undefined"
-#                     }
-#         active_processing_subproducts.append(active_3)
-#         active_4 = {"product_code": "fewsnet_rfe",
-#                     "subproduct_code": "10davg",
-#                     #"version": "undefined",
-#                     "dep_product_code_1": "fewsnet_rfe",
-#                     "dep_subproduct_code_1": "rfe"
-#                     #"dep_product_version_1": "undefined"
-#                     }
-#         active_processing_subproducts.append(active_4)
-#         active_5 = {"product_code": "fewsnet_rfe",
-#                     "subproduct_code": "10dmed",
-#                     #"version": "undefined",
-#                     "dep_product_code_1": "fewsnet_rfe",
-#                     "dep_subproduct_code_1": "rfe"
-#                     #"dep_product_version_1": "undefined"
-#                     }
-#         active_processing_subproducts.append(active_5)
-#
-#         # 10d anomalies
-#         active_6 = {"product_code": "fewsnet_rfe",
-#                     "subproduct_code": "10ddiff",
-#                     #"version": "undefined",
-#                     "dep_product_code_1": "fewsnet_rfe",
-#                     "dep_subproduct_code_1": "rfe",
-#                     "dep_product_code_2": "fewsnet_rfe",
-#                     "dep_subproduct_code_2": "10davg"
-#                     #"dep_product_version_1": "undefined"
-#                     }
-#         active_processing_subproducts.append(active_6)
-#         active_7 = {"product_code": "fewsnet_rfe",
-#                     "subproduct_code": "10dperc",
-#                     #"version": "undefined",
-#                     "dep_product_code_1": "fewsnet_rfe",
-#                     "dep_subproduct_code_1": "rfe",
-#                     "dep_product_code_2": "fewsnet_rfe",
-#                     "dep_subproduct_code_2": "10davg"
-#                     #"dep_product_version_1": "undefined"
-#                     }
-#         active_processing_subproducts.append(active_7)
-#         active_8 = {"product_code": "fewsnet_rfe",
-#                     "subproduct_code": "10dnpcum",
-#                     #"version": "undefined",
-#                     "dep_product_code_1": "fewsnet_rfe",
-#                     "dep_subproduct_code_1": "rfe",
-#                     "dep_product_code_2": "fewsnet_rfe",
-#                     "dep_subproduct_code_2": "10dmax",
-#                     "dep_product_code_3": "fewsnet_rfe",
-#                     "dep_subproduct_code_3": "10dmin"
-#                     #"dep_product_version_1": "undefined"
-#                     }
-#         active_processing_subproducts.append(active_8)
-#
-#
-#     #     if allrecs:
-#     #         ingestion_product = ingestion_product.filter(ingest.activated == True)
-#     #
-#     #         if ingestion_product.count() >= 1:      # At least 1 product ingestion definition has to exist.
-#     #             active_ingestions = ingestion_product.all()
-#     #             if echo:
-#     #                 for row in active_ingestions:
-#     #                     print row
-#     #     else:
-#     #         where = and_(ingest.productcode == productcode,
-#     #                      ingest.activated == True,
-#     #                      ingest.version == version)
-#     #         if ingestion_product.filter(where).count() == 1:    # Exactly 1 product ingestion definition has to exist.
-#     #             active_ingestions = ingestion_product.filter(where).one()
-#     #             if echo:
-#     #                 print active_ingestions
-#
-#         return active_processing
-#     # except:
-#     #     exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-#     #     if echo:
-#     #         print traceback.format_exc()
-#     #     # Exit the script and print an error telling what happened.
-#     #     logger.error("get_processing_product: Database query error!\n -> {}".format(exceptionvalue))
+#   Output: Return the internet of all the active product INTERNET data sources.
+def get_active_internet_sources(echo=False):
+    try:
+        session = db.session
+
+        es = session.query(db.internet_source).subquery()
+        pads = aliased(db.product_acquisition_data_source)
+
+        # The columns on the subquery "es" are accessible through an attribute called "c"
+        # e.g. es.c.filter_expression_jrc
+
+        internet_sources = session.query( pads,
+                                          es.c.internet_id,
+                                          es.c.defined_by ,
+                                          es.c.descriptive_name ,
+                                          es.c.description,
+                                          es.c.modified_by,
+                                          es.c.update_datetime,
+                                          es.c.url,
+                                          es.c.user_name,
+                                          es.c.password,
+                                          es.c.list,
+                                          es.c.period ,
+                                          es.c.scope ,
+                                          es.c.include_files_expression ,
+                                          es.c.exclude_files_expression,
+                                          es.c.status ,
+                                          es.c.pull_frequency ,
+                                          es.c.datasource_descr_id ).\
+            outerjoin(es, pads.data_source_id == es.c.internet_id).\
+            filter(and_(pads.type == 'INTERNET', pads.activated == True)).all()
+
+        if echo:
+            for row in internet_sources:
+                print row
+
+        return internet_sources
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_internet_sources: Database query error!\n -> {}".format(exceptionvalue))
+        #raise Exception("get_ingestion: Database query error!\n ->%s" % exceptionvalue)
+
+
