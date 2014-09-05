@@ -10,7 +10,7 @@ from __future__ import absolute_import
 
 import unittest
 import datetime
-
+import sys
 from ..helpers import INTERVAL_TYPE
 from ..datasets import Dataset
 from ..exceptions import (WrongDateType, NoProductFound )
@@ -89,3 +89,13 @@ class TestDatasets(unittest.TestCase):
         dataset.get_filenames = lambda: self.files_dekad
         number = dataset.get_number_files()
         self.assertEquals(number, number)
+
+    def test_normalized_info(self):
+        kwargs = self.kwargs.copy()
+        kwargs.update({'to_date': datetime.date(2014, 12, 31)})
+        dataset = Dataset(**kwargs)
+        dataset.get_filenames = lambda: self.files_dekad
+        segments = dataset.get_dataset_normalized_info()
+        total=0
+        for segment in segments: total+=segment['perc_duration']
+        self.assertEquals(int(total), 100)
