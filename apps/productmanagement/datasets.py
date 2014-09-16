@@ -167,14 +167,17 @@ class Dataset(object):
         self.from_date = from_date or None
         self.to_date = to_date or datetime.date.today()
         self._db_product = querydb.get_product_out_info(**kwargs)
-        if self._db_product is None:
+        if self._db_product is None or self._db_product==[]:
             raise NoProductFound(kwargs)
-        # M.C. 03.09.2014 Modified to _db_product[0] !! otherwise goes in error
+        if isinstance(self._db_product,list):
+            my_db_products=self._db_product[0]
+        else:
+            my_db_products=self._db_product
+
         self._path = functions.set_path_sub_directory(product_code, sub_product_code,
-                self._db_product[0].product_type, version, mapset)
+                my_db_products.product_type, version, mapset)
         self._fullpath = os.path.join(locals.es2globals['data_dir'], self._path)
-        # M.C. 03.09.2014 Modified to _db_product[0] !! otherwise goes in error
-        self._db_frequency = querydb.db.frequency.get(self._db_product[0].frequency_id)
+        self._db_frequency = querydb.db.frequency.get(my_db_products.frequency_id)
         if self._db_frequency is None:
             raise NoFrequencyFound(self._db_product)
         self._frequency = Frequency(value=self._db_frequency.frequency, 
