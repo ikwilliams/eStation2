@@ -97,5 +97,6 @@ class TestDatasets(unittest.TestCase):
         dataset.get_filenames = lambda: self.files_dekad
         segments = dataset.get_dataset_normalized_info()
         total=0
+        print segments
         for segment in segments: total+=segment['perc_duration']
         self.assertEquals(int(total), 100)
