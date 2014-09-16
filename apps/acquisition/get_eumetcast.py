@@ -57,7 +57,13 @@ def get_eumetcast_info(eumetcast_id):
     info = load_obj_from_pickle(filename)
     return info
 
-#   It will ensure backup of the ongoing list
+######################################################################################
+#   signal_handler
+#   Purpose: properly terminate the service, in case of interruption (copied from old get_eumetcast)
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/09/01
+#   Inputs: none
+
 def signal_handler(signal, frame):
 
     global processed_list_filename, processed_list
