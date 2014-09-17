@@ -77,12 +77,12 @@ class ProductAcquisition:
 
     def GET(self, params):
         #return web.ctx
-        #getparams = web.input()
+        getparams = web.input()
         #activated = True
-        #if getparams.activated:
-        #    activated = getparams.activated
-        #products = querydb.get_products(echo=False, activated=getparams.activated)
-        products = querydb.get_products(echo=False)
+        if getparams.activated:
+            activated = getparams.activated
+        products = querydb.get_products(echo=False, activated=getparams.activated)
+        #products = querydb.get_products(echo=False)
         return products
 
 

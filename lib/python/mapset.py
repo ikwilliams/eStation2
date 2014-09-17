@@ -11,7 +11,8 @@
 import locals
 
 # Import eStation lib modules
-import database.querydb as querydb
+#import database.querydb as querydb
+from database.querydb import *
 
 # Import third-party modules
 from osgeo.gdalconst import *
