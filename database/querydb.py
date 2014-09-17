@@ -115,6 +115,7 @@ def get_ingestions(echo=False):
         #                            i.activated).order_by(desc(i.productcode)).first()
 
         i = db.ingestion._table
+        m = db.mapset._table
         s = select([func.CONCAT(i.c.productcode, '_', i.c.version).label('productID'),
                     i.c.productcode,
                     i.c.subproductcode,
@@ -122,7 +123,8 @@ def get_ingestions(echo=False):
                     i.c.mapsetcode,
                     i.c.defined_by,
                     func.CONCAT('tristate', ' chart widget').label('completeness'),
-                    i.c.activated], from_obj=[i])
+                    i.c.activated,
+                    m.c.descriptive_name.label('mapsetname')]).select_from(i.outerjoin(m, i.c.mapsetcode == m.c.mapsetcode))
 
         s = s.alias('ingest')
         i = db.map(s, primary_key=[s.c.productID, i.c.subproductcode, i.c.mapsetcode])

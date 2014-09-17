@@ -9,6 +9,7 @@ from __future__ import absolute_import
 import datetime
 import os
 import glob
+import sys
 
 from lib.python import functions
 from database import querydb
@@ -166,14 +167,17 @@ class Dataset(object):
         self.from_date = from_date or None
         self.to_date = to_date or datetime.date.today()
         self._db_product = querydb.get_product_out_info(**kwargs)
-        if self._db_product is None:
+        if self._db_product is None or self._db_product==[]:
             raise NoProductFound(kwargs)
-        # M.C. 03.09.2014 Modified to _db_product[0] !! otherwise goes in error
+        if isinstance(self._db_product,list):
+            my_db_products=self._db_product[0]
+        else:
+            my_db_products=self._db_product
+
         self._path = functions.set_path_sub_directory(product_code, sub_product_code,
-                self._db_product[0].product_type, version, mapset)
+                my_db_products.product_type, version, mapset)
         self._fullpath = os.path.join(locals.es2globals['data_dir'], self._path)
-        # M.C. 03.09.2014 Modified to _db_product[0] !! otherwise goes in error
-        self._db_frequency = querydb.db.frequency.get(self._db_product[0].frequency_id)
+        self._db_frequency = querydb.db.frequency.get(my_db_products.frequency_id)
         if self._db_frequency is None:
             raise NoFrequencyFound(self._db_product)
         self._frequency = Frequency(value=self._db_frequency.frequency, 
@@ -201,6 +205,37 @@ class Dataset(object):
             "to_date": interval[1],
             "interval_type": interval[2],
             }
+    def get_dataset_normalized_info(self, from_date=None, to_date=None):
+
+        intervals =[Interval(**self._extract_kwargs(interval)) for interval in self.find_intervals()]
+        tot_time_extension = intervals[-1].to_date-intervals[0].from_date
+
+        segment_list=[]
+        total_duration = 0.0
+        # Assign first as duration in secs (and cumulate to total)
+        for ii in range(0,len(intervals)):
+            if ii is 0:
+                delta = intervals[1].from_date - intervals[0].from_date
+            else:
+                delta = intervals[ii].to_date - intervals[ii-1].to_date
+
+            segm_duration = delta.total_seconds()
+
+            segment = {'from_date':intervals[ii].from_date,
+                       'to_date':intervals[ii].to_date,
+                       'type': intervals[ii].interval_type,
+                       'perc_duration':segm_duration}
+
+            total_duration+=segm_duration
+            segment_list.append(segment)
+        total_perc = 0
+
+        for ii in range(0,len(intervals)):
+            perc_duration = segment_list[ii]['perc_duration']/total_duration*100.
+            segment_list[ii]['perc_duration'] = perc_duration
+            total_perc+=perc_duration
+
+        return segment_list
 
     @property
     def intervals(self):

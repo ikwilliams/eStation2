@@ -26,6 +26,7 @@ import re
 import resource
 from datetime import date
 import uuid
+import pickle
 
 # Import eStation2 modules
 from lib.python import es_logging as log
@@ -678,6 +679,55 @@ def mem_usage(point=""):
     usage = resource.getrusage(resource.RUSAGE_SELF)
     return '''%s: usertime=%s systime=%s mem=%s mb
            ''' % (point, usage[0], usage[1], (usage[2]*resource.getpagesize())/1000000.0)
+
+#  Dump an object info a file (pickle serialization)
+def dump_obj_to_pickle(object, filename):
+
+    dump_file = open(filename, 'wb')
+    pickle.dump(object, dump_file)
+    dump_file.close()
+
+#  Restore an object from a file (pickle serialization), if the file exist
+#  If file does not exist, create it empty
+#  If file cannot be loaded, delete it
+
+def restore_obj_from_pickle(object, filename):
+
+    # Restore/Create Info
+    if os.path.exists(filename):
+        try:
+            dump_file_info = open(filename, 'r')
+            tmp_object = pickle.load(dump_file_info)
+            logger.debug("Dump file info loaded from %s.", filename)
+            object=tmp_object
+        except:
+            logger.warning("Dump file %s can't be loaded, the file will be removed.", filename)
+            os.remove(filename)
+    else:
+        # Create an empty file in the tmp dir
+        open(filename, 'a').close()
+
+    return object
+
+#  Load an object from a file (pickle serialization), if the file exist
+
+def load_obj_from_pickle(filename):
+
+    object = None
+
+    # Restore/Create Info
+    if os.path.exists(filename):
+        try:
+            dump_file_info = open(filename, 'r')
+            object = pickle.load(dump_file_info)
+
+        except:
+            logger.warning("Dump file %s can't be loaded, the file will be removed.", filename)
+    else:
+        # Raise warning
+        logger.warning("Dump file %s does not exist.", filename)
+
+    return object
 
 
 ######################################################################################

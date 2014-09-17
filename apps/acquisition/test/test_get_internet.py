@@ -1,12 +1,19 @@
 
 
 
+#from apps.acquisition.get_internet import *
 from apps.acquisition.get_internet import *
+from apps.acquisition.get_eumetcast import *
+
 import unittest
 
 
 class TestGetInternet(unittest.TestCase):
 
+    def TestGetInfo(self):
+
+        eum_id = 'EO:EUM:DAT:MSG:LST-SEVIRI'
+        info = get_eumetcast_info(eum_id)
 
     #   ---------------------------------------------------------------------------
     #   Test iteration on remote ftp (e.g. MODIS)
@@ -22,19 +29,6 @@ class TestGetInternet(unittest.TestCase):
         list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
 
         self.assertTrue(file_to_check in list)
-
-    #   ---------------------------------------------------------------------------
-    #   Test iteration on the filesystem
-    #   ---------------------------------------------------------------------------
-    def TestIterFilesystem(self):
-        base_dir='/data/tmp/get_internet_tree/'
-        full_regex='201./win02/file01'
-        #remote_url='http://oceandata.sci.gsfc.nasa.gov/'
-        #UserPwd='anonymous:anonymous'
-        list = get_list_matching_files_dir_local(base_dir, full_regex)
-        print 1
-        #logger.info('Returned list is: '+list[0])
-        self.assertEqual(1,1)
 
     #   ---------------------------------------------------------------------------
     #   Get contents of a directory (HTTP)  -> MODIS_SST_8D
