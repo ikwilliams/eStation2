@@ -698,8 +698,9 @@ def restore_obj_from_pickle(object, filename):
     if os.path.exists(filename):
         try:
             dump_file_info = open(filename, 'r')
-            object = pickle.load(dump_file_info)
+            tmp_object = pickle.load(dump_file_info)
             logger.debug("Dump file info loaded from %s.", filename)
+            object=tmp_object
         except:
             logger.warning("Dump file %s can't be loaded, the file will be removed.", filename)
             os.remove(filename)

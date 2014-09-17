@@ -5,7 +5,6 @@
 #   descr:	 Reads the definition from eStation DB and execute the copy to local disk
 #	history: 1.0
 
-
 # Import local definitions
 import locals
 
@@ -16,7 +15,7 @@ from StringIO import StringIO
 import cStringIO
 import tempfile
 import os
-import unittest
+#import unittest
 import glob
 import re
 import pickle
@@ -30,7 +29,7 @@ from lib.python.functions import *
 
 logger = log.my_logger(__name__)
 
-output_dir = ingest_server_in_dir
+#output_dir = ingest_server_in_dir
 
 #   General definitions
 c = pycurl.Curl()
@@ -42,6 +41,27 @@ user_def_sleep = poll_frequency
 #   ---------------------------------------------------------------------------
 #   Functions
 #   ---------------------------------------------------------------------------
+
+######################################################################################
+#   signal_handler
+#   Purpose: properly terminate the service, in case of interruption (copied from old get_eumetcast)
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/09/01
+#   Inputs: defaults for signa_handler
+
+def signal_handler(signal, frame):
+
+    global processed_list_filename, processed_list
+    global processed_info_filename, processed_info
+
+    logger.info("Len of proc list is %i" % len(processed_list))
+
+    dump_obj_to_pickle(processed_list, processed_list_filename)
+    dump_obj_to_pickle(processed_info, processed_info_filename)
+
+    print 'Exit ' + sys.argv[0]
+    logger.info("Stopping the service.")
+    sys.exit(0)
 
 ######################################################################################
 #   get_list_current_subdirs_ftp
@@ -116,10 +136,8 @@ def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex):
 #           sub_dir: current subdir searched on the site (appended to remote_url)
 #
 #   Output: list of matched files (incremented)
-#
+#   TODO-M.C.: check if the '/' has to be replaced by os.sep (?)
 
-#   Returns the list of objects(files or dirs) located in a remote subdir and
-#   matching 'regex' (single 'regex' - not tree structure). Can be called iteratively.
 def get_list_matching_files_subdir_ftp(list, remote_url, usr_pwd, full_regex, level, sub_dir):
 
     # split the regex
@@ -141,52 +159,70 @@ def get_list_matching_files_subdir_ftp(list, remote_url, usr_pwd, full_regex, le
                 new_remote_url=remote_url+'/'+element+'/'
                 get_list_matching_files_subdir_ftp(list, new_remote_url, usr_pwd, full_regex, new_level, new_sub_dir)
     return 0
-   
-#   Target dir is created as 'tmpdir' if not passed
-#   Full pathname is returned (or positive number for error)
 
-#   Returns the list of files matching 'regex' (complex 'regex' - i.e. tree structure).
-#   It applies to cases like 'dirs_ftp'
+######################################################################################
+#   get_list_matching_files_dir_local
+#   Purpose: return the list of matching files from the local filesystem
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/09/01
+#   Inputs: local_dir: local directory (might incl. sub_dirs)
+#           full_regex: re including subdirs (e.g. 'Collection51/TIFF/Win1[01]/201[1-3]/MCD45monthly.A20.*burndate.tif.gz'
+#   Output: list of matched files
 
-def get_list_matching_files_dir_local(remote_url_dir, full_regex):
+def get_list_matching_files_dir_local(local_dir, full_regex):
 
-    # Local implementation (filesystem, not http/ftp remote server)
+    # Local implementation (filesystem)
     list_matches=[]
     level = 1
-    maxlevel=len(full_regex.split('/'))
+    max_level=len(full_regex.split('/'))
     toprint=''
-    get_list_matching_files_subdir_local(list_matches, remote_url_dir, full_regex, level, maxlevel,'')
+    get_list_matching_files_subdir_local(list_matches, local_dir, full_regex, level, max_level,'')
     for elem in list_matches:
         toprint+=elem+','
     logger.info(toprint)
 
-#   Returns the list of objects(files or dirs) located in a remote subdir and
-#   matching 'regex' (single 'regex' - not tree structure). Can be called iteratively.
-def get_list_matching_files_subdir_local(list, remote_url_dir, regex, level, max_level, sub_dir):
+######################################################################################
+#   get_list_matching_files_subdir_local
+#   Purpose: return the list of matching files, or iterate the search
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/09/01
+#   Inputs: list_matches: list of matching files, find so far
+#           local_dir: local directory
+#           full_regex: re including subdirs (e.g. 'Collection51/TIFF/Win1[01]/201[1-3]/MCD45monthly.A20.*burndate.tif.gz'
+#           level: position in the full_regex tree (increasing from 1 ON .. )
+#           sub_dir: current subdir searched on the site (appended to remote_url)
+#
+def get_list_matching_files_subdir_local(list, local_dir, regex, level, max_level, sub_dir):
 
     # split the regex
-    tokens=regex.split('/')
+    tokens=regex.split(os.sep)
     regex_my_level=''
     # regex for this level
     regex_my_level+=tokens[level-1]
 
-    my_list = os.listdir(remote_url_dir)
+    my_list = os.listdir(local_dir)
     for element in my_list:
         if re.match(regex_my_level,element) is not None:
             # Is it already the file ?
             if max_level == level:
-                #logger.info(element)
                 list.append(sub_dir+element)
             else:
                 # Enter the subdir
                 new_level=level+1
-                new_sub_dir=sub_dir+element+'/'
-                get_list_matching_files_subdir_local(list, remote_url_dir+'/'+element, regex, new_level, max_level, new_sub_dir)
+                new_sub_dir=sub_dir+element+os.sep
+                get_list_matching_files_subdir_local(list, local_dir+os.sep+element, regex, new_level, max_level, new_sub_dir)
 
     return 0
 
-#   Target dir is created as 'tmpdir' if not passed
-#   Full pathname is returned (or positive number for error)
+######################################################################################
+#   get_file_from_url
+#   Purpose: download and save locally a file
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/09/01
+#   Inputs: remote_url_file: full file path
+#           target_file: target file name (by default 'test_output_file')
+#           target_dir: target directory (by default a tmp dir is created)
+#   Output: full pathname is returned (or positive number for error)
 def get_file_from_url(remote_url_file, target_file=None, target_dir=None, userpwd=''):
 
     if target_dir is None:
@@ -239,18 +275,17 @@ def get_dir_contents_from_url(remote_url_dir, target_file=None, target_dir=None,
 
     return target_fullpath
 
-def signal_handler(signal, frame):
-    global processed_list
-    #process_files = open(processlist, 'wb')
-    logger.info("Len of proc list is %i" % len(processed_list))
-
-    #pickle.dump(processed_list, process_files)
-    #process_files.close()
-    print 'Exit ' + sys.argv[0]
-    logger.info("Stopping the service.")
-    sys.exit(0)
+######################################################################################
+#   drive_get_internet
+#   Purpose: drive the get_internet as a service
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/09/01
+#   Inputs: none
 
 def drive_get_internet():
+
+    global processed_list_filename, processed_list
+    global processed_info_filename, processed_info
 
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
@@ -258,6 +293,7 @@ def drive_get_internet():
 
     logger.info("Starting retrieving data from INTERNET.")
 
+    output_dir = ingest_server_in_dir
     logger.debug("Check if the Ingest Server output directory : %s exists.", output_dir)
     if not os.path.exists(output_dir):
         logger.fatal("The Ingest Server output directory : %s doesn't exists.", output_dir)
@@ -279,17 +315,31 @@ def drive_get_internet():
         logger.debug("Reading active INTERNET data sources from database")
         internet_sources_list = querydb.get_active_internet_sources(echo=echo_query)
 
+        # Loop over active triggers
         for internet_source in internet_sources_list:
             logger.debug("Processing internet source  %s.", internet_source.descriptive_name)
 
-            processed_list_file = get_internet_processed_list_prefix+str(internet_source.internet_id)
+            processed_list_filename = get_internet_processed_list_prefix+str(internet_source.internet_id)+'.list'
+            processed_info_filename = get_internet_processed_list_prefix+str(internet_source.internet_id)+'.info'
+
+            # Create objects for list and info
             processed_list = []
+            processed_info = {'lenght_proc_list': 0,
+                              'time_latest_exec': datetime.datetime.now(),
+                              'time_latest_copy': datetime.datetime.now()}
+            # Restore/Create List
+            processed_list=restore_obj_from_pickle(processed_list, processed_list_filename)
+            # Restore/Create Info
+            processed_info=restore_obj_from_pickle(processed_info, processed_info_filename)
+            # Update processing time (in case it is restored)
+            processed_info['time_latest_exec']=datetime.datetime.now()
 
             logger.debug("Create current list of file to process for source %s.", internet_source.internet_id)
-            if isinstance(internet_source.user_name,str) and isinstance(internet_source.password,str):
-                usr_pwd = str(internet_source.user_name)+':'+internet_source.password
-            else:
-                usr_pwd = str(internet_source.user_name)+':'+internet_source.password
+            #if isinstance(internet_source.user_name,str) and isinstance(internet_source.password,str):
+            usr_pwd = str(internet_source.user_name)+':'+internet_source.password
+            #else:
+            #    usr_pwd =''
+
             logger.debug("              Url is %s.", internet_source.url)
             logger.debug("              usr/pwd is %s.", usr_pwd)
             logger.debug("              regex   is %s.", internet_source.include_files_expression)
@@ -298,41 +348,30 @@ def drive_get_internet():
 
             logger.debug("Number of files currently available for source %s is %i", internet_source.internet_id, len(current_list))
             if len(current_list) > 0:
-                logger.debug("Loading the processed file list for source %s", internet_source.internet_id)
-                if os.path.exists(processed_list_file):
-                    try:
-                        process_file = open(processed_list_file, 'r')
-                        processed_list = pickle.load(process_file)
-                        logger.debug("Processed file list loaded for source %s", internet_source.internet_id)
-                    except:
-                        logger.warning("Processed file can't be loaded, the file will be removed.")
-                        os.remove(processed_list_file)
-                else:
-                    # Create an empty file in the tmp dir
-                    open(processed_list_file, 'a').close()
-
                 logger.debug("Number of files already copied for trigger %s is %i", internet_source.internet_id, len(processed_list))
                 listtoprocess = []
                 for current_file in current_list:
-                    # HERE !!!!!! if os.filename(current_file) is not in processed_list:
+                    if len(processed_list) == 0:
                         listtoprocess.append(current_file)
+                    else:
+                        if os.path.basename(current_file) not in processed_list:
+                            listtoprocess.append(current_file)
 
                 logger.debug("Number of files to be copied for trigger %s is %i", internet_source.internet_id, len(listtoprocess))
                 if listtoprocess != set([]):
                      logger.debug("Loop on the found files.")
                      for filename in list(listtoprocess):
                          logger.debug("Processing file: "+os.path.basename(filename))
-                         try:
-                            target_file=filename
-                            get_file_from_url(str(internet_source.url), target_file=target_file, target_dir=ingest_server_in_dir, userpwd=str(usr_pwd))
-                            logger.info("File %s copied.", filename)
-                            processed_list.append(os.filename(filename))
-                         except:
-                            logger.warning("Problem while copying file: %s.", filename)
+                         #try:
+                         target_file=filename
+                         get_file_from_url(str(internet_source.url)+'/'+target_file, target_file=os.path.basename(target_file), target_dir=ingest_server_in_dir, userpwd=str(usr_pwd))
+                         logger.info("File %s copied.", filename)
+                         processed_list.append(os.path.basename(filename))
+                         #except:
+                         #   logger.warning("Problem while copying file: %s.", filename)
 
-            process_file = open(processed_list_file, 'wb')
-            pickle.dump(processed_list, process_file)
-            process_file.close()
+            dump_obj_to_pickle(processed_list, processed_list_filename)
+            dump_obj_to_pickle(processed_info, processed_info_filename)
 
             sleep(float(user_def_sleep))
 #        except Exception, e:
