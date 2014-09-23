@@ -95,8 +95,7 @@ class TestDatasets(unittest.TestCase):
         kwargs.update({'to_date': datetime.date(2014, 12, 31)})
         dataset = Dataset(**kwargs)
         dataset.get_filenames = lambda: self.files_dekad
-        segments = dataset.get_dataset_normalized_info()
         total=0
-        print segments
-        for segment in segments: total+=segment['perc_duration']
+        for segment in dataset.segments:
+            total+=segment['perc_duration']
         self.assertEquals(int(total), 100)

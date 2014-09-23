@@ -11,19 +11,14 @@ import os
 import glob
 import sys
 
-from lib.python import es_logging as log
 from lib.python import functions
-#from database import querydb
-import database.querydb
+from database import querydb
 import locals
 
-logger = log.my_logger(__name__)
-
-
 from .exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
-                         WrongFrequencyType, WrongFrequencyDateFormat,
-                         NoProductFound, NoFrequencyFound,
-                         WrongDateType)
+        WrongFrequencyType, WrongFrequencyDateFormat,
+        NoProductFound, NoFrequencyFound,
+        WrongDateType)
 from .helpers import add_years, add_months, add_dekads, add_pentads, add_days, find_gaps, cast_to_int
 
 
@@ -44,7 +39,6 @@ class Frequency(object):
         PENTAD = 'pentad'
         DAY = 'day'
         HOUR = 'hour'
-        MINUTE = 'minute'
 
     class TYPE:
         PER = 'p'
@@ -91,11 +85,8 @@ class Frequency(object):
             return date + datetime.timedelta(days=value)
         elif unit == self.UNIT.HOUR:
             return date + datetime.timedelta(hours=value)
-        #elif unit == self.UNIT.MINUTE:
-        #    return date + datetime.timedelta(minutes=value)
         else:
-            logger.error("Unit not managed: %s" % unit)
-            #raise Exception("Unit not managed: %s" % unit)
+            raise Exception("Unit not managed: %s" % unit)
 
     def get_mapset(self, filename):
         return filename[len(self.dateformat):]
@@ -128,15 +119,7 @@ class Frequency(object):
         else:
             raise Exception("Dateformat not managed: %s" % self.dateformat)
         return date
-
-    def count_dates(self, fromdate, todate):
-        date = self.next_date(fromdate)
-        count = 1
-        while date <= todate:
-            date = self.next_date(date)
-            count += 1
-        return count
-
+        
     def next_filename(self, filename):
         date = self.next_date(self.extract_date(filename))
         return self.format_filename(date, self.get_mapset(filename))
@@ -174,7 +157,7 @@ class Dataset(object):
             raise WrongDateType(date, datetime.date)
 
     def __init__(self, product_code, sub_product_code, mapset, version=None, from_date=None, to_date=None):
-        kwargs = {'productcode': product_code, 'subproductcode': sub_product_code}
+        kwargs = {'productcode':product_code, 'subproductcode':sub_product_code}
         if not version is None:
             kwargs['version'] = version
         if from_date:
@@ -183,18 +166,18 @@ class Dataset(object):
             self._check_date(to_date)
         self.from_date = from_date or None
         self.to_date = to_date or datetime.date.today()
-        self._db_product = database.querydb.get_product_out_info(**kwargs)
-        if self._db_product is None or self._db_product == []:
+        self._db_product = querydb.get_product_out_info(**kwargs)
+        if self._db_product is None or self._db_product==[]:
             raise NoProductFound(kwargs)
-        if isinstance(self._db_product, list):
-            my_db_products = self._db_product[0]
+        if isinstance(self._db_product,list):
+            my_db_products=self._db_product[0]
         else:
-            my_db_products = self._db_product
+            my_db_products=self._db_product
 
         self._path = functions.set_path_sub_directory(product_code, sub_product_code,
                 my_db_products.product_type, version, mapset)
         self._fullpath = os.path.join(locals.es2globals['data_dir'], self._path)
-        self._db_frequency = database.querydb.db.frequency.get(my_db_products.frequency_id)
+        self._db_frequency = querydb.db.frequency.get(my_db_products.frequency_id)
         if self._db_frequency is None:
             raise NoFrequencyFound(self._db_product)
         self._frequency = Frequency(value=self._db_frequency.frequency, 
@@ -211,27 +194,26 @@ class Dataset(object):
         return list(os.path.basename(filename) for filename in self.get_filenames())
 
     def find_intervals(self, from_date=None, to_date=None):
-        return find_gaps(self.get_basenames(), self._frequency, only_intervals=True, from_date=from_date or self.from_date, to_date=to_date or self.to_date)
+       return find_gaps(self.get_basenames(), self._frequency, only_intervals=True, from_date=from_date or self.from_date, to_date=to_date or self.to_date)
 
     def find_gaps(self, from_date=None, to_date=None):
-        return find_gaps(self.get_basenames(), self._frequency, only_intervals=False, from_date=from_date or self.from_date, to_date=to_date or self.to_date)
+       return find_gaps(self.get_basenames(), self._frequency, only_intervals=False, from_date=from_date or self.from_date, to_date=to_date or self.to_date)
 
     def _extract_kwargs(self, interval):
         return {
             "from_date": interval[0],
             "to_date": interval[1],
             "interval_type": interval[2],
-        }
-
+            }
     def get_dataset_normalized_info(self, from_date=None, to_date=None):
 
-        intervals = [Interval(**self._extract_kwargs(interval)) for interval in self.find_intervals()]
+        intervals =[Interval(**self._extract_kwargs(interval)) for interval in self.find_intervals()]
         tot_time_extension = intervals[-1].to_date-intervals[0].from_date
 
-        segment_list = []
+        segment_list=[]
         total_duration = 0.0
         # Assign first as duration in secs (and cumulate to total)
-        for ii in range(0, len(intervals)):
+        for ii in range(0,len(intervals)):
             if ii is 0:
                 delta = intervals[1].from_date - intervals[0].from_date
             else:
@@ -239,22 +221,19 @@ class Dataset(object):
 
             segm_duration = delta.total_seconds()
 
-            totfilesinterval = self._frequency.count_dates(intervals[ii].from_date, intervals[ii].to_date)
+            segment = {'from_date':intervals[ii].from_date,
+                       'to_date':intervals[ii].to_date,
+                       'type': intervals[ii].interval_type,
+                       'perc_duration':segm_duration}
 
-            segment = {'totfiles': totfilesinterval,
-                       'fromdate': intervals[ii].from_date,
-                       'todate': intervals[ii].to_date,
-                       'intervaltype': intervals[ii].interval_type,
-                       'intervalpercentage': segm_duration}
-
-            total_duration += segm_duration
+            total_duration+=segm_duration
             segment_list.append(segment)
         total_perc = 0
 
-        for ii in range(0, len(intervals)):
-            perc_duration = segment_list[ii]['intervalpercentage']/total_duration*100.
-            segment_list[ii]['intervalpercentage'] = perc_duration
-            total_perc += perc_duration
+        for ii in range(0,len(intervals)):
+            perc_duration = segment_list[ii]['perc_duration']/total_duration*100.
+            segment_list[ii]['perc_duration'] = perc_duration
+            total_perc+=perc_duration
 
         return segment_list
 

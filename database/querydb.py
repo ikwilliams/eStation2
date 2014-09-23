@@ -859,26 +859,19 @@ def get_active_internet_sources(echo=False):
         # The columns on the subquery "es" are accessible through an attribute called "c"
         # e.g. es.c.filter_expression_jrc
 
-        internet_sources = session.query( pads,
-                                          es.c.internet_id,
-                                          es.c.defined_by ,
-                                          es.c.descriptive_name ,
-                                          es.c.description,
-                                          es.c.modified_by,
-                                          es.c.update_datetime,
-                                          es.c.url,
-                                          es.c.user_name,
-                                          es.c.password,
-                                          es.c.list,
-                                          es.c.period ,
-                                          es.c.scope ,
-                                          es.c.include_files_expression ,
-                                          es.c.exclude_files_expression,
-                                          es.c.status ,
-                                          es.c.pull_frequency ,
-                                          es.c.datasource_descr_id ).\
-            outerjoin(es, pads.data_source_id == es.c.internet_id).\
-            filter(and_(pads.type == 'INTERNET', pads.activated == True)).all()
+        args = tuple(x for x in (pads, es.c.internet_id, es.c.defined_by ,
+                                 es.c.descriptive_name, es.c.description,
+                                 es.c.modified_by, es.c.update_datetime,
+                                 es.c.url, es.c.user_name, es.c.password,
+                                 es.c.list, es.c.period, es.c.scope ,
+                                 es.c.include_files_expression ,
+                                 es.c.exclude_files_expression,
+                                 es.c.status, es.c.pull_frequency ,
+                                 es.c.datasource_descr_id)
+                    if x != es.c.update_datetime or not CrudDB.is_testing())
+        internet_sources = session.query(*args).outerjoin(es,
+                pads.data_source_id == es.c.internet_id).filter(
+                and_(pads.type == 'INTERNET', pads.activated == 1.0)).all()
 
         if echo:
             for row in internet_sources:
