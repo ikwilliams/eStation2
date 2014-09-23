@@ -127,7 +127,7 @@ def find_gaps(unsorted_filenames, frequency, only_intervals=False, from_date=Non
         current_filename = frequency.format_filename(date, mapset)
         if not filenames or current_filename < filenames[0]:
             gaps.append(current_filename + original_ext)
-            if not current_interval or  current_interval[2] != INTERVAL_TYPE.MISSING:
+            if not current_interval or current_interval[2] != INTERVAL_TYPE.MISSING:
                 current_interval = [date, date, INTERVAL_TYPE.MISSING]
                 intervals.append(current_interval)
             else:

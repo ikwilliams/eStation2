@@ -14,6 +14,7 @@
 #
 
 # source eStation2 base definitions
+
 import locals
 
 # Import standard modules
@@ -710,6 +711,7 @@ def restore_obj_from_pickle(object, filename):
     return object
 
 #  Load an object from a file (pickle serialization), if the file exist
+
 
 def load_obj_from_pickle(filename):
 

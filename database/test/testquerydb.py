@@ -10,22 +10,20 @@ import database.querydb as querydb
 
 db = querydb.connect_db()
 
-# internet_sources = querydb.get_active_internet_sources(echo=True)
-# for internet_source in internet_sources:
-#     print internet_source.scope
+ingestions = querydb.get_ingestions(echo=True)
+print ingestions
 
 
-class TestQuerydb(unittest.TestCase):
-
-    def Test_get_active_internet_sources(self):
-
-        internet_sources = querydb.get_active_internet_sources()
-        logger.info("Internet sources are: %s", internet_sources)
-        if internet_sources is not None:
-            for internet_source in internet_sources:
-                print internet_source.url
-
-        self.assertEqual(1,1)
+#class TestQuerydb(unittest.TestCase):
+#
+#    def Test_get_active_internet_sources(self):
+#
+#        internet_sources = querydb.get_active_internet_sources()
+#        logger.info("Internet sources are: %s", internet_sources)
+#        for internet_source in internet_sources:
+#            print internet_source.url
+#
+#        self.assertEqual(1,1)
     #
     # def test_querydb(self):
     #     product = 'vgt_ndvi'
