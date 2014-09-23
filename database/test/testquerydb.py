@@ -21,8 +21,9 @@ class TestQuerydb(unittest.TestCase):
 
         internet_sources = querydb.get_active_internet_sources()
         logger.info("Internet sources are: %s", internet_sources)
-        for internet_source in internet_sources:
-            print internet_source.url
+        if internet_sources is not None:
+            for internet_source in internet_sources:
+                print internet_source.url
 
         self.assertEqual(1,1)
     #
