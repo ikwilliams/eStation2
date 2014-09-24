@@ -1,7 +1,8 @@
 
-from apps.acquisition.get_eumetcast import *
+from apps.acquisition import get_eumetcast
 import unittest
-import database.querydb as querydb
+from database import querydb
+from database import query_db_filesys
 
 
 class TestGetEumetcast(unittest.TestCase):
@@ -11,13 +12,13 @@ class TestGetEumetcast(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def TestGetEumetcastInfo(self):
         db = querydb.db
-        dataacquisitions = querydb.get_dataacquisitions(echo=True, toJSON=False)
+        data_acquisitions = query_db_filesys.get_data_acquisitions(echo=True, toJSON=False)
 
-        for row in dataacquisitions:
+        for row in data_acquisitions:
             print row.data_source_id
             # Retrieve datetime of latest acquired file and lastest datetime
             # the acquisition was active of a specific eumetcast id
-            acq_dates = get_eumetcast_info(row.data_source_id)
+            acq_dates = get_eumetcast.get_eumetcast_info(row.data_source_id)
             if acq_dates:
                 for key in acq_dates.keys():
                     print "key: %s , value: %s" % (key, acq_dates[key])
