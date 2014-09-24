@@ -7,14 +7,16 @@
 import os
 import datetime
 import os.path
-import config.es_constants
+from config import es_constants
+
 from osgeo import gdal
-from osgeo.gdalconst import *
+from osgeo import gdalconst
 from functions import *
+
 # Import eStation2 modules
 from lib.python import es_logging as log
-from lib.python.functions import get_subdir_from_path_full
-from database.querydb import get_product_out_info
+from lib.python import functions
+from database import querydb
 logger = log.my_logger(__name__)
 
 # TODO-M.C.: Add all the attributes of 'mapset' and 'category_id' ? so that the contents of the db tables can be created (if not existing on the target station) from metadata ?
@@ -118,7 +120,7 @@ class SdsMetadata:
              logger.error('Output file does not exist %s' % filepath)
         else:
             # Open output file
-            sds = gdal.Open(filepath, GA_Update)
+            sds = gdal.Open(filepath, gdalconst.GA_Update)
             self.write_to_ds(sds)
 
     def read_from_ds(self, dataset):
@@ -173,7 +175,7 @@ class SdsMetadata:
 
     def assign_from_product(self, product, subproduct, version):
     #
-        product_out_info = get_product_out_info(productcode=product,subproductcode=subproduct,version=version, echo=False)
+        product_out_info = querydb.get_product_out_info(productcode=product,subproductcode=subproduct,version=version, echo=False)
 
     #   Assign prod/subprod/version
         sds_metadata['eStation2_product'] = str(product)
@@ -208,7 +210,7 @@ class SdsMetadata:
     def assign_subdir_from_fullpath(self, full_directory):
     #
     #   Assign subdir
-        subdir = get_subdir_from_path_full(full_directory)
+        subdir = functions.get_subdir_from_path_full(full_directory)
         sds_metadata['eStation2_subdir'] = str(subdir)
 
     def assign_input_files(self, input_files):
