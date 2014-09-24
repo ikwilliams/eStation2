@@ -31,6 +31,51 @@ class TestGetInternet(unittest.TestCase):
         self.assertTrue(file_to_check in list)
 
     #   ---------------------------------------------------------------------------
+    #   Test iteration on remote ftp (e.g. NASA_FIRMS)
+    #   ---------------------------------------------------------------------------
+    def TestRemoteFtp_FIRMS_NASA(self):
+
+        # Retrieve a list of MODIS burndate file .. check only one present
+        remote_url='ftp://nrt1.modaps.eosdis.nasa.gov/FIRMS/Global'
+        usr_pwd='jrcMondeFires:FIRE@data1'
+        full_regex   ='Global_MCD14DL_20142...txt'
+        file_to_check='Global_MCD14DL_2014260.txt'
+
+        list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+
+        self.assertTrue(file_to_check in list)
+
+    #   ---------------------------------------------------------------------------
+    #   Test iteration on remote ftp (e.g. VITO GL-GIO products)
+    #   ---------------------------------------------------------------------------
+    # def TestRemoteFtp_FTP_VITO(self):
+    #
+    #     # Retrieve a list of MODIS burndate file .. check only one present
+    #     remote_url='ftp://catftp.vgt.vito.be/'
+    #     usr_pwd='estationJRC:eStation14'
+    #     full_regex   ='/^[A-Za-z0-9].*/^g2_BIOPAR_.*zip$'
+    #     file_to_check=''
+    #
+    #     list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+    #
+    #     self.assertTrue(file_to_check in list)
+
+    #   ---------------------------------------------------------------------------
+    #   Test iteration on remote ftp (e.g. VITO GL-GIO products)
+    #   ---------------------------------------------------------------------------
+    def TestRemoteFtp_CHIRP(self):
+
+        # Retrieve a list of CHIRP
+        remote_url='ftp://chg-ftpout.geog.ucsb.edu/pub/org/chg/products/CHIRP/pentads/'
+        usr_pwd='anonymous:anonymous'
+        full_regex   ='CHIRP.[12][0-9][0-9][0-9].[01][0-9].[1-6].tif$'
+        file_to_check='CHIRP.2014.09.3.tif'
+
+        list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+
+        self.assertTrue(file_to_check in list)
+
+    #   ---------------------------------------------------------------------------
     #   Get contents of a directory (HTTP)  -> MODIS_SST_8D
     #   An html document is returned
     #   ---------------------------------------------------------------------------

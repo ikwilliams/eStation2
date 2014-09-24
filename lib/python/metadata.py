@@ -7,16 +7,16 @@
 import os
 import datetime
 import os.path
-import config.es_constants
+from config import es_constants
+
 from osgeo import gdal
-from osgeo.gdalconst import *
+from osgeo import gdalconst
 from functions import *
+
 # Import eStation2 modules
 from lib.python import es_logging as log
-from lib.python.functions import get_subdir_from_path_full
-from database.querydb import get_product_out_info
-#import database.querydb as querydb
-
+from lib.python import functions
+from database import querydb
 logger = log.my_logger(__name__)
 
 # TODO-M.C.: Add all the attributes of 'mapset' and 'category_id' ? so that the contents of the db tables can be created (if not existing on the target station) from metadata ?
@@ -210,7 +210,7 @@ class SdsMetadata:
     def assign_subdir_from_fullpath(self, full_directory):
     #
     #   Assign subdir
-        subdir = get_subdir_from_path_full(full_directory)
+        subdir = functions.get_subdir_from_path_full(full_directory)
         sds_metadata['eStation2_subdir'] = str(subdir)
 
     def assign_input_files(self, input_files):

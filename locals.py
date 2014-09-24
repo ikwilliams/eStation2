@@ -3,12 +3,6 @@
 #   Indeed, this is not to be synchronized through machines
 #
 
-
-
-import os
-import sys
-
-#this_dir=os.path.abspath(os.path.dirname(__file__))
 es2globals = {
     'host': 'localhost',
     'port': '5432',

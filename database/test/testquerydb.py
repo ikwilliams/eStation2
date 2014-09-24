@@ -10,8 +10,8 @@ import database.querydb as querydb
 
 db = querydb.connect_db()
 
-ingestions = querydb.get_ingestions(echo=True)
-print ingestions
+#ingestions = querydb.get_ingestions(echo=True)
+#print ingestions
 
 
 #class TestQuerydb(unittest.TestCase):

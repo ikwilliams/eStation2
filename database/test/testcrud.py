@@ -4,10 +4,10 @@ import unittest
 
 __author__ = "Jurriaan van 't Klooster"
 
-import database.crud as crudDB
+from database import crud
 
-crud = crudDB.CrudDB()
-schema = ("%s." % crud.schema) if crud.schema else ""
+crud_db = crud.CrudDB()
+schema = ("%s." % crud_db.schema) if crud_db.schema else ""
 
 
 class TestCrud(unittest.TestCase):

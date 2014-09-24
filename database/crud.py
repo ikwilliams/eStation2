@@ -3,7 +3,7 @@ __author__ = "Jurriaan van 't Klooster"
 import sys
 # Import eStation lib modules
 from lib.python import es_logging as log
-from config.es_constants import *
+from config import es_constants
 
 
 from sqlalchemy import *
@@ -14,7 +14,8 @@ logger = log.my_logger(__name__)
 class CrudDB(object):
     @staticmethod
     def is_testing():
-        # return False
+        # Force connecting to sqlite db
+        # return True
         if getattr(CrudDB, "_testing", None) is None:
             setattr(CrudDB, "_testing", sys.argv[0].lower().endswith('nosetests'))
         return CrudDB._testing
@@ -37,13 +38,13 @@ class CrudDB(object):
                 con.executescript(file(os.path.join(os.path.dirname(__file__), "fixtures", "sqlite.sql")).read())
                 con.close()
                 # Used in querydb
-                dbglobals['schema_products'] = None
+                es_constants.dbglobals['schema_products'] = None
             db_url = CrudDB._db_url
         else:
-            db_url = "postgresql://%s:%s@%s/%s" % (dbglobals['dbUser'],
-                                             dbglobals['dbPass'],
-                                             dbglobals['host'],
-                                             dbglobals['dbName'])
+            db_url = "postgresql://%s:%s@%s/%s" % (es_constants.dbglobals['dbUser'],
+                                             es_constants.dbglobals['dbPass'],
+                                             es_constants.dbglobals['host'],
+                                             es_constants.dbglobals['dbName'])
         return db_url
 
     @staticmethod
@@ -52,7 +53,7 @@ class CrudDB(object):
 
     # Initialize the DB
     def __init__(self, schema='products', echo=False):
-        self.schema = schema or dbglobals['schema_products']
+        self.schema = schema or es_constants.dbglobals['schema_products']
         db = self.get_db_engine()
 
         if self.is_testing():

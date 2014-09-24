@@ -14,12 +14,10 @@
 #
 
 # source eStation2 base definitions
-
 import locals
 
 # Import standard modules
 import os
-import sys
 import math
 import calendar
 import datetime

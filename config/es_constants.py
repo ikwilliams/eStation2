@@ -8,8 +8,7 @@
 
 import os
 import locals
-from osgeo.gdalconst import *
-
+from osgeo import gdalconst
 
 # Get base dir
 try:
@@ -100,4 +99,4 @@ DB_TABLE_TSDECAD = prefix+'timeseries_decad'
 # Various definitions
 ES2_OUTFILE_FORMAT = 'GTiff'
 ES2_OUTFILE_OPTIONS = 'COMPRESS=LZW'
-ES2_OUTFILE_INTERP_METHOD = GRA_NearestNeighbour
+ES2_OUTFILE_INTERP_METHOD = gdalconst.GRA_NearestNeighbour

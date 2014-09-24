@@ -11,11 +11,10 @@
 import locals
 
 # Import eStation lib modules
-#import database.querydb as querydb
-from database.querydb import *
+from database import querydb
 
 # Import third-party modules
-from osgeo.gdalconst import *
+from osgeo import gdalconst
 from osgeo import gdal
 from osgeo import osr
 import pygrib
