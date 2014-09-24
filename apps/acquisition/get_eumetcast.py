@@ -19,7 +19,10 @@ import pickle
 # Import eStation2 modules
 from lib.python import es_logging as log
 from config.es_constants import *
-import database.querydb as querydb
+
+#import database.querydb as querydb
+from database.querydb import *
+
 from lib.python.mapset import *
 from lib.python.functions import *
 from lib.python.metadata import *
@@ -33,6 +36,7 @@ output_dir = ingest_server_in_dir
 user_def_sleep = poll_frequency
 
 echo_query = False
+
 
 def find_files(directory, pattern):
     lst = []
@@ -51,19 +55,15 @@ def match_curlst(lst, pattern):
             currentlst.append(entry)
     return currentlst
 
-def get_eumetcast_info(eumetcast_id):
 
-    filename = get_eumetcast_processed_list_prefix+str(eumetcast_id)+'.info'
-    info = load_obj_from_pickle(filename)
-    return info
+#def get_eumetcast_info(eumetcast_id):
+#
+#    filename = get_eumetcast_processed_list_prefix+str(eumetcast_id)+'.info'
+#    info = load_obj_from_pickle(filename)
+#    return info
 
-######################################################################################
-#   signal_handler
-#   Purpose: properly terminate the service, in case of interruption (copied from old get_eumetcast)
-#   Author: Marco Clerici, JRC, European Commission
-#   Date: 2014/09/01
-#   Inputs: none
 
+#   It will ensure backup of the ongoing list
 def signal_handler(signal, frame):
 
     global processed_list_filename, processed_list
@@ -77,6 +77,7 @@ def signal_handler(signal, frame):
     print 'Exit ' + sys.argv[0]
     logger.info("Stopping the service.")
     sys.exit(0)
+
 
 def drive_eumetcast():
 
@@ -118,7 +119,7 @@ def drive_eumetcast():
 
         # try:
         logger.debug("Reading active EUMETCAST data sources from database")
-        eumetcast_sources_list = querydb.get_eumetcast_sources(echo=echo_query)
+        eumetcast_sources_list = db.get_eumetcast_sources(echo=echo_query)
         logger.debug("N. %i active EUMETCAST data sources found", len(eumetcast_sources_list))
 
         # Loop over active triggers
@@ -186,5 +187,4 @@ def drive_eumetcast():
         #     logger.fatal(str(e))
         #     exit(1)
     exit(0)
-
 

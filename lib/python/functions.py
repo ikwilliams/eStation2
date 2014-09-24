@@ -31,6 +31,7 @@ import pickle
 
 # Import eStation2 modules
 from lib.python import es_logging as log
+from config.es_constants import *
 
 logger = log.my_logger(__name__)
 
@@ -884,3 +885,8 @@ def get_machine_mac_address():
 
     return ':'.join(re.findall('..', '%012x' % uuid.getnode()))
 
+def get_eumetcast_info(eumetcast_id):
+
+    filename = get_eumetcast_processed_list_prefix+str(eumetcast_id)+'.info'
+    info = load_obj_from_pickle(filename)
+    return info

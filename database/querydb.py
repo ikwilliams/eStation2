@@ -24,7 +24,7 @@ from lib.python import es_logging as log
 from config.es_constants import *
 from crud import CrudDB
 
-from apps.acquisition.get_eumetcast import *
+#from apps.acquisition.get_eumetcast import *
 
 from apps.productmanagement.datasets import Dataset
 
