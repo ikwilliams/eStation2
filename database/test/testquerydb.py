@@ -6,12 +6,12 @@ logger = log.my_logger(__name__)
 
 __author__ = "Jurriaan van 't Klooster"
 
-import database.querydb as querydb
+from database import querydb
 
 db = querydb.connect_db()
 
-#ingestions = querydb.get_ingestions(echo=True)
-#print ingestions
+products = querydb.get_products(echo=True)
+print products
 
 
 #class TestQuerydb(unittest.TestCase):
