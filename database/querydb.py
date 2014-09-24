@@ -24,6 +24,8 @@ from lib.python import es_logging as log
 from config import es_constants
 from crud import CrudDB
 
+from database import connectdb
+
 #from apps.acquisition.get_eumetcast import *
 
 #from apps.productmanagement.datasets import Dataset
@@ -44,7 +46,7 @@ logger = log.my_logger(__name__)
 def connect_db_sqlsoup():
 
     try:
-        sqlsoup_dns = CrudDB.get_db_url()
+        sqlsoup_dns = connectdb.ConnectDB.get_db_url()
 
         dbconn = sqlsoup.SQLSoup(sqlsoup_dns)
         dbconn.schema = es_constants.dbglobals['schema_products']
