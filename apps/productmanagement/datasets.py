@@ -4,18 +4,20 @@
 #	author:  Marco Beri marcoberi@gmail.com
 #	date:	 09.07.2014
 #
+#   TODO-M.C.: improve the error handling
 
 from __future__ import absolute_import
+
 import datetime
 import os
 import glob
 import sys
 
+import locals
 from lib.python import es_logging as log
 from lib.python import functions
-#from database import querydb
-import database.querydb
-import locals
+from database import querydb
+
 
 logger = log.my_logger(__name__)
 
@@ -183,7 +185,7 @@ class Dataset(object):
             self._check_date(to_date)
         self.from_date = from_date or None
         self.to_date = to_date or datetime.date.today()
-        self._db_product = database.querydb.get_product_out_info(**kwargs)
+        self._db_product = querydb.get_product_out_info(**kwargs)
         if self._db_product is None or self._db_product == []:
             raise NoProductFound(kwargs)
         if isinstance(self._db_product, list):
@@ -194,7 +196,7 @@ class Dataset(object):
         self._path = functions.set_path_sub_directory(product_code, sub_product_code,
                 my_db_products.product_type, version, mapset)
         self._fullpath = os.path.join(locals.es2globals['data_dir'], self._path)
-        self._db_frequency = database.querydb.db.frequency.get(my_db_products.frequency_id)
+        self._db_frequency = querydb.db.frequency.get(my_db_products.frequency_id)
         if self._db_frequency is None:
             raise NoFrequencyFound(self._db_product)
         self._frequency = Frequency(value=self._db_frequency.frequency, 
