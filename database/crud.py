@@ -12,44 +12,44 @@ from sqlalchemy.orm import *
 logger = log.my_logger(__name__)
 
 class CrudDB(object):
-    @staticmethod
-    def is_testing():
-        # Force connecting to sqlite db
-        # return True
-        if getattr(CrudDB, "_testing", None) is None:
-            setattr(CrudDB, "_testing", sys.argv[0].lower().endswith('nosetests'))
-        return CrudDB._testing
-
-    @staticmethod
-    def get_db_url():
-        if CrudDB.is_testing():
-            if getattr(CrudDB, '_db_url', None) is None:
-                import sqlite3, os
-                # SQL Alchemy cound not execute full sql scripts
-                # so we use a regular file to import fixtures
-                #CrudDB._db_url = "sqlite://"
-                #con = sqlite3.connect(":memory:")
-                import tempfile
-                tf = tempfile.NamedTemporaryFile()
-                tmp_name = tf.name
-                tf.close()
-                CrudDB._db_url = "sqlite:///%s" % tmp_name
-                con = sqlite3.connect(tmp_name)
-                con.executescript(file(os.path.join(os.path.dirname(__file__), "fixtures", "sqlite.sql")).read())
-                con.close()
-                # Used in querydb
-                es_constants.dbglobals['schema_products'] = None
-            db_url = CrudDB._db_url
-        else:
-            db_url = "postgresql://%s:%s@%s/%s" % (es_constants.dbglobals['dbUser'],
-                                             es_constants.dbglobals['dbPass'],
-                                             es_constants.dbglobals['host'],
-                                             es_constants.dbglobals['dbName'])
-        return db_url
-
-    @staticmethod
-    def get_db_engine():
-        return create_engine(CrudDB.get_db_url())
+    # @staticmethod
+    # def is_testing():
+    #     # Force connecting to sqlite db
+    #     # return True
+    #     if getattr(CrudDB, "_testing", None) is None:
+    #         setattr(CrudDB, "_testing", sys.argv[0].lower().endswith('nosetests'))
+    #     return CrudDB._testing
+    #Changes
+    # @staticmethod
+    # def get_db_url():
+    #     if CrudDB.is_testing():
+    #         if getattr(CrudDB, '_db_url', None) is None:
+    #             import sqlite3, os
+    #             # SQL Alchemy cound not execute full sql scripts
+    #             # so we use a regular file to import fixtures
+    #             #CrudDB._db_url = "sqlite://"
+    #             #con = sqlite3.connect(":memory:")
+    #             import tempfile
+    #             tf = tempfile.NamedTemporaryFile()
+    #             tmp_name = tf.name
+    #             tf.close()
+    #             CrudDB._db_url = "sqlite:///%s" % tmp_name
+    #             con = sqlite3.connect(tmp_name)
+    #             con.executescript(file(os.path.join(os.path.dirname(__file__), "fixtures", "sqlite.sql")).read())
+    #             con.close()
+    #             # Used in querydb
+    #             es_constants.dbglobals['schema_products'] = None
+    #         db_url = CrudDB._db_url
+    #     else:
+    #         db_url = "postgresql://%s:%s@%s/%s" % (es_constants.dbglobals['dbUser'],
+    #                                          es_constants.dbglobals['dbPass'],
+    #                                          es_constants.dbglobals['host'],
+    #                                          es_constants.dbglobals['dbName'])
+    #     return db_url
+    #
+    # @staticmethod
+    # def get_db_engine():
+    #     return create_engine(CrudDB.get_db_url())
 
     # Initialize the DB
     def __init__(self, schema='products', echo=False):
