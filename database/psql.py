@@ -9,8 +9,6 @@ import sys
 
 import psycopg2
 import psycopg2.extras
-#from lib.python import es_logging as log
-#from lib.python.es_constants import *
 
 myglobals = {
     'host': 'h05-dev-vm19',
