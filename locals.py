@@ -22,6 +22,7 @@ es2globals['test_base_dir']     =  es2globals['base_dir'] + 'TestFiles/'
 es2globals['test_data_in_dir']  =  es2globals['test_base_dir'] + 'Inputs/'
 es2globals['test_data_refs_dir'] =  es2globals['test_base_dir'] + 'RefsOutput/'
 es2globals['test_data_out']     =  es2globals['test_base_dir'] + 'Outputs/'
+es2globals['db_test_mode']  = 0
 
 try:
     from my_locals import *
