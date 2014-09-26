@@ -5,7 +5,7 @@
 #   descr:	 Functions to access and query the DB using SQLSoup and SQLAlchemy as Database Abstraction Layer and ORM.
 ####################################################################################################################
 
-import locals
+#import locals
 import sys
 import traceback
 import json
@@ -16,13 +16,13 @@ import re
 #import JsonSerializer
 #import anyjson
 
-from sqlalchemy import engine
+#from sqlalchemy import engine
 from sqlalchemy.sql import func, select, or_, and_, desc, asc, expression
 from sqlalchemy.orm import aliased
 
 from lib.python import es_logging as log
-from config import es_constants
-from crud import CrudDB
+#from config import es_constants
+#from crud import CrudDB
 
 from database import connectdb
 
@@ -33,8 +33,6 @@ from database import connectdb
 
 logger = log.my_logger(__name__)
 
-# TODO: Working with SQLAlchemy Sessions?
-
 
 ######################################################################################
 #   connect_db()
@@ -43,43 +41,43 @@ logger = log.my_logger(__name__)
 #   Date: 2014/05/16
 #   Input: None
 #   Output: Return connection handler to the database
-def connect_db_sqlsoup():
+#def connect_db_sqlsoup():
+#
+#    try:
+#        sqlsoup_dns = connectdb.ConnectDB.get_db_url()
+#
+#        dbconn = sqlsoup.SQLSoup(sqlsoup_dns)
+#        dbconn.schema = es_constants.dbglobals['schema_products']
+#        return dbconn
+#    except:
+#        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+#        #print traceback.format_exc()
+#        # Exit the script and print an error telling what happened.
+#        logger.error("Database connection failed!\n -> {}".format(exceptionvalue))
+#        #raise Exception("Database connection failed!\n ->%s" % exceptionvalue)
 
-    try:
-        sqlsoup_dns = connectdb.ConnectDB.get_db_url()
 
-        dbconn = sqlsoup.SQLSoup(sqlsoup_dns)
-        dbconn.schema = es_constants.dbglobals['schema_products']
-        return dbconn
-    except:
-        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        #print traceback.format_exc()
-        # Exit the script and print an error telling what happened.
-        logger.error("Database connection failed!\n -> {}".format(exceptionvalue))
-        #raise Exception("Database connection failed!\n ->%s" % exceptionvalue)
+#def connect_db():
+#
+#    try:
+#        schema = es_constants.dbglobals['schema_products']
+#
+#        db_url = "postgresql://%s:%s@%s/%s" % (es_constants.dbglobals['dbUser'],
+#                                               es_constants.dbglobals['dbPass'],
+#                                               es_constants.dbglobals['host'],
+#                                               es_constants.dbglobals['dbName'])
+#        dbconn = engine.create_engine(db_url)
+#        dbconn.schema = schema
+#        return dbconn
+#    except:
+#        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+#        #print traceback.format_exc()
+#        # Exit the script and print an error telling what happened.
+#        logger.error("Database connection failed!\n -> {}".format(exceptionvalue))
+#        #raise Exception("Database connection failed!\n ->%s" % exceptionvalue)
 
-
-def connect_db():
-
-    try:
-        schema = es_constants.dbglobals['schema_products']
-
-        db_url = "postgresql://%s:%s@%s/%s" % (es_constants.dbglobals['dbUser'],
-                                               es_constants.dbglobals['dbPass'],
-                                               es_constants.dbglobals['host'],
-                                               es_constants.dbglobals['dbName'])
-        dbconn = engine.create_engine(db_url)
-        dbconn.schema = schema
-        return dbconn
-    except:
-        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        #print traceback.format_exc()
-        # Exit the script and print an error telling what happened.
-        logger.error("Database connection failed!\n -> {}".format(exceptionvalue))
-        #raise Exception("Database connection failed!\n ->%s" % exceptionvalue)
-
-db = connect_db_sqlsoup()
-
+db = connectdb.ConnectDB().db
+#db = dbconn.db
 
 def row2dict(row):
     d = {}
@@ -144,80 +142,80 @@ def get_ingestions(echo=False):
         i = db.map(s, primary_key=[s.c.productID, i.c.subproductcode, i.c.mapsetcode])
         ingestions = i.order_by(desc(i.productcode)).all()
 
-        completeness = {
-            'completeness': {
-                'firstdate': '2010-01-01',
-                'lastdate': '2014-12-21',
-                'totfiles': 312,
-                'missingfiles': 4,
-                'intervals': [{
-                    'fromdate': '2010-01-01',
-                    'todate': '2013-05-21',
-                    'intervaltype': 'present',
-                    'intervalpercentage': 20
-                }, {
-                    'fromdate': '2013-06-01',
-                    'todate': '2013-06-21',
-                    'intervaltype': 'missing',
-                    'intervalpercentage': 1
-                }, {
-                    'fromdate': '2014-07-01',
-                    'todate': '2014-07-21',
-                    'intervaltype': 'present',
-                    'intervalpercentage': 35
-                }, {
-                    'fromdate': '2014-08-01',
-                    'todate': '2014-08-21',
-                    'intervaltype': 'permanent-missing',
-                    'intervalpercentage': 2
-                }, {
-                    'fromdate': '2014-09-01',
-                    'todate': '2014-12-21',
-                    'intervaltype': 'present',
-                    'intervalpercentage': 32
-                }, {
-                    'fromdate': '2014-09-01',
-                    'todate': '2014-12-21',
-                    'intervaltype': 'missing',
-                    'intervalpercentage': 1
-                }, {
-                    'fromdate': '2014-09-01',
-                    'todate': '2014-12-21',
-                    'intervaltype': 'present',
-                    'intervalpercentage': 9
-                }]
-            }
-        }
-
-        if ingestions.__len__() > 0:
-            ingest_dict_all = []
-            for row in ingestions:
-                kwargs = {'product_code': row.productcode, 'sub_product_code': row.subproductcode, 'version': row.version, 'mapset': row.mapsetcode}
-                print kwargs
-                #kwargs.update({'to_date': datetime.date(2013, 12, 31)})
-                dataset = Dataset(**kwargs)
-                intervals = dataset.get_dataset_normalized_info()
-                print intervals
-
-                ingest_dict = row2dict(row)
-                ingest_dict.update(completeness)
-                ingest_dict_all.append(ingest_dict)
-
-            #ingestions_json = toJson(ingestions)
-            ingestions_json = json.dumps(ingest_dict_all, ensure_ascii=False, sort_keys=True, indent=4, separators=(', ', ': '))
-
-            # ingestions_json = json.dumps(ingestions,  ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': '))
-            ingestions_json = '{"success":true, "total":'+str(ingestions.__len__())+',"ingestions":'+ingestions_json+'}'
-            # ingestions_json = '{"success":true, "total":1,"ingestions":'+ingestions_json+'}'
-
-        else:
-            ingestions_json = '{"success":false, "error":"No data acquisitions defined!"}'
+        #completeness = {
+        #    'completeness': {
+        #        'firstdate': '2010-01-01',
+        #        'lastdate': '2014-12-21',
+        #        'totfiles': 312,
+        #        'missingfiles': 4,
+        #        'intervals': [{
+        #            'fromdate': '2010-01-01',
+        #            'todate': '2013-05-21',
+        #            'intervaltype': 'present',
+        #            'intervalpercentage': 20
+        #        }, {
+        #            'fromdate': '2013-06-01',
+        #            'todate': '2013-06-21',
+        #            'intervaltype': 'missing',
+        #            'intervalpercentage': 1
+        #        }, {
+        #            'fromdate': '2014-07-01',
+        #            'todate': '2014-07-21',
+        #            'intervaltype': 'present',
+        #            'intervalpercentage': 35
+        #        }, {
+        #            'fromdate': '2014-08-01',
+        #            'todate': '2014-08-21',
+        #            'intervaltype': 'permanent-missing',
+        #            'intervalpercentage': 2
+        #        }, {
+        #            'fromdate': '2014-09-01',
+        #            'todate': '2014-12-21',
+        #            'intervaltype': 'present',
+        #            'intervalpercentage': 32
+        #        }, {
+        #            'fromdate': '2014-09-01',
+        #            'todate': '2014-12-21',
+        #            'intervaltype': 'missing',
+        #            'intervalpercentage': 1
+        #        }, {
+        #            'fromdate': '2014-09-01',
+        #            'todate': '2014-12-21',
+        #            'intervaltype': 'present',
+        #            'intervalpercentage': 9
+        #        }]
+        #    }
+        #}
+        #
+        #if ingestions.__len__() > 0:
+        #    ingest_dict_all = []
+        #    for row in ingestions:
+        #        kwargs = {'product_code': row.productcode, 'sub_product_code': row.subproductcode, 'version': row.version, 'mapset': row.mapsetcode}
+        #        print kwargs
+        #        #kwargs.update({'to_date': datetime.date(2013, 12, 31)})
+        #        dataset = Dataset(**kwargs)
+        #        intervals = dataset.get_dataset_normalized_info()
+        #        print intervals
+        #
+        #        ingest_dict = row2dict(row)
+        #        ingest_dict.update(completeness)
+        #        ingest_dict_all.append(ingest_dict)
+        #
+        #    #ingestions_json = toJson(ingestions)
+        #    ingestions_json = json.dumps(ingest_dict_all, ensure_ascii=False, sort_keys=True, indent=4, separators=(', ', ': '))
+        #
+        #    # ingestions_json = json.dumps(ingestions,  ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': '))
+        #    ingestions_json = '{"success":true, "total":'+str(ingestions.__len__())+',"ingestions":'+ingestions_json+'}'
+        #    # ingestions_json = '{"success":true, "total":1,"ingestions":'+ingestions_json+'}'
+        #
+        #else:
+        #    ingestions_json = '{"success":false, "error":"No data acquisitions defined!"}'
 
         if echo:
             for row in ingestions:
                 print row
 
-        return ingestions_json
+        return ingestions
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
@@ -272,47 +270,47 @@ def get_dataacquisitions(echo=False, tojson=True):
         #                                  pa.store_original_data,
         #                                  expression.literal("05/06/2014").label('latest')).order_by(desc(pa.productcode)).first()
 
-        if dataacquisitions.__len__() > 0:
-            #dataacquisitions_json = toJson(dataacquisitions)
-
-            acq_dict_all = []
-            for row in dataacquisitions:
-                acq_dict = row2dict(row)
-                # Retrieve datetime of latest acquired file and lastest datetime
-                # the acquisition was active of a specific eumetcast id
-                acq_dates = get_eumetcast_info(row.data_source_id)
-                if acq_dates:
-                    for key in acq_dates.keys():
-                        #acq_info += '"%s": "%s", ' % (key, acq_dates[key])
-                        if isinstance(acq_dates[key], datetime.date):
-                            datetostring = acq_dates[key].strftime("%y-%m-%d %H:%M")
-                            acq_dict[key] = datetostring
-                        else:
-                            acq_dict[key] = acq_dates[key]
-                else:
-                    acq_dict['time_latest_copy'] = datetime.datetime.now().strftime("%y-%m-%d %H:%M")
-                    acq_dict['time_latest_exec'] = datetime.datetime.now().strftime("%y-%m-%d %H:%M")
-                    acq_dict['lenght_proc_list'] = datetime.datetime.now().strftime("%y-%m-%d %H:%M")
-
-                acq_dict_all.append(acq_dict)
-
-                acq_json = json.dumps(acq_dict_all, ensure_ascii=False, sort_keys=True, indent=4, separators=(', ', ': '))
-
-                logger.error("Just to log something in this log file to see if the rotatingfilehandler works!\n")
-
-                # dataacquisitions_json = json.dumps(dataacquisitions, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': '))
-                dataacquisitions_json = '{"success":true, "total":'+str(dataacquisitions.__len__())+',"dataacquisitions":'+acq_json+'}'
-                # dataacquisitions_json = '{"success":true, "total":1,"dataacquisitions":['+dataacquisitions_json+']}'
-
-        else:
-            dataacquisitions_json = '{"success":false, "error":"No data acquisitions defined!"}'
+        #if dataacquisitions.__len__() > 0:
+        #    #dataacquisitions_json = toJson(dataacquisitions)
+        #
+        #    acq_dict_all = []
+        #    for row in dataacquisitions:
+        #        acq_dict = row2dict(row)
+        #        # Retrieve datetime of latest acquired file and lastest datetime
+        #        # the acquisition was active of a specific eumetcast id
+        #        acq_dates = get_eumetcast_info(row.data_source_id)
+        #        if acq_dates:
+        #            for key in acq_dates.keys():
+        #                #acq_info += '"%s": "%s", ' % (key, acq_dates[key])
+        #                if isinstance(acq_dates[key], datetime.date):
+        #                    datetostring = acq_dates[key].strftime("%y-%m-%d %H:%M")
+        #                    acq_dict[key] = datetostring
+        #                else:
+        #                    acq_dict[key] = acq_dates[key]
+        #        else:
+        #            acq_dict['time_latest_copy'] = datetime.datetime.now().strftime("%y-%m-%d %H:%M")
+        #            acq_dict['time_latest_exec'] = datetime.datetime.now().strftime("%y-%m-%d %H:%M")
+        #            acq_dict['lenght_proc_list'] = datetime.datetime.now().strftime("%y-%m-%d %H:%M")
+        #
+        #        acq_dict_all.append(acq_dict)
+        #
+        #        acq_json = json.dumps(acq_dict_all, ensure_ascii=False, sort_keys=True, indent=4, separators=(', ', ': '))
+        #
+        #        logger.error("Just to log something in this log file to see if the rotatingfilehandler works!\n")
+        #
+        #        # dataacquisitions_json = json.dumps(dataacquisitions, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': '))
+        #        dataacquisitions_json = '{"success":true, "total":'+str(dataacquisitions.__len__())+',"dataacquisitions":'+acq_json+'}'
+        #        # dataacquisitions_json = '{"success":true, "total":1,"dataacquisitions":['+dataacquisitions_json+']}'
+        #
+        #else:
+        #    dataacquisitions_json = '{"success":false, "error":"No data acquisitions defined!"}'
 
         if echo:
             for row in dataacquisitions:
                 print row
 
         if tojson:
-            return dataacquisitions_json
+            return dataacquisitions
         else:
             return dataacquisitions
 

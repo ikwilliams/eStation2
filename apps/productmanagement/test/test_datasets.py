@@ -100,3 +100,15 @@ class TestDatasets(unittest.TestCase):
         # for segment in dataset.segments:
         #     total+=segment['perc_duration']
         # self.assertEquals(int(total), 100)
+
+    def test_normalized_info_minute(self):
+        kwargs = self.kwargs.copy()
+        kwargs.update({'product_code':"msg_mpe", 'sub_product_code': "mpe", 'mapset': 'MSG_satellite_3km'})
+
+        dataset = Dataset(**kwargs)
+        dataset.get_filenames = lambda: ['201309040800_msg_mpe_mpe_MSG_satellite_3km.tif', ]
+        print dataset.get_dataset_normalized_info()
+        total=0
+        # for segment in dataset.segments:
+        #     total+=segment['perc_duration']
+        # self.assertEquals(int(total), 100)

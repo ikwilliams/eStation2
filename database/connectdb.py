@@ -1,17 +1,26 @@
 __author__ = "Jurriaan van 't Klooster"
 
 import sys
+from lib.python import es_logging as log
 
 # Import eStation lib modules
 import locals
-from lib.python import es_logging as log
 from config import es_constants
 
 import sqlalchemy
+import sqlsoup
 from sqlalchemy.orm import *
 
 logger = log.my_logger(__name__)
 
+
+######################################################################################
+#   connect_db()
+#   Purpose: Create a connection to the database
+#   Author: Marco Clerici and Jurriaan van 't Klooster
+#   Date: 2014/05/16
+#   Input: schema='products', usesqlsoup=True
+#   Output: Return connection handler to the database
 class ConnectDB(object):
 
     @staticmethod
@@ -48,9 +57,9 @@ class ConnectDB(object):
             db_url = ConnectDB._db_url
         else:
             db_url = "postgresql://%s:%s@%s/%s" % (es_constants.dbglobals['dbUser'],
-                                             es_constants.dbglobals['dbPass'],
-                                             es_constants.dbglobals['host'],
-                                             es_constants.dbglobals['dbName'])
+                                                   es_constants.dbglobals['dbPass'],
+                                                   es_constants.dbglobals['host'],
+                                                   es_constants.dbglobals['dbName'])
         return db_url
 
     @staticmethod
@@ -58,35 +67,25 @@ class ConnectDB(object):
         return sqlalchemy.create_engine(ConnectDB.get_db_url())
 
     # Initialize the DB
-    def __init__(self, schema='products', echo=False):
-        self.schema = schema or es_constants.dbglobals['schema_products']
-        self.db = self.get_db_engine()
+    def __init__(self, schema='products', usesqlsoup=True):
 
-        if self.is_testing():
-            self.schema = None
+        try:
+            self.schema = schema or es_constants.dbglobals['schema_products']
 
-#        db.echo = echo
-#        self.table_map = {}
-        self.session = None
+            if usesqlsoup:
+                dburl = ConnectDB.get_db_url()
+                self.db = sqlsoup.SQLSoup(ConnectDB.get_db_url())
+            else:
+                self.db = self.get_db_engine()
 
-        #Initialize DB and create a hashmap of table name and associated ORM mapper class
-#        metadata = MetaData(db, schema=self.schema)
-        #retrieve database table information dynamically
-#        metadata.reflect()
-#        metadata.schema = None
-#         for table_name in metadata.tables:
-#             #create a class that inherits basetable class and maps the class to table
-#             table_class = type(str(table_name), (BaseTable,), {})
-#             try:
-#                 mapper(table_class, Table(table_name, metadata, autoload=True))
-#                 self.table_map[table_name] = table_class
-#             except:
-#                 #exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-#                 #print "could not map table ", table_name
-#                 # Exit the script and print an error telling what happened.
-#                 logger.error("CrudDB: could not map table %s!" % table_name)
-#
-#         #create a Session template that requires commit to be called explicit
-        self.session = sessionmaker(bind=self.db, autoflush=True)
-        # metadata.schema = self.schema
+            if self.is_testing():
+                self.schema = None
+            else:
+                self.db.schema = self.schema
+        except:
+            exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+            #print traceback.format_exc()
+            # Exit the script and print an error telling what happened.
+            logger.error("Database connection failed!\n -> {}".format(exceptionvalue))
+            #raise Exception("Database connection failed!\n ->%s" % exceptionvalue)
 

@@ -8,7 +8,7 @@ __author__ = "Jurriaan van 't Klooster"
 
 from database import querydb
 
-db = querydb.connect_db()
+#db = querydb.connect_db()
 
 products = querydb.get_products(echo=True)
 print products

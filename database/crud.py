@@ -11,19 +11,18 @@ from sqlalchemy.orm import *
 
 logger = log.my_logger(__name__)
 
+
 class CrudDB(object):
 
     # Initialize the DB
-    def __init__(self, schema='products'):
-        #self.schema = schema or es_constants.dbglobals['schema_products']
-        self.connect_db = connectdb.ConnectDB(schema=schema)
-        # db = connect_db.get_db_engine()
-
-        #if self.is_testing():
-            #self.schema = None
+    def __init__(self, schema='products', echo=False):
+        self.schema = schema or es_constants.dbglobals['schema_products']
+        self.connect_db = connectdb.ConnectDB(schema=schema, usesqlsoup=False)
+        db = self.connect_db.db
+        db.echo = echo
 
         self.table_map = {}
-        #self.session = None
+        self.session = None
 
         # new session
         #self.Session = Session()
@@ -31,7 +30,7 @@ class CrudDB(object):
         #db.execute("SET search_path TO products")
 
         #Initialize DB and create a hashmap of table name and associated ORM mapper class
-        metadata = sqlalchemy.MetaData(self.connect_db.db,schema=self.connect_db.schema)
+        metadata = sqlalchemy.MetaData(db, schema=self.schema)
         #retrieve database table information dynamically
         metadata.reflect()
         metadata.schema = None
@@ -48,8 +47,8 @@ class CrudDB(object):
                 logger.error("CrudDB: could not map table %s!" % table_name)
 
         #create a Session template that requires commit to be called explicit
-        #self.session = sessionmaker(bind=db, autoflush=True)
-        metadata.schema = self.connect_db.schema
+        self.session = sessionmaker(bind=db, autoflush=True)
+        metadata.schema = self.schema
 
     #create a record
     def create(self, table_name, record):
@@ -165,4 +164,3 @@ class BaseTable(object):
     #string representation of the record
     def __str__(self):
         return self.unpack()
-
