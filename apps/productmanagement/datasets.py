@@ -58,9 +58,14 @@ class Frequency(object):
 
     @classmethod
     def dateformat_default(class_, unit):
-        if unit in (class_.UNIT.HOUR,):
+        if unit in (class_.UNIT.HOUR, class_.UNIT.MINUTE,):
             return class_.DATEFORMAT.DATETIME
         return class_.DATEFORMAT.DATE
+
+    def today(self):
+        if Frequency.dateformat_default(self.unit) == self.DATEFORMAT.DATETIME:
+            return datetime.datetime.today()
+        return datetime.date.today()
 
     def filename_mask_ok(self, filename):
         if len(filename) > len(self.dateformat) + 1:
@@ -93,8 +98,8 @@ class Frequency(object):
             return date + datetime.timedelta(days=value)
         elif unit == self.UNIT.HOUR:
             return date + datetime.timedelta(hours=value)
-        #elif unit == self.UNIT.MINUTE:
-        #    return date + datetime.timedelta(minutes=value)
+        elif unit == self.UNIT.MINUTE:
+            return date + datetime.timedelta(minutes=value)
         else:
             logger.error("Unit not managed: %s" % unit)
             #raise Exception("Unit not managed: %s" % unit)
@@ -183,8 +188,6 @@ class Dataset(object):
             self._check_date(from_date)
         if to_date:
             self._check_date(to_date)
-        self.from_date = from_date or None
-        self.to_date = to_date or datetime.date.today()
         self._db_product = querydb.get_product_out_info(**kwargs)
         if self._db_product is None or self._db_product == []:
             raise NoProductFound(kwargs)
@@ -202,6 +205,8 @@ class Dataset(object):
         self._frequency = Frequency(value=self._db_frequency.frequency, 
                                     unit=self._db_frequency.time_unit, 
                                     frequency_type=self._db_frequency.frequency_type)
+        self.from_date = from_date or None
+        self.to_date = to_date or self._frequency.today()
 
     def get_filenames(self):
         return glob.glob(os.path.join(self._fullpath, "*"))

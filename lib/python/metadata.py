@@ -120,7 +120,7 @@ class SdsMetadata:
              logger.error('Output file does not exist %s' % filepath)
         else:
             # Open output file
-            sds = gdal.Open(filepath, gdalconst.GA_Update)
+            sds = gdal.Open(filepath, GA_Update)
             self.write_to_ds(sds)
 
     def read_from_ds(self, dataset):
