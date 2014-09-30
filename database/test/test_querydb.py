@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 from unittest import TestCase
 from lib.python import es_logging as log
+# Trivial change
 logger = log.my_logger(__name__)
 
 __author__ = "Jurriaan van 't Klooster"
