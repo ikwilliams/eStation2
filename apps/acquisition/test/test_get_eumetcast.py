@@ -1,8 +1,7 @@
 
-from apps.acquisition import get_eumetcast
 import unittest
+from apps.acquisition import get_eumetcast
 from database import querydb
-from database import query_db_filesys
 
 
 class TestGetEumetcast(unittest.TestCase):
@@ -12,7 +11,7 @@ class TestGetEumetcast(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def TestGetEumetcastInfo(self):
         db = querydb.db
-        data_acquisitions = query_db_filesys.get_data_acquisitions(echo=True, toJSON=False)
+        data_acquisitions = querydb.get_data_acquisitions(echo=True, toJSON=False)
 
         for row in data_acquisitions:
             print row.data_source_id
