@@ -12,9 +12,7 @@ import json
 import sqlsoup
 import datetime
 import time
-import re
-#import JsonSerializer
-#import anyjson
+
 
 #from sqlalchemy import engine
 from sqlalchemy.sql import func, select, or_, and_, desc, asc, expression
@@ -79,26 +77,26 @@ logger = log.my_logger(__name__)
 db = connectdb.ConnectDB().db
 #db = dbconn.db
 
-def row2dict(row):
-    d = {}
-    for column in row.c._all_cols:
-        d[column.name] = str(getattr(row, column.name))
-
-    return d
-
-
-def toJson(queryResult):
-    tojson = ''
-    for row in queryResult:
-        da = row2dict(row)
-        tojson = tojson + json.dumps(da, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': ')) + ', '
-    tojson = tojson[:-2]
-    return tojson
-
-# Return True if the date is in the correct format
-def checkDateFormat(myString):
-    isDate = re.match('[0-1][0-9]\/[0-3][0-9]\/[1-2][0-9]{3}', myString)
-    return isDate
+#def row2dict(row):
+#    d = {}
+#    for column in row.c._all_cols:
+#        d[column.name] = str(getattr(row, column.name))
+#
+#    return d
+#
+#
+#def toJson(queryResult):
+#    tojson = ''
+#    for row in queryResult:
+#        da = row2dict(row)
+#        tojson = tojson + json.dumps(da, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': ')) + ', '
+#    tojson = tojson[:-2]
+#    return tojson
+#
+## Return True if the date is in the correct format
+#def checkDateFormat(myString):
+#    isDate = re.match('[0-1][0-9]\/[0-3][0-9]\/[1-2][0-9]{3}', myString)
+#    return isDate
 
 
 ######################################################################################
@@ -140,53 +138,10 @@ def get_ingestions(echo=False):
 
         s = s.alias('ingest')
         i = db.map(s, primary_key=[s.c.productID, i.c.subproductcode, i.c.mapsetcode])
-        ingestions = i.order_by(desc(i.productcode)).all()
 
-        #completeness = {
-        #    'completeness': {
-        #        'firstdate': '2010-01-01',
-        #        'lastdate': '2014-12-21',
-        #        'totfiles': 312,
-        #        'missingfiles': 4,
-        #        'intervals': [{
-        #            'fromdate': '2010-01-01',
-        #            'todate': '2013-05-21',
-        #            'intervaltype': 'present',
-        #            'intervalpercentage': 20
-        #        }, {
-        #            'fromdate': '2013-06-01',
-        #            'todate': '2013-06-21',
-        #            'intervaltype': 'missing',
-        #            'intervalpercentage': 1
-        #        }, {
-        #            'fromdate': '2014-07-01',
-        #            'todate': '2014-07-21',
-        #            'intervaltype': 'present',
-        #            'intervalpercentage': 35
-        #        }, {
-        #            'fromdate': '2014-08-01',
-        #            'todate': '2014-08-21',
-        #            'intervaltype': 'permanent-missing',
-        #            'intervalpercentage': 2
-        #        }, {
-        #            'fromdate': '2014-09-01',
-        #            'todate': '2014-12-21',
-        #            'intervaltype': 'present',
-        #            'intervalpercentage': 32
-        #        }, {
-        #            'fromdate': '2014-09-01',
-        #            'todate': '2014-12-21',
-        #            'intervaltype': 'missing',
-        #            'intervalpercentage': 1
-        #        }, {
-        #            'fromdate': '2014-09-01',
-        #            'todate': '2014-12-21',
-        #            'intervaltype': 'present',
-        #            'intervalpercentage': 9
-        #        }]
-        #    }
-        #}
-        #
+        where = and_(i.c.activated)
+        ingestions = i.filter(where).order_by(desc(i.productcode)).all()
+
         #if ingestions.__len__() > 0:
         #    ingest_dict_all = []
         #    for row in ingestions:
@@ -242,15 +197,15 @@ def get_dataacquisitions(echo=False, tojson=True):
     try:
         pa = db.product_acquisition_data_source._table
         s = select([ func.CONCAT(pa.c.productcode, '_', pa.c.version).label('productID'),
-                  pa.c.productcode,
-                  pa.c.subproductcode,
-                  pa.c.version,
-                  pa.c.data_source_id,
-                  pa.c.defined_by,
-                  pa.c.type,
-                  pa.c.activated,
-                  pa.c.store_original_data,
-                  expression.literal("05/06/2014").label('latest')], from_obj=[pa])
+                     pa.c.productcode,
+                     pa.c.subproductcode,
+                     pa.c.version,
+                     pa.c.data_source_id,
+                     pa.c.defined_by,
+                     pa.c.type,
+                     pa.c.activated,
+                     pa.c.store_original_data,
+                     expression.literal("05/06/2014").label('latest')], from_obj=[pa])
 
         s = s.alias('mypa')
         pa = db.map(s, primary_key=[s.c.productID])
@@ -388,8 +343,6 @@ def get_products(echo=False, activated=True):
         s = s.alias('pl')
         pl = db.map(s, primary_key=[s.c.productID])
 
-        #where = and_(pl.c.product_type == 'Native')
-
         if activated or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
             where = and_(pl.c.product_type == 'Native', pl.c.activated)
         else:
@@ -397,17 +350,12 @@ def get_products(echo=False, activated=True):
 
         productslist = pl.filter(where).order_by(asc(pl.c.order_index), asc(pl.c.productcode)).all()
         #productslist.filter(where).order_by(asc(productslist.c.order_index), asc(productslist.c.productcode)).all()
-        productslist_json = toJson(productslist)
 
-        #productslist_json = json.dumps(productslist, sort_keys=True, indent=4, separators=(',', ': '))
-        productslist_json = '{"success":true, "total":'+str(productslist.__len__())+',"products":['+productslist_json+']}'
-
-        #echo '{"success":false,"error":"' . 'No records found!' . '"}';
         if echo:
             for row in productslist:
                 print row
 
-        return productslist_json
+        return productslist
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()

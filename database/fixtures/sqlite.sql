@@ -614,8 +614,7 @@ INSERT INTO ingestion VALUES ('modis_chla', 'chla_day', 'undefined', 'MODIS_Glob
 INSERT INTO ingestion VALUES ('modis_sst', 'sst_8d', 'undefined', 'MODIS_Global_4km', 'JRC', 1, 0, NULL);
 INSERT INTO ingestion VALUES ('msg_mpe', 'mpe', 'undefined', 'MSG_satellite_3km', 'JRC', 1, 0, NULL);
 INSERT INTO ingestion VALUES ('pml_modis_chl', 'chl_3day', 'undefined', 'WGS84_IOC_1km', 'JRC', 1, 0, NULL);
-INSERT INTO ingestion VALUES ('tamsat_rfe', 'rfe', 'undefined', 'TAMSAT_Africa_4km', 'JRC', 1, 0, 'Null
-');
+INSERT INTO ingestion VALUES ('tamsat_rfe', 'rfe', 'undefined', 'TAMSAT_Africa_4km', 'JRC', 1, 0, 'Null');
 INSERT INTO ingestion VALUES ('vgt_fapar', 'fapar', 'V1.3', 'WGS84_Africa_1km', 'JRC', 1, 0, 'Null');
 INSERT INTO ingestion VALUES ('vgt_ndvi', 'ndv', 'undefined', 'WGS84_Africa_1km', 'JRC', 1, 0, 'Null');
 INSERT INTO ingestion VALUES ('vgt_ndvi', 'sm', 'undefined', 'WGS84_Africa_1km', 'JRC', 1, 0, 'Null');

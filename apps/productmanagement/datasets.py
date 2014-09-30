@@ -237,6 +237,7 @@ class Dataset(object):
 
         segment_list = []
         total_duration = 0.0
+        totfiles, totfilesmissing = 0
         # Assign first as duration in secs (and cumulate to total)
         for ii in range(0, len(intervals)):
             if ii is 0:
@@ -247,7 +248,9 @@ class Dataset(object):
             segm_duration = delta.total_seconds()
 
             totfilesinterval = self._frequency.count_dates(intervals[ii].from_date, intervals[ii].to_date)
-
+            totfiles += totfilesinterval
+            if intervals[ii].interval_type == 'missing':
+                totfilesmissing += totfilesinterval
             segment = {'totfiles': totfilesinterval,
                        'fromdate': intervals[ii].from_date,
                        'todate': intervals[ii].to_date,
@@ -256,6 +259,8 @@ class Dataset(object):
 
             total_duration += segm_duration
             segment_list.append(segment)
+        intervals = {}
+
         total_perc = 0
 
         for ii in range(0, len(intervals)):
