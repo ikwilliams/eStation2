@@ -8,35 +8,35 @@
 #	history: 1.0
 
 # Import local definitions
+import locals
 
 # Import standard modules
 import signal
 import commands
-from time import sleep
-
-#from lxml import etree
+from time import *
+import datetime
+import os
+import re
+import sys
 
 # Import eStation2 modules
 from lib.python import es_logging as log
-from config.es_constants import *
+from config import es_constants
 
-#import database.querydb as querydb
-from database.querydb import *
+from database import querydb
 
-from lib.python.mapset import *
-from lib.python.functions import *
-from lib.python.metadata import *
-import datetime
+from lib.python import mapset
+from lib.python import functions
+from lib.python import metadata
 
 logger = log.my_logger(__name__)
 
 # Defined in lib.python.es_constants.py
-input_dir = eumetcast_files_dir
-output_dir = ingest_server_in_dir
-user_def_sleep = poll_frequency
+input_dir = es_constants.eumetcast_files_dir
+output_dir = es_constants.ingest_server_in_dir
+user_def_sleep = es_constants.poll_frequency
 
 echo_query = False
-
 
 def find_files(directory, pattern):
     lst = []
@@ -58,8 +58,8 @@ def match_curlst(lst, pattern):
 
 def get_eumetcast_info(eumetcast_id):
 
-    filename = get_eumetcast_processed_list_prefix+str(eumetcast_id)+'.info'
-    info = load_obj_from_pickle(filename)
+    filename = es_constants.get_eumetcast_processed_list_prefix+str(eumetcast_id)+'.info'
+    info = functions.load_obj_from_pickle(filename)
     return info
 
 
@@ -71,8 +71,8 @@ def signal_handler(signal, frame):
 
     logger.info("Len of proc list is %i" % len(processed_list))
 
-    dump_obj_to_pickle(processed_list, processed_list_filename)
-    dump_obj_to_pickle(processed_info, processed_info_filename)
+    functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+    functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
     print 'Exit ' + sys.argv[0]
     logger.info("Stopping the service.")
@@ -100,14 +100,14 @@ def drive_eumetcast():
         # TODO Jurvtk: Create the Ingest Server output directory if it doesn't exist!
         exit(1)
 
-    if not os.path.exists(base_tmp_dir):
-        os.mkdir(base_tmp_dir)
+    if not os.path.exists(es_constants.base_tmp_dir):
+        os.mkdir(es_constants.base_tmp_dir)
 
-    if not os.path.exists(processed_list_base_dir):
-        os.mkdir(processed_list_base_dir)
+    if not os.path.exists(es_constants.processed_list_base_dir):
+        os.mkdir(es_constants.processed_list_base_dir)
 
-    if not os.path.exists(processed_list_eum_dir):
-        os.mkdir(processed_list_eum_dir)
+    if not os.path.exists(es_constants.processed_list_eum_dir):
+        os.mkdir(es_constants.processed_list_eum_dir)
 
     while 1:
         try:
@@ -119,7 +119,7 @@ def drive_eumetcast():
 
         # try:
         logger.debug("Reading active EUMETCAST data sources from database")
-        eumetcast_sources_list = db.get_eumetcast_sources(echo=echo_query)
+        eumetcast_sources_list = querydb.get_eumetcast_sources(echo=echo_query)
         logger.debug("N. %i active EUMETCAST data sources found", len(eumetcast_sources_list))
 
         # Loop over active triggers
@@ -127,8 +127,8 @@ def drive_eumetcast():
 
             logger.debug("Processing eumetcast source  %s.", eumetcast_source.eumetcast_id)
 
-            processed_list_filename = get_eumetcast_processed_list_prefix+str(eumetcast_source.eumetcast_id)+'.list'
-            processed_info_filename = get_eumetcast_processed_list_prefix+str(eumetcast_source.eumetcast_id)+'.info'
+            processed_list_filename = es_constants.get_eumetcast_processed_list_prefix+str(eumetcast_source.eumetcast_id)+'.list'
+            processed_info_filename = es_constants.get_eumetcast_processed_list_prefix+str(eumetcast_source.eumetcast_id)+'.info'
 
             # Create objects for list and info
             processed_list = []
@@ -139,9 +139,9 @@ def drive_eumetcast():
             logger.debug("Loading the processed file list for source %s ", eumetcast_source.eumetcast_id)
 
             # Restore/Create List
-            processed_list=restore_obj_from_pickle(processed_list, processed_list_filename)
+            processed_list=functions.restore_obj_from_pickle(processed_list, processed_list_filename)
             # Restore/Create Info
-            processed_info=restore_obj_from_pickle(processed_info, processed_info_filename)
+            processed_info=functions.restore_obj_from_pickle(processed_info, processed_info_filename)
             # Update processing time (in case it is restored)
             processed_info['time_latest_exec']=datetime.datetime.now()
 
@@ -178,8 +178,8 @@ def drive_eumetcast():
                    if not os.path.exists(infile):
                        processed_list.remove(infile)
 
-            dump_obj_to_pickle(processed_list, processed_list_filename)
-            dump_obj_to_pickle(processed_info, processed_info_filename)
+            functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+            functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
         sleep(float(user_def_sleep))
 

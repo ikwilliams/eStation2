@@ -5,6 +5,7 @@ __author__ = "Jurriaan van 't Klooster"
 
 from unittest import TestCase
 from lib.python import es_logging as log
+# Trivial change
 logger = log.my_logger(__name__)
 
 from database import querydb
