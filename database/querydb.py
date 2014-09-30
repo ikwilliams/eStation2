@@ -867,10 +867,10 @@ def get_active_internet_sources(echo=False):
                                  es.c.exclude_files_expression,
                                  es.c.status, es.c.pull_frequency ,
                                  es.c.datasource_descr_id)
-                    if x != es.c.update_datetime or not CrudDB.is_testing())
+                    if x != es.c.update_datetime )
+
         internet_sources = session.query(*args).outerjoin(es,
-                pads.data_source_id == es.c.internet_id).filter(
-                and_(pads.type == 'INTERNET', pads.activated == 1.0)).all()
+                pads.data_source_id == es.c.internet_id).filter(and_(pads.type == 'INTERNET', pads.activated)).all()
 
         if echo:
             for row in internet_sources:
