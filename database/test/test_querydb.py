@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 __author__ = "Jurriaan van 't Klooster"
 
-from __future__ import absolute_import
+
 from unittest import TestCase
 from lib.python import es_logging as log
 logger = log.my_logger(__name__)
