@@ -11,21 +11,20 @@ import locals
 # Import standard modules
 import pycurl
 import signal
-from StringIO import StringIO
+import StringIO
 import cStringIO
 import tempfile
-import os
-#import unittest
-import glob
+import sys
 import re
-import pickle
+import datetime
+
 from time import sleep
 
 # Import eStation2 modules
 from lib.python import es_logging as log
 from config.es_constants import *
-import database.querydb as querydb
-from lib.python.functions import *
+from database import querydb
+from lib.python import functions
 
 logger = log.my_logger(__name__)
 
@@ -33,7 +32,7 @@ logger = log.my_logger(__name__)
 
 #   General definitions
 c = pycurl.Curl()
-buffer = StringIO()
+buffer = StringIO.StringIO()
 tmpdir = tempfile.mkdtemp(prefix=__name__, dir=locals.es2globals['temp_dir'])
 echo_query = False
 user_def_sleep = poll_frequency
@@ -56,8 +55,8 @@ def signal_handler(signal, frame):
 
     logger.info("Len of proc list is %i" % len(processed_list))
 
-    dump_obj_to_pickle(processed_list, processed_list_filename)
-    dump_obj_to_pickle(processed_info, processed_info_filename)
+    functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+    functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
     print 'Exit ' + sys.argv[0]
     logger.info("Stopping the service.")
@@ -107,8 +106,8 @@ def get_list_current_subdirs_ftp(remote_url, usr_pwd):
 def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex):
 
     # Check the arguments (remote_url must end with os.sep and full_regex should begin with os.sep)
-    remote_url=ensure_sep_present(remote_url,'end')
-    full_regex=ensure_sep_present(full_regex,'begin')
+    remote_url=functions.ensure_sep_present(remote_url,'end')
+    full_regex=functions.ensure_sep_present(full_regex,'begin')
 
     # Get list from a remote ftp
     list_matches=[]
@@ -328,9 +327,9 @@ def drive_get_internet():
                               'time_latest_exec': datetime.datetime.now(),
                               'time_latest_copy': datetime.datetime.now()}
             # Restore/Create List
-            processed_list=restore_obj_from_pickle(processed_list, processed_list_filename)
+            processed_list=functions.restore_obj_from_pickle(processed_list, processed_list_filename)
             # Restore/Create Info
-            processed_info=restore_obj_from_pickle(processed_info, processed_info_filename)
+            processed_info=functions.restore_obj_from_pickle(processed_info, processed_info_filename)
             # Update processing time (in case it is restored)
             processed_info['time_latest_exec']=datetime.datetime.now()
 
@@ -370,8 +369,8 @@ def drive_get_internet():
                          #except:
                          #   logger.warning("Problem while copying file: %s.", filename)
 
-            dump_obj_to_pickle(processed_list, processed_list_filename)
-            dump_obj_to_pickle(processed_info, processed_info_filename)
+            functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+            functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
             sleep(float(user_def_sleep))
 #        except Exception, e:
