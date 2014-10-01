@@ -25,7 +25,7 @@ from .exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
                          WrongFrequencyType, WrongFrequencyDateFormat,
                          NoProductFound, NoFrequencyFound,
                          WrongDateType)
-from .helpers import add_years, add_months, add_dekads, add_pentads, add_days, find_gaps, cast_to_int
+from .helpers import add_years, add_months, add_dekads, add_pentads, add_days, find_gaps, cast_to_int, INTERVAL_TYPE
 
 
 def _check_constant(class_, constant_name, value):
@@ -175,6 +175,10 @@ class Interval(object):
         self.length = length
         self.percentage = percentage
 
+    @property
+    def missing(self):
+        return self.interval_type == INTERVAL_TYPE.MISSING
+
 class Dataset(object):
     def _check_date(self, date):
         if not isinstance(date, datetime.date):
@@ -233,12 +237,27 @@ class Dataset(object):
         }
 
     def get_dataset_normalized_info(self, from_date=None, to_date=None):
-        return list({'totfiles': interval.length,
-                     'fromdate': interval.from_date,
-                     'todate': interval.to_date,
+        interval_list = list({'totfiles': interval.length,
+                     'fromdate': interval.from_date.strftime("%Y-%m-%d"),
+                     'todate': interval.to_date.strftime("%Y-%m-%d"),
                      'intervaltype': interval.interval_type,
+                     'missing': interval.missing,
                      'intervalpercentage': interval.percentage} for interval in self.intervals)
+
+        return {
+                'firstdate': interval_list[0]['fromdate'] if interval_list else '',
+                'lastdate': interval_list[-1]['todate'] if interval_list else '',
+                'totfiles': sum(i['totfiles'] for i in interval_list),
+                'missingfiles': sum(i['totfiles'] for i in interval_list if i['missing']),
+                'intervals': interval_list
+        }
 
     @property
     def intervals(self):
-        return [Interval(**self._extract_kwargs(interval)) for interval in self.find_intervals()]
+        _intervals = getattr(self, "_intervals", None)
+        if _intervals is None:
+            _intervals = [Interval(**self._extract_kwargs(interval)) for interval in self.find_intervals()]
+            setattr(self, "_intervals", _intervals)
+        return _intervals
+
+        #return [Interval(**self._extract_kwargs(interval)) for interval in self.find_intervals()]

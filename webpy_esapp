@@ -138,11 +138,11 @@ class Ingestion:
                           'sub_product_code': row.subproductcode,
                           'version': row.version,
                           'mapset': row.mapsetcode}
-                #print kwargs
+                print kwargs
                 #kwargs.update({'to_date': datetime.date(2013, 12, 31)})
                 dataset = Dataset(**kwargs)
                 completeness = dataset.get_dataset_normalized_info()
-                #print completeness
+                print completeness
                 ingest_dict = row2dict(row)
                 ingest_dict['completeness'] = completeness
                 ingest_dict_all.append(ingest_dict)

@@ -105,7 +105,7 @@ class TestDatasets(unittest.TestCase):
                 ]
         dataset = Dataset(**kwargs)
         dataset.get_filenames = lambda: files_dekad
-        segments = dataset.get_dataset_normalized_info()
+        segments = dataset.get_dataset_normalized_info()['intervals']
 
         total = 0
         for segment in segments:
@@ -114,6 +114,26 @@ class TestDatasets(unittest.TestCase):
         self.assertEquals(segments[0]['intervalpercentage'], 50.0)
         self.assertEquals(segments[1]['intervalpercentage'], 25.0)
         self.assertEquals(segments[2]['intervalpercentage'], 25.0)
+
+
+    def test_normalized_info_15_minutes(self):
+        kwargs = self.kwargs.copy()
+        kwargs.update({
+            'to_date': datetime.datetime(2014, 2, 1),
+            'product_code': "lsasaf_lst",
+            'sub_product_code': "lst",
+            'mapset': 'WGS84_Africa_1km'
+        })
+        files_15min = [
+                "201307251200_lsasaf_lst_lst_WGS84_Africa_1km.tif",
+                ]
+        dataset = Dataset(**kwargs)
+        dataset.get_filenames = lambda: files_15min
+        completeness = dataset.get_dataset_normalized_info()
+        self.assertEquals(completeness['totfiles'], 18289)
+        self.assertEquals(completeness['missingfiles'], 18288)
+        self.assertEquals(completeness['intervals'][0]['intervalpercentage'], 1.0)
+        print completeness
 
     def test_normalized_info2(self):
         ingestions = querydb.get_ingestions(echo=False)

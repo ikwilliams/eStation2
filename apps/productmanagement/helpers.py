@@ -9,6 +9,7 @@ from __future__ import absolute_import
 
 import os
 import datetime
+import operator
 
 from .exceptions import WrongSequence, WrongDateParameter
 
@@ -132,6 +133,7 @@ def find_gaps(unsorted_filenames, frequency, only_intervals=False, from_date=Non
                 intervals.append(current_interval)
             else:
                 current_interval[1] = date
+                current_interval[3] += 1
         else:
             filename = filenames.pop(0)
             original = original_filenames[filename]
@@ -148,7 +150,13 @@ def find_gaps(unsorted_filenames, frequency, only_intervals=False, from_date=Non
         date = frequency.next_date(date)
     if only_intervals:
         total = sum(interval[3] for interval in intervals)
+        remainder = 0.0
         for interval in intervals:
             interval[4] = float(interval[3]*100.0/float(total))
+            if interval[4] < 1.0:
+                remainder += 1.0 - interval[4]
+                interval[4] = 1.0
+        index, value = max(enumerate(intervals), key=operator.itemgetter(1))
+        intervals[index][4] -= remainder
         return intervals
     return gaps
