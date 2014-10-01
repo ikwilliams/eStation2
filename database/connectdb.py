@@ -29,10 +29,8 @@ class ConnectDB(object):
         if getattr(ConnectDB, "_testing", None) is None:
             setattr(ConnectDB, "_testing", sys.argv[0].lower().endswith('nosetests'))
         # Force through a global variable
-        if locals.es2globals['db_test_mode'] is not None:
-            if locals.es2globals['db_test_mode'] is True:
-                setattr(ConnectDB, "_testing", 1)
-
+        if locals.es2globals.get('db_test_mode'):
+            setattr(ConnectDB, "_testing", 1)
         return ConnectDB._testing
 
     @staticmethod
