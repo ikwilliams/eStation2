@@ -243,7 +243,7 @@ class Dataset(object):
         totfilesmissing = 0
 
         if len(intervals) > 1:
-            totfiles = self._frequency.count_dates(intervals[-1].from_date, intervals[len(intervals)].to_date)
+            totfiles = self._frequency.count_dates(intervals[0].from_date, intervals[len(intervals)].to_date)
         else:
             totfiles = self._frequency.count_dates(intervals[0].from_date, intervals[0].to_date)
 
