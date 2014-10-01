@@ -13,8 +13,11 @@ import datetime
 import sys
 from ..helpers import INTERVAL_TYPE
 from ..datasets import Dataset
-from ..exceptions import (WrongDateType, NoProductFound )
+from ..exceptions import (WrongDateType, NoProductFound)
 
+from lib.python import functions
+from database import querydb
+import json
 
 class TestDatasets(unittest.TestCase):
     # def setUp(self):
@@ -107,11 +110,89 @@ class TestDatasets(unittest.TestCase):
         dataset.get_filenames = lambda: self.files_dekad
         segments = dataset.get_dataset_normalized_info()
 
-        total=0
+        total = 0
         for segment in segments:
-            total+=segment['intervalpercentage']
+            total += segment['intervalpercentage']
             print segment['intervalpercentage']
         self.assertEquals(int(total), 100)
         self.assertEquals(segments[0]['intervalpercentage'], 50.0)
         self.assertEquals(segments[1]['intervalpercentage'], 25.0)
         self.assertEquals(segments[2]['intervalpercentage'], 25.0)
+
+    def test_normalized_info2(self):
+        ingestions = querydb.get_ingestions(echo=False)
+
+        completeness2 = {
+            'completeness': {
+                'firstdate': '2010-01-01',
+                'lastdate': '2014-12-21',
+                'totfiles': 312,
+                'missingfiles': 4,
+                'intervals': [{
+                    'fromdate': '2010-01-01',
+                    'todate': '2013-05-21',
+                    'intervaltype': 'present',
+                    'intervalpercentage': 20
+                }, {
+                    'fromdate': '2013-06-01',
+                    'todate': '2013-06-21',
+                    'intervaltype': 'missing',
+                    'intervalpercentage': 1
+                }, {
+                    'fromdate': '2014-07-01',
+                    'todate': '2014-07-21',
+                    'intervaltype': 'present',
+                    'intervalpercentage': 35
+                }, {
+                    'fromdate': '2014-08-01',
+                    'todate': '2014-08-21',
+                    'intervaltype': 'permanent-missing',
+                    'intervalpercentage': 2
+                }, {
+                    'fromdate': '2014-09-01',
+                    'todate': '2014-12-21',
+                    'intervaltype': 'present',
+                    'intervalpercentage': 32
+                }, {
+                    'fromdate': '2014-09-01',
+                    'todate': '2014-12-21',
+                    'intervaltype': 'missing',
+                    'intervalpercentage': 1
+                }, {
+                    'fromdate': '2014-09-01',
+                    'todate': '2014-12-21',
+                    'intervaltype': 'present',
+                    'intervalpercentage': 9
+                }]
+            }
+        }
+
+        if ingestions.__len__() > 0:
+            ingest_dict_all = []
+            for row in ingestions:
+                kwargs = {'product_code': row.productcode,
+                          'sub_product_code': row.subproductcode,
+                          'version': row.version,
+                          'mapset': row.mapsetcode}
+                print kwargs
+                #kwargs.update({'to_date': datetime.date(2013, 12, 31)})
+                dataset = Dataset(**kwargs)
+                completeness = dataset.get_dataset_normalized_info()
+                print completeness
+                ingest_dict = functions.row2dict(row)
+                ingest_dict['completeness'] = completeness
+                ingest_dict_all.append(ingest_dict)
+
+            #print ingest_dict_all
+
+            #ingestions_json = tojson(ingestions)
+            ingestions_json = json.dumps(ingest_dict_all,
+                                         ensure_ascii=False,
+                                         sort_keys=True,
+                                         indent=4,
+                                         separators=(', ', ': '))
+            ingestions_json = '{"success":true, "total":'+str(ingestions.__len__())+',"ingestions":'+ingestions_json+'}'
+        else:
+            ingestions_json = '{"success":false, "error":"No ingestions defined!"}'
+
+        print ingestions_json

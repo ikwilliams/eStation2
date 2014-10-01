@@ -82,8 +82,6 @@ class TestQuerydb(TestCase):
 
         mapset = querydb.get_mapset(mapsetcode='WGS84_Africa_1km')
         logger.info("Mapset: %s", mapset)
-        for row in mapset:
-            print row
 
         self.assertEqual(1, 1)
 
@@ -91,8 +89,6 @@ class TestQuerydb(TestCase):
 
         internet = querydb.get_internet(internet_id='USGS:EARLWRN:FEWSNET')
         logger.info("Internet source info: %s", internet)
-        for row in internet:
-            print row
 
         self.assertEqual(1, 1)
 
@@ -100,8 +96,6 @@ class TestQuerydb(TestCase):
 
         eumetcast = querydb.get_eumetcast(source_id='EO:EUM:DAT:SPOT:S10NDVI')
         logger.info("Eumetcast source info: %s", eumetcast)
-        for row in eumetcast:
-            print row
 
         self.assertEqual(1, 1)
 
@@ -109,8 +103,6 @@ class TestQuerydb(TestCase):
 
         product = querydb.get_product_native(productcode='fewsnet_rfe')
         logger.info("Native product info: %s", product)
-        for row in product:
-            print row
 
         self.assertEqual(1, 1)
 
@@ -121,8 +113,6 @@ class TestQuerydb(TestCase):
                                                  version='undefined',
                                                  datasource_descr_id='USGS:EARLWRN:FEWSNET')
         logger.info("Product IN info: %s", product_in)
-        for row in product_in:
-            print row
 
         self.assertEqual(1, 1)
 

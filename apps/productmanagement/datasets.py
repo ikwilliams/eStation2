@@ -232,43 +232,62 @@ class Dataset(object):
 
     def get_dataset_normalized_info(self, from_date=None, to_date=None):
 
-        intervals = [Interval(**self._extract_kwargs(interval)) for interval in self.find_intervals()]
-        tot_time_extension = intervals[-1].to_date-intervals[0].from_date
+        #intervals = [Interval(**self._extract_kwargs(interval)) for interval in self.find_intervals()]
+        #tot_time_extension = intervals[-1].to_date-intervals[0].from_date
 
-        segment_list = []
+        intervals = self.intervals
+
+        interval_list = []
         total_duration = 0.0
-        totfiles, totfilesmissing = 0
+        totfilescheck = 0
+        totfilesmissing = 0
+
+        if len(intervals) > 1:
+            totfiles = self._frequency.count_dates(intervals[-1].from_date, intervals[len(intervals)].to_date)
+        else:
+            totfiles = self._frequency.count_dates(intervals[0].from_date, intervals[0].to_date)
+
         # Assign first as duration in secs (and cumulate to total)
         for ii in range(0, len(intervals)):
-            if ii is 0:
-                delta = intervals[1].from_date - intervals[0].from_date
-            else:
-                delta = intervals[ii].to_date - intervals[ii-1].to_date
-
-            segm_duration = delta.total_seconds()
+            #if ii is 0:
+            #    delta = intervals[1].from_date - intervals[0].from_date
+            #else:
+            #    delta = intervals[ii].to_date - intervals[ii-1].to_date
+            #
+            #segm_duration = delta.total_seconds()
 
             totfilesinterval = self._frequency.count_dates(intervals[ii].from_date, intervals[ii].to_date)
-            totfiles += totfilesinterval
+            totfilescheck += totfilesinterval
+            interval_percentage = 100 * float(totfilesinterval)/float(totfiles)
+
             if intervals[ii].interval_type == 'missing':
                 totfilesmissing += totfilesinterval
+
             segment = {'totfiles': totfilesinterval,
-                       'fromdate': intervals[ii].from_date,
-                       'todate': intervals[ii].to_date,
+                       'fromdate': intervals[ii].from_date.strftime("%Y-%m-%d"),
+                       'todate': intervals[ii].to_date.strftime("%Y-%m-%d"),
                        'intervaltype': intervals[ii].interval_type,
-                       'intervalpercentage': segm_duration}
+                       'intervalpercentage': interval_percentage}
 
-            total_duration += segm_duration
-            segment_list.append(segment)
-        intervals = {}
+            #total_duration += segm_duration
+            interval_list.append(segment)
 
-        total_perc = 0
+        completeness = {
+                'firstdate': '2010-01-01',
+                'lastdate': '2014-12-21',
+                'totfiles': totfiles,
+                'missingfiles': totfilesmissing,
+                'intervals': interval_list
+        }
 
-        for ii in range(0, len(intervals)):
-            perc_duration = segment_list[ii]['intervalpercentage']/total_duration*100.
-            segment_list[ii]['intervalpercentage'] = perc_duration
-            total_perc += perc_duration
+        #total_perc = 0
 
-        return segment_list
+        #for ii in range(0, len(intervals)):
+        #    perc_duration = interval_list[ii]['intervalpercentage']/total_duration*100.
+        #    interval_list[ii]['intervalpercentage'] = perc_duration
+        #    total_perc += perc_duration
+
+        return completeness
 
     @property
     def intervals(self):

@@ -86,51 +86,6 @@ class Ingestion:
         #return web.ctx
         ingestions = querydb.get_ingestions(echo=False)
 
-        #completeness = {
-        #    'completeness': {
-        #        'firstdate': '2010-01-01',
-        #        'lastdate': '2014-12-21',
-        #        'totfiles': 312,
-        #        'missingfiles': 4,
-        #        'intervals': [{
-        #            'fromdate': '2010-01-01',
-        #            'todate': '2013-05-21',
-        #            'intervaltype': 'present',
-        #            'intervalpercentage': 20
-        #        }, {
-        #            'fromdate': '2013-06-01',
-        #            'todate': '2013-06-21',
-        #            'intervaltype': 'missing',
-        #            'intervalpercentage': 1
-        #        }, {
-        #            'fromdate': '2014-07-01',
-        #            'todate': '2014-07-21',
-        #            'intervaltype': 'present',
-        #            'intervalpercentage': 35
-        #        }, {
-        #            'fromdate': '2014-08-01',
-        #            'todate': '2014-08-21',
-        #            'intervaltype': 'permanent-missing',
-        #            'intervalpercentage': 2
-        #        }, {
-        #            'fromdate': '2014-09-01',
-        #            'todate': '2014-12-21',
-        #            'intervaltype': 'present',
-        #            'intervalpercentage': 32
-        #        }, {
-        #            'fromdate': '2014-09-01',
-        #            'todate': '2014-12-21',
-        #            'intervaltype': 'missing',
-        #            'intervalpercentage': 1
-        #        }, {
-        #            'fromdate': '2014-09-01',
-        #            'todate': '2014-12-21',
-        #            'intervaltype': 'present',
-        #            'intervalpercentage': 9
-        #        }]
-        #    }
-        #}
-
         if ingestions.__len__() > 0:
             ingest_dict_all = []
             for row in ingestions:
@@ -141,13 +96,13 @@ class Ingestion:
                 print kwargs
                 #kwargs.update({'to_date': datetime.date(2013, 12, 31)})
                 dataset = Dataset(**kwargs)
-                intervals = dataset.get_dataset_normalized_info()
-                #print intervals
-
+                completeness = dataset.get_dataset_normalized_info()
+                print completeness
                 ingest_dict = row2dict(row)
-                #ingest_dict.update(completeness)
+                ingest_dict['completeness'] = completeness
                 ingest_dict_all.append(ingest_dict)
-                print ingest_dict_all
+
+            #print ingest_dict_all
 
             #ingestions_json = tojson(ingestions)
             ingestions_json = json.dumps(ingest_dict_all,
@@ -157,7 +112,7 @@ class Ingestion:
                                          separators=(', ', ': '))
             ingestions_json = '{"success":true, "total":'+str(ingestions.__len__())+',"ingestions":'+ingestions_json+'}'
         else:
-            ingestions_json = '{"success":false, "error":"No data acquisitions defined!"}'
+            ingestions_json = '{"success":false, "error":"No ingestions defined!"}'
 
         return ingestions_json
 
