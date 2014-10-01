@@ -128,7 +128,7 @@ def find_gaps(unsorted_filenames, frequency, only_intervals=False, from_date=Non
         if not filenames or current_filename < filenames[0]:
             gaps.append(current_filename + original_ext)
             if not current_interval or current_interval[2] != INTERVAL_TYPE.MISSING:
-                current_interval = [date, date, INTERVAL_TYPE.MISSING]
+                current_interval = [date, date, INTERVAL_TYPE.MISSING, 1, 0.0]
                 intervals.append(current_interval)
             else:
                 current_interval[1] = date
@@ -140,11 +140,15 @@ def find_gaps(unsorted_filenames, frequency, only_intervals=False, from_date=Non
             else:
                 interval_type = INTERVAL_TYPE.PERMANENT_MISSING if original.lower().endswith(".missing") else INTERVAL_TYPE.PRESENT
                 if not current_interval or current_interval[2] != interval_type:
-                    current_interval = [date, date, interval_type]
+                    current_interval = [date, date, interval_type, 1, 0.0]
                     intervals.append(current_interval)
                 else:
                     current_interval[1] = date
+                    current_interval[3] += 1
         date = frequency.next_date(date)
     if only_intervals:
+        total = sum(interval[3] for interval in intervals)
+        for interval in intervals:
+            interval[4] = float(interval[3]*100.0/float(total))
         return intervals
     return gaps

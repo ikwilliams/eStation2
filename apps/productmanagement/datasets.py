@@ -11,7 +11,6 @@ from __future__ import absolute_import
 import datetime
 import os
 import glob
-import sys
 
 import locals
 from lib.python import es_logging as log
@@ -169,11 +168,12 @@ class Frequency(object):
 
 
 class Interval(object):
-    def __init__(self, interval_type, from_date, to_date):
+    def __init__(self, interval_type, from_date, to_date, length, percentage):
         self.interval_type = interval_type
         self.from_date = from_date
         self.to_date = to_date
-
+        self.length = length
+        self.percentage = percentage
 
 class Dataset(object):
     def _check_date(self, date):
@@ -217,8 +217,8 @@ class Dataset(object):
     def get_basenames(self):
         return list(os.path.basename(filename) for filename in self.get_filenames())
 
-    def find_intervals(self, from_date=None, to_date=None):
-        return find_gaps(self.get_basenames(), self._frequency, only_intervals=True, from_date=from_date or self.from_date, to_date=to_date or self.to_date)
+    def find_intervals(self, from_date=None, to_date=None, only_intervals=True):
+        return find_gaps(self.get_basenames(), self._frequency, only_intervals, from_date=from_date or self.from_date, to_date=to_date or self.to_date)
 
     def find_gaps(self, from_date=None, to_date=None):
         return find_gaps(self.get_basenames(), self._frequency, only_intervals=False, from_date=from_date or self.from_date, to_date=to_date or self.to_date)
@@ -228,66 +228,16 @@ class Dataset(object):
             "from_date": interval[0],
             "to_date": interval[1],
             "interval_type": interval[2],
+            "length": interval[3],
+            "percentage": interval[4],
         }
 
     def get_dataset_normalized_info(self, from_date=None, to_date=None):
-
-        #intervals = [Interval(**self._extract_kwargs(interval)) for interval in self.find_intervals()]
-        #tot_time_extension = intervals[-1].to_date-intervals[0].from_date
-
-        intervals = self.intervals
-
-        interval_list = []
-        total_duration = 0.0
-        totfilescheck = 0
-        totfilesmissing = 0
-
-        if len(intervals) > 1:
-            totfiles = self._frequency.count_dates(intervals[-1].from_date, intervals[len(intervals)].to_date)
-        else:
-            totfiles = self._frequency.count_dates(intervals[0].from_date, intervals[0].to_date)
-
-        # Assign first as duration in secs (and cumulate to total)
-        for ii in range(0, len(intervals)):
-            #if ii is 0:
-            #    delta = intervals[1].from_date - intervals[0].from_date
-            #else:
-            #    delta = intervals[ii].to_date - intervals[ii-1].to_date
-            #
-            #segm_duration = delta.total_seconds()
-
-            totfilesinterval = self._frequency.count_dates(intervals[ii].from_date, intervals[ii].to_date)
-            totfilescheck += totfilesinterval
-            interval_percentage = 100 * float(totfilesinterval)/float(totfiles)
-
-            if intervals[ii].interval_type == 'missing':
-                totfilesmissing += totfilesinterval
-
-            segment = {'totfiles': totfilesinterval,
-                       'fromdate': intervals[ii].from_date.strftime("%Y-%m-%d"),
-                       'todate': intervals[ii].to_date.strftime("%Y-%m-%d"),
-                       'intervaltype': intervals[ii].interval_type,
-                       'intervalpercentage': interval_percentage}
-
-            #total_duration += segm_duration
-            interval_list.append(segment)
-
-        completeness = {
-                'firstdate': '2010-01-01',
-                'lastdate': '2014-12-21',
-                'totfiles': totfiles,
-                'missingfiles': totfilesmissing,
-                'intervals': interval_list
-        }
-
-        #total_perc = 0
-
-        #for ii in range(0, len(intervals)):
-        #    perc_duration = interval_list[ii]['intervalpercentage']/total_duration*100.
-        #    interval_list[ii]['intervalpercentage'] = perc_duration
-        #    total_perc += perc_duration
-
-        return completeness
+        return list({'totfiles': interval.length,
+                     'fromdate': interval.from_date,
+                     'todate': interval.to_date,
+                     'intervaltype': interval.interval_type,
+                     'intervalpercentage': interval.percentage} for interval in self.intervals)
 
     @property
     def intervals(self):
