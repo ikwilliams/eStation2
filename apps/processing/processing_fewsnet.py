@@ -52,7 +52,7 @@ version='undefined'
 #activate_fewsnet_rfe_comput=0
 
 #   switch wrt temporal resolution
-activate_10d_comput=0
+activate_10d_comput=1
 activate_1month_comput=1
 
 #   specific switch for each subproduct
