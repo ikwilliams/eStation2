@@ -26,6 +26,7 @@ import resource
 from datetime import date
 import uuid
 import pickle
+import json
 
 # Import eStation2 modules
 from lib.python import es_logging as log
@@ -34,6 +35,34 @@ from config.es_constants import *
 logger = log.my_logger(__name__)
 
 dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'derived'}
+
+
+def row2dict(row):
+    d = {}
+    for column in row.c._all_cols:
+        d[column.name] = str(getattr(row, column.name))
+
+    return d
+
+
+def tojson(queryresult):
+    jsonresult = ''
+    for row in queryresult:
+        da = row2dict(row)
+        jsonresult = jsonresult + json.dumps(da,
+                                             ensure_ascii=False,
+                                             sort_keys=True,
+                                             indent=4,
+                                             separators=(',', ': ')) + ', '
+    jsonresult = jsonresult[:-2]
+    return jsonresult
+
+
+# Return True if the date is in the correct format
+def checkDateFormat(myString):
+    isDate = re.match('[0-1][0-9]\/[0-3][0-9]\/[1-2][0-9]{3}', myString)
+    return isDate
+
 
 ######################################################################################
 #                            DATE FUNCTIONS

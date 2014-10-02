@@ -8,97 +8,17 @@
 #import locals
 import sys
 import traceback
-import json
 import sqlsoup
 import datetime
-import time
-import re
-#import JsonSerializer
-#import anyjson
 
-#from sqlalchemy import engine
 from sqlalchemy.sql import func, select, or_, and_, desc, asc, expression
 from sqlalchemy.orm import aliased
-
 from lib.python import es_logging as log
-#from config import es_constants
-#from crud import CrudDB
-
 from database import connectdb
-
-#from apps.acquisition.get_eumetcast import *
-
-#from apps.productmanagement.datasets import Dataset
-
 
 logger = log.my_logger(__name__)
 
-
-######################################################################################
-#   connect_db()
-#   Purpose: Create a connection to the database
-#   Author: Jurriaan van 't Klooster
-#   Date: 2014/05/16
-#   Input: None
-#   Output: Return connection handler to the database
-#def connect_db_sqlsoup():
-#
-#    try:
-#        sqlsoup_dns = connectdb.ConnectDB.get_db_url()
-#
-#        dbconn = sqlsoup.SQLSoup(sqlsoup_dns)
-#        dbconn.schema = es_constants.dbglobals['schema_products']
-#        return dbconn
-#    except:
-#        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-#        #print traceback.format_exc()
-#        # Exit the script and print an error telling what happened.
-#        logger.error("Database connection failed!\n -> {}".format(exceptionvalue))
-#        #raise Exception("Database connection failed!\n ->%s" % exceptionvalue)
-
-
-#def connect_db():
-#
-#    try:
-#        schema = es_constants.dbglobals['schema_products']
-#
-#        db_url = "postgresql://%s:%s@%s/%s" % (es_constants.dbglobals['dbUser'],
-#                                               es_constants.dbglobals['dbPass'],
-#                                               es_constants.dbglobals['host'],
-#                                               es_constants.dbglobals['dbName'])
-#        dbconn = engine.create_engine(db_url)
-#        dbconn.schema = schema
-#        return dbconn
-#    except:
-#        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-#        #print traceback.format_exc()
-#        # Exit the script and print an error telling what happened.
-#        logger.error("Database connection failed!\n -> {}".format(exceptionvalue))
-#        #raise Exception("Database connection failed!\n ->%s" % exceptionvalue)
-
 db = connectdb.ConnectDB().db
-#db = dbconn.db
-
-def row2dict(row):
-    d = {}
-    for column in row.c._all_cols:
-        d[column.name] = str(getattr(row, column.name))
-
-    return d
-
-
-def toJson(queryResult):
-    tojson = ''
-    for row in queryResult:
-        da = row2dict(row)
-        tojson = tojson + json.dumps(da, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': ')) + ', '
-    tojson = tojson[:-2]
-    return tojson
-
-# Return True if the date is in the correct format
-def checkDateFormat(myString):
-    isDate = re.match('[0-1][0-9]\/[0-3][0-9]\/[1-2][0-9]{3}', myString)
-    return isDate
 
 
 ######################################################################################
@@ -116,16 +36,6 @@ def checkDateFormat(myString):
 #
 def get_ingestions(echo=False):
     try:
-        # session = db.session
-        # i = aliased(db.ingestion)
-        # ingestions = session.query(func.CONCAT(i.productcode, '_', i.subproductcode, '_', i.version, '_', i.mapsetcode).label('ingestionID'),
-        #                            i.productcode,
-        #                            i.subproductcode,
-        #                            i.version,
-        #                            i.mapsetcode,
-        #                            i.defined_by,
-        #                            i.activated).order_by(desc(i.productcode)).first()
-
         i = db.ingestion._table
         m = db.mapset._table
         s = select([func.CONCAT(i.c.productcode, '_', i.c.version).label('productID'),
@@ -140,76 +50,9 @@ def get_ingestions(echo=False):
 
         s = s.alias('ingest')
         i = db.map(s, primary_key=[s.c.productID, i.c.subproductcode, i.c.mapsetcode])
-        ingestions = i.order_by(desc(i.productcode)).all()
 
-        #completeness = {
-        #    'completeness': {
-        #        'firstdate': '2010-01-01',
-        #        'lastdate': '2014-12-21',
-        #        'totfiles': 312,
-        #        'missingfiles': 4,
-        #        'intervals': [{
-        #            'fromdate': '2010-01-01',
-        #            'todate': '2013-05-21',
-        #            'intervaltype': 'present',
-        #            'intervalpercentage': 20
-        #        }, {
-        #            'fromdate': '2013-06-01',
-        #            'todate': '2013-06-21',
-        #            'intervaltype': 'missing',
-        #            'intervalpercentage': 1
-        #        }, {
-        #            'fromdate': '2014-07-01',
-        #            'todate': '2014-07-21',
-        #            'intervaltype': 'present',
-        #            'intervalpercentage': 35
-        #        }, {
-        #            'fromdate': '2014-08-01',
-        #            'todate': '2014-08-21',
-        #            'intervaltype': 'permanent-missing',
-        #            'intervalpercentage': 2
-        #        }, {
-        #            'fromdate': '2014-09-01',
-        #            'todate': '2014-12-21',
-        #            'intervaltype': 'present',
-        #            'intervalpercentage': 32
-        #        }, {
-        #            'fromdate': '2014-09-01',
-        #            'todate': '2014-12-21',
-        #            'intervaltype': 'missing',
-        #            'intervalpercentage': 1
-        #        }, {
-        #            'fromdate': '2014-09-01',
-        #            'todate': '2014-12-21',
-        #            'intervaltype': 'present',
-        #            'intervalpercentage': 9
-        #        }]
-        #    }
-        #}
-        #
-        #if ingestions.__len__() > 0:
-        #    ingest_dict_all = []
-        #    for row in ingestions:
-        #        kwargs = {'product_code': row.productcode, 'sub_product_code': row.subproductcode, 'version': row.version, 'mapset': row.mapsetcode}
-        #        print kwargs
-        #        #kwargs.update({'to_date': datetime.date(2013, 12, 31)})
-        #        dataset = Dataset(**kwargs)
-        #        intervals = dataset.get_dataset_normalized_info()
-        #        print intervals
-        #
-        #        ingest_dict = row2dict(row)
-        #        ingest_dict.update(completeness)
-        #        ingest_dict_all.append(ingest_dict)
-        #
-        #    #ingestions_json = toJson(ingestions)
-        #    ingestions_json = json.dumps(ingest_dict_all, ensure_ascii=False, sort_keys=True, indent=4, separators=(', ', ': '))
-        #
-        #    # ingestions_json = json.dumps(ingestions,  ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': '))
-        #    ingestions_json = '{"success":true, "total":'+str(ingestions.__len__())+',"ingestions":'+ingestions_json+'}'
-        #    # ingestions_json = '{"success":true, "total":1,"ingestions":'+ingestions_json+'}'
-        #
-        #else:
-        #    ingestions_json = '{"success":false, "error":"No data acquisitions defined!"}'
+        where = and_(i.c.activated)
+        ingestions = i.filter(where).order_by(desc(i.productcode)).all()
 
         if echo:
             for row in ingestions:
@@ -238,81 +81,29 @@ def get_ingestions(echo=False):
 #    SELECT productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data
 #    FROM products.product_acquisition_data_source;
 #
-def get_dataacquisitions(echo=False, tojson=True):
+def get_dataacquisitions(echo=False):
     try:
         pa = db.product_acquisition_data_source._table
         s = select([ func.CONCAT(pa.c.productcode, '_', pa.c.version).label('productID'),
-                  pa.c.productcode,
-                  pa.c.subproductcode,
-                  pa.c.version,
-                  pa.c.data_source_id,
-                  pa.c.defined_by,
-                  pa.c.type,
-                  pa.c.activated,
-                  pa.c.store_original_data,
-                  expression.literal("05/06/2014").label('latest')], from_obj=[pa])
+                     pa.c.productcode,
+                     pa.c.subproductcode,
+                     pa.c.version,
+                     pa.c.data_source_id,
+                     pa.c.defined_by,
+                     pa.c.type,
+                     pa.c.activated,
+                     pa.c.store_original_data,
+                     expression.literal("05/06/2014").label('latest')], from_obj=[pa])
 
         s = s.alias('mypa')
         pa = db.map(s, primary_key=[s.c.productID])
         dataacquisitions = pa.order_by(desc(pa.productcode)).all()
 
-        # session = db.session
-        # pa = aliased(db.product_acquisition_data_source)
-        #
-        # dataacquisitions = session.query(func.CONCAT(pa.productcode, '_', pa.subproductcode, '_', pa.version).label('productID'),
-        #                                  pa.productcode,
-        #                                  pa.subproductcode,
-        #                                  pa.version,
-        #                                  pa.data_source_id,
-        #                                  pa.defined_by,
-        #                                  pa.type,
-        #                                  pa.activated,
-        #                                  pa.store_original_data,
-        #                                  expression.literal("05/06/2014").label('latest')).order_by(desc(pa.productcode)).first()
-
-        #if dataacquisitions.__len__() > 0:
-        #    #dataacquisitions_json = toJson(dataacquisitions)
-        #
-        #    acq_dict_all = []
-        #    for row in dataacquisitions:
-        #        acq_dict = row2dict(row)
-        #        # Retrieve datetime of latest acquired file and lastest datetime
-        #        # the acquisition was active of a specific eumetcast id
-        #        acq_dates = get_eumetcast_info(row.data_source_id)
-        #        if acq_dates:
-        #            for key in acq_dates.keys():
-        #                #acq_info += '"%s": "%s", ' % (key, acq_dates[key])
-        #                if isinstance(acq_dates[key], datetime.date):
-        #                    datetostring = acq_dates[key].strftime("%y-%m-%d %H:%M")
-        #                    acq_dict[key] = datetostring
-        #                else:
-        #                    acq_dict[key] = acq_dates[key]
-        #        else:
-        #            acq_dict['time_latest_copy'] = datetime.datetime.now().strftime("%y-%m-%d %H:%M")
-        #            acq_dict['time_latest_exec'] = datetime.datetime.now().strftime("%y-%m-%d %H:%M")
-        #            acq_dict['lenght_proc_list'] = datetime.datetime.now().strftime("%y-%m-%d %H:%M")
-        #
-        #        acq_dict_all.append(acq_dict)
-        #
-        #        acq_json = json.dumps(acq_dict_all, ensure_ascii=False, sort_keys=True, indent=4, separators=(', ', ': '))
-        #
-        #        logger.error("Just to log something in this log file to see if the rotatingfilehandler works!\n")
-        #
-        #        # dataacquisitions_json = json.dumps(dataacquisitions, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': '))
-        #        dataacquisitions_json = '{"success":true, "total":'+str(dataacquisitions.__len__())+',"dataacquisitions":'+acq_json+'}'
-        #        # dataacquisitions_json = '{"success":true, "total":1,"dataacquisitions":['+dataacquisitions_json+']}'
-        #
-        #else:
-        #    dataacquisitions_json = '{"success":false, "error":"No data acquisitions defined!"}'
-
         if echo:
             for row in dataacquisitions:
                 print row
 
-        if tojson:
-            return dataacquisitions
-        else:
-            return dataacquisitions
+        return dataacquisitions
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
@@ -339,9 +130,8 @@ def get_dataacquisitions(echo=False, tojson=True):
 #   ORDER BY pc.order_index, productcode
 #
 def get_products(echo=False, activated=True):
-#def get_products(echo=False):
     try:
-        session = db.session
+        #session = db.session
 
         #pc = session.query(db.product_category.category_id,
         #                   db.product_category.descriptive_name,
@@ -388,26 +178,18 @@ def get_products(echo=False, activated=True):
         s = s.alias('pl')
         pl = db.map(s, primary_key=[s.c.productID])
 
-        #where = and_(pl.c.product_type == 'Native')
-
         if activated or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
             where = and_(pl.c.product_type == 'Native', pl.c.activated)
         else:
             where = and_(pl.c.product_type == 'Native', pl.c.activated != 't')
 
         productslist = pl.filter(where).order_by(asc(pl.c.order_index), asc(pl.c.productcode)).all()
-        #productslist.filter(where).order_by(asc(productslist.c.order_index), asc(productslist.c.productcode)).all()
-        productslist_json = toJson(productslist)
 
-        #productslist_json = json.dumps(productslist, sort_keys=True, indent=4, separators=(',', ': '))
-        productslist_json = '{"success":true, "total":'+str(productslist.__len__())+',"products":['+productslist_json+']}'
-
-        #echo '{"success":false,"error":"' . 'No records found!' . '"}';
         if echo:
             for row in productslist:
                 print row
 
-        return productslist_json
+        return productslist
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
@@ -543,7 +325,6 @@ def get_eumetcast(source_id='', allrecs=False, echo=False):
     try:
         if allrecs:
             eumetcasts = db.eumetcast_source.order_by(asc(db.eumetcast_source.eumetcast_id)).all()
-            #eumetcasts.sort()
             if echo:
                 for row in eumetcasts:
                     print row
@@ -697,8 +478,8 @@ def get_ingestion_subproduct(allrecs=False, echo=False, productcode='', version=
     try:
         ingestion = []
         if allrecs:
-            if db.ingestion.filter(db.ingestion.activated == True).count() >= 1:
-                ingestion = db.ingestion.filter(db.ingestion.activated == True).\
+            if db.ingestion.filter(db.ingestion.activated is True).count() >= 1:
+                ingestion = db.ingestion.filter(db.ingestion.activated is True).\
                     order_by(asc(db.ingestion.productcode)).all()
                 if echo:
                     for row in ingestion:
@@ -775,11 +556,6 @@ def get_datasource_descr(echo=False, source_type='', source_id=''):
     try:
         session = db.session
         if source_type == 'EUMETCAST':
-            #q = "select e.filter_expression_jrc, dd.* \
-            #     from products.datasource_description dd \
-            #     inner join products.eumetcast_source e \
-            #     on e.datasource_descr_id = dd.datasource_descr_id \
-            #     where e.eumetcast_id = '%s' " % source_id
             es = aliased(db.eumetcast_source)
             dsd = aliased(db.datasource_description)
             datasource_descr = session.query(es.filter_expression_jrc, dsd).join(dsd). \
@@ -823,7 +599,7 @@ def get_eumetcast_sources(echo=False):
         # e.g. es.c.filter_expression_jrc
         eumetcast_sources = session.query(pads, es.c.eumetcast_id, es.c.filter_expression_jrc).\
             outerjoin(es, pads.data_source_id == es.c.eumetcast_id).\
-            filter(and_(pads.type == 'EUMETCAST', pads.activated == True)).all()
+            filter(and_(pads.type == 'EUMETCAST', pads.activated is True)).all()
 
         if echo:
             for row in eumetcast_sources:
