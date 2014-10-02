@@ -17,18 +17,21 @@ import zipfile
 import bz2
 import glob
 import ntpath
+import os
+import numpy as N
 
 # import eStation2 modules
-import database.crud as crud
-import database.querydb as querydb
-import lib.python.functions as func
+#from database import crud
+from database import querydb
+from lib.python import functions
 from lib.python import es_logging as log
-from lib.python.mapset import *
-from lib.python.metadata import *
-from config.es_constants import *
+from lib.python import mapset
+from lib.python import metadata
+from config import es_constants
 
 import pygrib
 from osgeo import gdal
+from osgeo import osr
 
 logger = log.my_logger(__name__)
 
@@ -207,8 +210,8 @@ def pre_process_msg_mpe (tmpdir , input_files):
     grbs = pygrib.open(out_tmp_grib_file)
     grb = grbs.select(name='Instantaneous rain rate')[0]
     data = grb.values
-    output_driver = gdal.GetDriverByName(ES2_OUTFILE_FORMAT)
-    output_ds = output_driver.Create(out_tmp_tiff_file, 3712, 3712, 1, GDT_Float64)
+    output_driver = gdal.GetDriverByName(es_constants.ES2_OUTFILE_FORMAT)
+    output_ds = output_driver.Create(out_tmp_tiff_file, 3712, 3712, 1, gdal.GDT_Float64)
     output_ds.GetRasterBand(1).WriteArray(data)
 
     return out_tmp_tiff_file
@@ -557,7 +560,7 @@ def pre_process_georef_netcdf (native_mapset_code, tmpdir, input_files):
         list_input_files.append(input_files)
 
     # Create native mapset object
-    native_mapset = MapSet()
+    native_mapset = mapset.MapSet()
     native_mapset.assigndb(native_mapset_code)
 
     # Convert netcdf to GTIFF
@@ -724,7 +727,7 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
     if native_mapset_code != 'default' and (not georef_already_done):
 
         # Create Mapset object and test
-        native_mapset = MapSet()
+        native_mapset = mapset.MapSet()
         native_mapset.assigndb(native_mapset_code)
         logger.debug('Native mapset IS passed: ' + native_mapset.short_name)
 
@@ -736,12 +739,12 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
             logger.debug('Intermediate file: ' + intermFile)
 
             # Open input dataset in update mode
-            orig_ds = gdal.Open(intermFile, GA_Update)
+            orig_ds = gdal.Open(intermFile, gdal.GA_Update)
 
             # Test result: in case of error (e.g. for nc files, it does not raise exception)
             # If wrong -> Open input dataset in read-only
             if orig_ds is None:
-                orig_ds = gdal.Open(intermFile, GA_ReadOnly)
+                orig_ds = gdal.Open(intermFile, gdal.GA_ReadOnly)
 
             # Otherwise read from native_mapset, and assign to ds
             orig_cs = native_mapset.spatial_ref
@@ -780,7 +783,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             return 1
 
     # Instance metadata object
-    sds_meta = SdsMetadata()
+    sds_meta = metadata.SdsMetadata()
 
     # -------------------------------------------------------------------------
     # Assign dir-name
@@ -822,6 +825,8 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # Get information from 'product' table
         args = {"productcode": product['productcode'], "subproductcode": subproducts[ii]['subproduct'], "version":product['version']}
         product_info = querydb.get_product_out_info(echo=echo_query, **args)
+        product_info = functions.list_to_element(product_info)
+
         out_data_type = product_info.data_type_id
         out_scale_factor = product_info.scale_factor
         out_offset = product_info.scale_offset
@@ -831,46 +836,46 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         out_data_type_gdal = conv_data_type_to_gdal(out_data_type)
         out_data_type_numpy = conv_data_type_to_numpy(out_data_type)
 
-        mapset = MapSet()
-        mapset.assigndb(subproducts[ii]['mapsetcode'])
+        trg_mapset=mapset.MapSet()
+        trg_mapset.assigndb(subproducts[ii]['mapsetcode'])
         # Check target-mapset
-        if mapset == '':
+        if trg_mapset == '':
             logger.debug('Target mapset NOT passed: keep the native one.')
             mapset_id = 'native'
         else:
-            mapset_id = mapset.short_name
+            mapset_id = trg_mapset.short_name
             logger.debug('Target mapset IS passed: ' + mapset_id)
 
         # Convert the in_date format into a convenient one for DB and file naming
         # (i.e YYYYMMDD or YYYYMMDDHHMM)
         if datasource_descr.date_type == 'YYYYMMDD':
-            if func.is_date_yyyymmdd(in_date):
+            if functions.is_date_yyyymmdd(in_date):
                 output_date_str = in_date
             else:
                 output_date_str = -1
 
         if datasource_descr.date_type == 'YYYYMMDDHHMM':
-            if func.is_date_yyyymmddhhmm(in_date):
+            if functions.is_date_yyyymmddhhmm(in_date):
                 output_date_str = in_date
             else:
                 output_date_str = -1
 
         if datasource_descr.date_type == 'YYYYDOY_YYYYDOY':
-            output_date_str = func.conv_date_yyyydoy_2_yyyymmdd(str(in_date)[0:7])
+            output_date_str = functions.conv_date_yyyydoy_2_yyyymmdd(str(in_date)[0:7])
 
         if datasource_descr.date_type == 'YYYYMMDD_YYYYMMDD':
             output_date_str = str(in_date)[0:8]
-            if not func.is_date_yyyymmdd(output_date_str):
+            if not functions.is_date_yyyymmdd(output_date_str):
                 output_date_str = -1
 
         if datasource_descr.date_type == 'YYYYDOY':
-            output_date_str = func.conv_date_yyyydoy_2_yyyymmdd(in_date)
+            output_date_str = functions.conv_date_yyyydoy_2_yyyymmdd(in_date)
 
         if datasource_descr.date_type == 'YYYY_MM_DKX':
-            output_date_str = func.conv_yyyy_mm_dkx_2_yyyymmdd(in_date)
+            output_date_str = functions.conv_yyyy_mm_dkx_2_yyyymmdd(in_date)
 
         if datasource_descr.date_type == 'YYMMK':
-            output_date_str = func.conv_yymmk_2_yyyymmdd(in_date)
+            output_date_str = functions.conv_yymmk_2_yyyymmdd(in_date)
 
         if output_date_str == -1:
             output_date_str = in_date+'_DATE_ERROR_'
@@ -888,7 +893,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
                 hour = None
 
         # Define output directory and make sure it exists
-        output_directory = data_dir_out+ func.set_path_sub_directory(product['productcode'],subproducts[ii]['subproduct'],
+        output_directory = data_dir_out+ functions.set_path_sub_directory(product['productcode'],subproducts[ii]['subproduct'],
                                                                 'Ingest', version_undef, mapset_id)
         try:
             if not os.path.exists(output_directory):
@@ -898,7 +903,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             return 1
 
         # Define output filename
-        output_filename = output_directory + func.set_path_filename(output_date_str,
+        output_filename = output_directory + functions.set_path_filename(output_date_str,
                                                                product['productcode'],
                                                                subproducts[ii]['subproduct'],
                                                                mapset_id,
@@ -910,14 +915,14 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         native_mapset_code = datasource_descr.native_mapset
         if native_mapset_code != 'default':
-            native_mapset = MapSet()
+            native_mapset = mapset.MapSet()
             native_mapset.assigndb(native_mapset_code)
         else:
             native_mapset = ''
 
-        native_mapset_code != 'default'
+        # ??? native_mapset_code != 'default'
         # Open input dataset in read-only
-        orig_ds = gdal.Open(intermFile, GA_ReadOnly)
+        orig_ds = gdal.Open(intermFile, gdal.GA_ReadOnly)
 
         # Import CoordSys from file
         orig_cs = osr.SpatialReference()
@@ -929,39 +934,42 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # Check if re-projection has to be done
         reprojection = 1
         # If no target mapset
-        if mapset == '':
+        if trg_mapset == '':
             reprojection = 0
         else:
             # .. OR if both defined, and equal
             if native_mapset != '':
-                if mapset.short_name == native_mapset.short_name:
+                if trg_mapset.short_name == native_mapset.short_name:
                     reprojection = 0
 
         # -------------------------------------------------------------------------
         # Generate the output file
         # -------------------------------------------------------------------------
         # Prepare output driver
-        out_driver = gdal.GetDriverByName(ES2_OUTFILE_FORMAT)
+        out_driver = gdal.GetDriverByName(es_constants.ES2_OUTFILE_FORMAT)
+
+        # Input data geo-referenced - OR use native mapset.
+
 
         if reprojection == 1:
 
-            logger.debug('Doing re-projection to target mapset: %s' % mapset.short_name)
+            logger.debug('Doing re-projection to target mapset: %s' % trg_mapset.short_name)
             # Get target SRS from mapset
-            out_cs = mapset.spatial_ref
-            out_size_x = mapset.size_x
-            out_size_y = mapset.size_y
+            out_cs = trg_mapset.spatial_ref
+            out_size_x = trg_mapset.size_x
+            out_size_y = trg_mapset.size_y
 
             # Create target in memory
             mem_driver = gdal.GetDriverByName('MEM')
 
             # Assign mapset to dataset in memory
             mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
-            mem_ds.SetGeoTransform(mapset.geo_transform)
+            mem_ds.SetGeoTransform(trg_mapset.geo_transform)
             mem_ds.SetProjection(out_cs.ExportToWkt())
 
             # Apply Reproject-Image to the memory-driver
             res = gdal.ReprojectImage(orig_ds, mem_ds, orig_cs.ExportToWkt(), out_cs.ExportToWkt(),
-                                      ES2_OUTFILE_INTERP_METHOD)
+                                      es_constants.ES2_OUTFILE_INTERP_METHOD)
 
             logger.debug('Re-projection to target done.')
 
@@ -973,7 +981,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
                                        out_data_type_numpy, out_scale_factor, out_offset, out_nodata)
 
             # Create a copy to output_file
-            trg_ds = out_driver.CreateCopy(output_filename, mem_ds, 0, [ES2_OUTFILE_OPTIONS])
+            trg_ds = out_driver.CreateCopy(output_filename, mem_ds, 0, [es_constants.ES2_OUTFILE_OPTIONS])
             trg_ds.GetRasterBand(1).WriteArray(scaled_data)
 
         else:
@@ -986,7 +994,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
             # No reprojection, only format-conversion
             trg_ds = out_driver.Create(output_filename, orig_size_x, orig_size_y, 1, out_data_type_gdal,
-                                       [ES2_OUTFILE_OPTIONS])
+                                       [es_constants.ES2_OUTFILE_OPTIONS])
             trg_ds.SetProjection(orig_ds.GetProjectionRef())
             trg_ds.SetGeoTransform(orig_geo_transform)
 
@@ -1151,7 +1159,7 @@ def mosaic_lsasaf_msg(in_files, output_file, format):
     for ifile in in_files:
         if ifile != '':
             # Open and append to list
-            fidin = gdal.Open(ifile, GA_ReadOnly)
+            fidin = gdal.Open(ifile, gdal.GA_ReadOnly)
             fid.append(fidin)
             # Find the region and append to list
             region = re.search(pattern, ntpath.basename(ifile))
@@ -1196,7 +1204,7 @@ def mosaic_lsasaf_msg(in_files, output_file, format):
 
     # instantiate output file
     out_driver = gdal.GetDriverByName('GTiff')
-    out_ds = out_driver.Create(output_file, out_ns, out_nl, 1, dataType, [ES2_OUTFILE_OPTIONS])
+    out_ds = out_driver.Create(output_file, out_ns, out_nl, 1, dataType, [es_constants.ES2_OUTFILE_OPTIONS])
 
     # assume only 1 band
     outband = out_ds.GetRasterBand(1)
@@ -1311,21 +1319,21 @@ def conv_data_type_to_numpy(type):
 #
 def conv_data_type_to_gdal(type):
     if type == 'Byte':
-        return GDT_Byte
+        return gdal.GDT_Byte
     elif type == 'Int16':
-        return GDT_Int16
+        return gdal.GDT_Int16
     elif type == 'UInt16':
-        return GDT_UInt16
+        return gdal.GDT_UInt16
     elif type == 'Int32':
-        return GDT_Int32
+        return gdal.GDT_Int32
     elif type == 'UInt32':
-        return GDT_UInt32
+        return gdal.GDT_UInt32
     elif type == 'Float32':
-        return GDT_Float32
+        return gdal.GDT_Float32
     elif type == 'Float64':
-        return GDT_Float64
+        return gdal.GDT_Float64
     elif type == 'CFloat64':
-        return GDT_CFloat64
+        return gdal.GDT_CFloat64
     else:
-        return GDT_Int16
+        return gdal.GDT_Int16
 

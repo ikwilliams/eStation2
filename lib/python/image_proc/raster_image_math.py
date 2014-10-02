@@ -23,7 +23,7 @@ __author__ = 'clerima'
 #                               create the output file(s) every time (no upgrade).
 #                               E.g. -9999 in the input file might be recoded to -10000 in the output
 #
-#                               Nevertheless if input_nodata id <def> and output_nodata is <undef> the latter is assigned
+#                               Nevertheless if input_nodata is <def> and output_nodata is <undef> the latter is assigned
 #                               to the value of inputs.
 #
 #                               In functions like <min>, <max> in the loop over files we update an output if we find
@@ -37,8 +37,8 @@ import locals
 
 # Import eStation lib modules
 from lib.python import es_logging as log
-from lib.python.metadata import *
-from lib.python.functions import *
+from lib.python import metadata
+from lib.python import functions
 
 # Import third-party modules
 from osgeo.gdalconst import *
@@ -1348,7 +1348,7 @@ def return_as_list(input_args):
 def assign_metadata_processing(input_file_list, output_file):
 
     # Create Metadata object
-    sds_meta = SdsMetadata()
+    sds_meta = metadata.SdsMetadata()
 
     # Check if the input file is single, or a list
     if isinstance(input_file_list, list) or isinstance(input_file_list, tuple):
@@ -1362,7 +1362,7 @@ def assign_metadata_processing(input_file_list, output_file):
     # Modify/Assign some to the ingested file
     sds_meta.assign_comput_time_now()
 
-    [productcode, subproductcode, version, str_date, mapset] = get_all_from_path_full(output_file)
+    [productcode, subproductcode, version, str_date, mapset] = functions.get_all_from_path_full(output_file)
     sds_meta.assign_from_product(productcode,subproductcode,version)
 
     sds_meta.assign_date(str_date)

@@ -1,6 +1,8 @@
 __author__ = "Jurriaan van 't Klooster"
 
+import locals
 import sys
+
 # Import eStation lib modules
 from lib.python import es_logging as log
 from config import es_constants

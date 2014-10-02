@@ -2,7 +2,7 @@
 #	purpose: Define the processing chain for ndvi
 #	author:  M.Clerici & Jurriaan van't Klooster
 #	date:	 25.06.2014
-#   descr:	 Generate additional derived products / implements processing chains
+#   descr:	 Generate additional Derived products / implements processing chains
 #	history: 1.0
 #
 
@@ -12,16 +12,18 @@ import locals
 
 # Import std modules
 import glob
+import os
 
 # Import eStation2 modules
-from config.es_constants import *
-import database.querydb as querydb
-from lib.python.functions import *
-from lib.python.metadata import *
+from config import es_constants
+from database import querydb
+from lib.python import functions
+from lib.python import metadata
 from lib.python.image_proc import raster_image_math
-from lib.python.image_proc.recode import *
-import database.crud as crud
+from lib.python.image_proc import recode
+from database import crud
 from apps.processing.processing_switches import *
+from lib.python import es_logging as log
 
 # Import third-party modules
 from ruffus import *
@@ -112,10 +114,10 @@ activate_ndvi_1monicn = 1
 #   ---------------------------------------------------------------------
 #   Define input files (NDV)
 starting_sprod='NDV'
-in_prod_ident = set_path_filename_no_date(prod, starting_sprod, mapset, ext)
+in_prod_ident = functions.set_path_filename_no_date(prod, starting_sprod, mapset, ext)
 
 input_dir = locals.es2globals['data_dir']+ \
-            set_path_sub_directory(prod, starting_sprod, 'tif', version, mapset)
+            functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
 
 starting_files = input_dir+"*"+in_prod_ident
 
@@ -126,8 +128,8 @@ starting_files = input_dir+"*"+in_prod_ident
 #   ---------------------------------------------------------------------
 #   NDV avg x dekad (i.e. avg_dekad)
 output_sprod="10DAVG"
-prod_ident_10davg = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_10davg  = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_10davg = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_10davg  = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
 formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_10davg+"{MMDD[0]}"+prod_ident_10davg]
@@ -136,8 +138,8 @@ formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_10davg+"{MMDD[0]}"+prod_iden
 @collate(starting_files, formatter(formatter_in),formatter_out)
 def vgt_ndvi_10davg_no_filter(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_avg_image(**args)
     #upsert_processed_ruffus(output_file)
@@ -146,8 +148,8 @@ def vgt_ndvi_10davg_no_filter(input_file, output_file):
 #   NDV min x dekad (i.e. min_dekad)
 output_sprod="10DMIN"
 
-prod_ident_10dmin = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_10dmin  = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_10dmin = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_10dmin  = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
 formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_10dmin+"{MMDD[0]}"+prod_ident_10dmin]
@@ -157,8 +159,8 @@ formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_10dmin+"{MMDD[0]}"+prod_iden
 @follows(vgt_ndvi_10davg_no_filter)
 def vgt_ndvi_10dmin_no_filter(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_min_image(**args)
     #upsert_processed_ruffus(output_file)
@@ -166,8 +168,8 @@ def vgt_ndvi_10dmin_no_filter(input_file, output_file):
 #   ---------------------------------------------------------------------
 #   NDV max x dekad (i.e. max_dekad)
 output_sprod="10DMAX"
-prod_ident_10dmax = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_10dmax  = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_10dmax = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_10dmax  = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
 formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_10dmax+"{MMDD[0]}"+prod_ident_10dmax]
@@ -177,8 +179,8 @@ formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_10dmax+"{MMDD[0]}"+prod_iden
 @follows(vgt_ndvi_10dmin_no_filter)
 def vgt_ndvi_10dmax_no_filter(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_max_image(**args)
     #upsert_processed_ruffus(output_file)
@@ -193,8 +195,8 @@ output_sprod="10DSTD"
 
 output_sprod="10DMED"
 
-prod_ident_10dmed = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_10dmed  = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_10dmed = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_10dmed  = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
 formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_10dmed+"{MMDD[0]}"+prod_ident_10dmed]
@@ -204,8 +206,8 @@ formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_10dmed+"{MMDD[0]}"+prod_iden
 @follows(vgt_ndvi_10dmax_no_filter)
 def vgt_ndvi_10dmed_no_filter(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_med_image(**args)
     #upsert_processed_ruffus(output_file)
@@ -219,8 +221,8 @@ def vgt_ndvi_10dmed_no_filter(input_file, output_file):
 #   ---------------------------------------------------------------------
 
 output_sprod="NDVI_LINEARX1"
-prod_ident_linearx1 = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_linearx1  = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_linearx1 = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_linearx1  = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 def generate_parameters_ndvi_linearx1():
 
@@ -230,11 +232,11 @@ def generate_parameters_ndvi_linearx1():
 
         for file_t0 in input_files:
             # Get current date
-            date_t0 = get_date_from_path_full(file_t0)
+            date_t0 = functions.get_date_from_path_full(file_t0)
             output_file = locals.es2globals['data_dir']+subdir_linearx1+str(date_t0)+prod_ident_linearx1
 
             # Get files at t-1 and t+1
-            adjac_files = files_temp_ajacent(file_t0)
+            adjac_files = functions.files_temp_ajacent(file_t0)
 
             if len(adjac_files) == 2:
 
@@ -247,8 +249,8 @@ def generate_parameters_ndvi_linearx1():
 @files(generate_parameters_ndvi_linearx1)
 def ndvi_linearx1(input_files, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_files[1], "before_file":input_files[0], "after_file": input_files[2], "output_file": output_file,
              "output_format": 'GTIFF', "options": "compress=lzw", 'threshold': 0.1}
     print args
@@ -256,8 +258,8 @@ def ndvi_linearx1(input_files, output_file):
 
 
 output_sprod="NDVI_LINEARX2"
-prod_ident_linearx2 = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_linearx2  = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_linearx2 = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_linearx2  = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 def generate_parameters_ndvi_linearx2():
 
@@ -268,11 +270,11 @@ def generate_parameters_ndvi_linearx2():
 
         for file_t0 in input_files:
             # Get current date
-            date_t0 = get_date_from_path_full(file_t0)
+            date_t0 = functions.get_date_from_path_full(file_t0)
             output_file = locals.es2globals['data_dir']+subdir_linearx2+str(date_t0)+prod_ident_linearx2
 
             # Get files at t-1 and t+1
-            adjac_files = files_temp_ajacent(file_t0)
+            adjac_files = functions.files_temp_ajacent(file_t0)
 
             if len(adjac_files) == 2:
 
@@ -285,8 +287,8 @@ def generate_parameters_ndvi_linearx2():
 @files(generate_parameters_ndvi_linearx2)
 def ndvi_linearx2(input_files, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_files[1], "before_file":input_files[0], "after_file": input_files[2], "output_file": output_file,
              "output_format": 'GTIFF', "options": "compress=lzw", 'threshold': 0.1}
     raster_image_math.do_ts_linear_filter(**args)
@@ -300,18 +302,18 @@ def ndvi_linearx2(input_files, output_file):
 #   ---------------------------------------------------------------------
 
 input_subprod_linearx2="NDVI_LINEARX2"
-in_prod_ident_linearx2=set_path_filename_no_date(prod, input_subprod_linearx2, mapset, ext)
+in_prod_ident_linearx2=functions.set_path_filename_no_date(prod, input_subprod_linearx2, mapset, ext)
 
 input_dir_linearx2=locals.es2globals['data_dir']+ \
-                   set_path_sub_directory(prod, input_subprod_linearx2, 'derived', version, mapset)
+                   functions.set_path_sub_directory(prod, input_subprod_linearx2, 'Derived', version, mapset)
 
 starting_files_linearx2=input_dir_linearx2+"*"+in_prod_ident_linearx2
 
 #   ---------------------------------------------------------------------
 #   Linearx2 avg x dekad
 output_sprod="10DAVG_LINEARX2"
-prod_ident_10davg_linearx2 = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_10davg_linearx2  = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_10davg_linearx2 = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_10davg_linearx2  = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 # formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident_linearx2
 # formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_10davg_linearx2+"{MMDD[0]}"+prod_ident_10davg_linearx2]
@@ -325,8 +327,8 @@ subdir_10davg_linearx2  = set_path_sub_directory(prod, output_sprod, 'derived', 
          ["{subpath[0][4]}"+os.path.sep+subdir_10davg_linearx2+"{MMDD[0]}"+prod_ident_10davg_linearx2])
 def vgt_ndvi_10davg_linearx2(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_avg_image(**args)
     #upsert_processed_ruffus(output_file)
@@ -335,8 +337,8 @@ def vgt_ndvi_10davg_linearx2(input_file, output_file):
 #   Linearx2 min x dekad
 output_sprod="10DMIN_LINEARX2"
 
-prod_ident_10dmin_linearx2 = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_10dmin_linearx2  = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_10dmin_linearx2 = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_10dmin_linearx2  = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident_linearx2
 formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_10dmin_linearx2+"{MMDD[0]}"+prod_ident_10dmin_linearx2]
@@ -345,8 +347,8 @@ formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_10dmin_linearx2+"{MMDD[0]}"+
 @collate(starting_files_linearx2, formatter(formatter_in),formatter_out)
 def vgt_ndvi_10dmin_linearx2(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_min_image(**args)
     #upsert_processed_ruffus(output_file)
@@ -354,8 +356,8 @@ def vgt_ndvi_10dmin_linearx2(input_file, output_file):
 #   ---------------------------------------------------------------------
 #   Linearx2 max x dekad
 output_sprod="10DMAX_LINEARX2"
-prod_ident_10dmax_linearx2 = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_10dmax_linearx2  = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_10dmax_linearx2 = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_10dmax_linearx2  = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident_linearx2
 formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_10dmax_linearx2+"{MMDD[0]}"+prod_ident_10dmax_linearx2]
@@ -364,8 +366,8 @@ formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_10dmax_linearx2+"{MMDD[0]}"+
 @collate(starting_files_linearx2, formatter(formatter_in),formatter_out)
 def vgt_ndvi_10dmax_linearx2(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_max_image(**args)
     #upsert_processed_ruffus(output_file)
@@ -380,8 +382,8 @@ output_sprod="10DSTD"
 
 output_sprod="10DMED_LINEARX2"
 
-prod_ident_10dmed_linearx2 = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_10dmed_linearx2  = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_10dmed_linearx2 = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_10dmed_linearx2  = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident_linearx2
 formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_10dmed_linearx2+"{MMDD[0]}"+prod_ident_10dmed_linearx2]
@@ -390,8 +392,8 @@ formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_10dmed_linearx2+"{MMDD[0]}"+
 @collate(starting_files_linearx2, formatter(formatter_in),formatter_out)
 def vgt_ndvi_10dmed_linearx2(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_med_image(**args)
     #upsert_processed_ruffus(output_file)
@@ -401,8 +403,8 @@ def vgt_ndvi_10dmed_linearx2(input_file, output_file):
 
 output_sprod="YEAR_MIN_LINEARX2"
 
-prod_ident_year_min_linearx2 = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_year_min_linearx2  =set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_year_min_linearx2 = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_year_min_linearx2  =functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="(?P<YYYY>[0-9]{4})[0-9]{4}"+in_prod_ident_linearx2
 formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_year_min_linearx2+"{YYYY[0]}"+prod_ident_year_min_linearx2]
@@ -411,8 +413,8 @@ formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_year_min_linearx2+"{YYYY[0]}
 @collate(starting_files_linearx2, formatter(formatter_in),formatter_out)
 def vgt_ndvi_year_min_linearx2(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_min_image(**args)
     #upsert_processed_ruffus(output_file)
@@ -422,8 +424,8 @@ def vgt_ndvi_year_min_linearx2(input_file, output_file):
 
 output_sprod="YEAR_MAX_LINEARX2"
 
-prod_ident_year_max_linearx2 = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_year_max_linearx2  = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_year_max_linearx2 = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_year_max_linearx2  = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="(?P<YYYY>[0-9]{4})[0-9]{4}"+in_prod_ident_linearx2
 formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_year_max_linearx2+"{YYYY[0]}"+prod_ident_year_max_linearx2]
@@ -432,8 +434,8 @@ formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_year_max_linearx2+"{YYYY[0]}
 @collate(starting_files_linearx2, formatter(formatter_in),formatter_out)
 def vgt_ndvi_year_max_linearx2(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_max_image(**args)
     #upsert_processed_ruffus(output_file)
@@ -443,17 +445,17 @@ def vgt_ndvi_year_max_linearx2(input_file, output_file):
 #   ---------------------------------------------------------------------
 
 input_subprod_year_min_linearx2="YEAR_MIN_LINEARX2"
-in_prod_ident_year_min_linearx2=set_path_filename_no_date(prod, input_subprod_year_min_linearx2, mapset, ext)
+in_prod_ident_year_min_linearx2=functions.set_path_filename_no_date(prod, input_subprod_year_min_linearx2, mapset, ext)
 
 input_dir_year_min_linearx2=locals.es2globals['data_dir']+ \
-                   set_path_sub_directory(prod, input_subprod_year_min_linearx2, 'derived', version, mapset)
+                   functions.set_path_sub_directory(prod, input_subprod_year_min_linearx2, 'Derived', version, mapset)
 
 starting_files_year_min_linearx2=input_dir_year_min_linearx2+"*"+in_prod_ident_year_min_linearx2
 
 #  ---------------------------------------------------------------------
 output_sprod="ABSOL_MIN_LINEARX2"
-prod_ident_absol_min_linearx2 = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_absol_min_linearx2  = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_absol_min_linearx2 = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_absol_min_linearx2  = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="[0-9]{4}"+in_prod_ident_year_min_linearx2
 formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_absol_min_linearx2+'Overall'+prod_ident_absol_min_linearx2]
@@ -463,8 +465,8 @@ formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_absol_min_linearx2+'Overall'
 @collate(starting_files_year_min_linearx2, formatter(formatter_in),formatter_out)
 def vgt_ndvi_absol_min_linearx2(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_min_image(**args)
     #upsert_processed_ruffus(output_file)
@@ -473,17 +475,17 @@ def vgt_ndvi_absol_min_linearx2(input_file, output_file):
 #   Linearx2 absolute max
 
 input_subprod_year_max_linearx2="YEAR_MAX_LINEARX2"
-in_prod_ident_year_max_linearx2=set_path_filename_no_date(prod, input_subprod_year_max_linearx2, mapset, ext)
+in_prod_ident_year_max_linearx2=functions.set_path_filename_no_date(prod, input_subprod_year_max_linearx2, mapset, ext)
 
 input_dir_year_max_linearx2=locals.es2globals['data_dir']+ \
-                   set_path_sub_directory(prod, input_subprod_year_max_linearx2, 'derived', version, mapset)
+                   functions.set_path_sub_directory(prod, input_subprod_year_max_linearx2, 'Derived', version, mapset)
 
 starting_files_year_max_linearx2=input_dir_year_max_linearx2+"*"+in_prod_ident_year_max_linearx2
 
 #  ---------------------------------------------------------------------
 output_sprod="ABSOL_MAX_LINEARX2"
-prod_ident_absol_max_linearx2 = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_absol_max_linearx2  = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_absol_max_linearx2 = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_absol_max_linearx2  = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="[0-9]{4}"+in_prod_ident_year_max_linearx2
 formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_absol_max_linearx2+'Overall'+prod_ident_absol_max_linearx2]
@@ -493,8 +495,8 @@ formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_absol_max_linearx2+'Overall'
 @collate(starting_files_year_max_linearx2, formatter(formatter_in),formatter_out)
 def vgt_ndvi_absol_max_linearx2(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_min_image(**args)
     #upsert_processed_ruffus(output_file)
@@ -506,8 +508,8 @@ def vgt_ndvi_absol_max_linearx2(input_file, output_file):
 #   ---------------------------------------------------------------------
 #
 output_sprod="BARESOIL_LINEARX2"
-prod_ident_baresoil_linearx2 = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_baresoil_linearx2  = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_baresoil_linearx2 = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_baresoil_linearx2  = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="(?P<YYYYMMDD>[0-9]{8})"+in_prod_ident_linearx2
 formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_baresoil_linearx2+"{YYYYMMDD[0]}"+prod_ident_baresoil_linearx2]
@@ -516,8 +518,8 @@ formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_baresoil_linearx2+"{YYYYMMDD
 @transform(starting_files_linearx2, formatter(formatter_in),formatter_out)
 def vgt_ndvi_baresoil_linearx2(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_make_baresoil(**args)
 
@@ -529,15 +531,15 @@ def vgt_ndvi_baresoil_linearx2(input_file, output_file):
 #   'diff' vs. avg_filtered (NDV - avg_dekad_filtered)
 
 output_sprod="DIFF_LINEARX2"
-prod_ident_diff_linearx2 = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_diff_linearx2 = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_diff_linearx2 = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_diff_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
 formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_diff_linearx2+"{YYYY[0]}{MMDD[0]}"+prod_ident_diff_linearx2]
 
 ancillary_sprod = "10DAVG_LINEARX2"
-ancillary_sprod_ident = set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
-ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived', version, mapset)
+ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
+ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived', version, mapset)
 ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
 
@@ -545,8 +547,8 @@ ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancil
 @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
 def vgt_ndvi_diff_linearx2(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_oper_subtraction(**args)
 
@@ -555,15 +557,15 @@ def vgt_ndvi_diff_linearx2(input_file, output_file):
 #   Linearx2 'diff' (Linearx2 - avg_dekad_filtered)
 
 output_sprod="LINEARX2DIFF_LINEARX2"
-prod_ident_linearx2_diff_linearx2 = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_linearx2_diff_linearx2 = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_linearx2_diff_linearx2 = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_linearx2_diff_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident_linearx2
 formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_linearx2_diff_linearx2+"{YYYY[0]}{MMDD[0]}"+prod_ident_linearx2_diff_linearx2]
 
 ancillary_sprod = "10DAVG_LINEARX2"
-ancillary_sprod_ident = set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
-ancillary_subdir      = set_path_sub_directory(prod, ancillary_sprod, 'derived', version, mapset)
+ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
+ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived', version, mapset)
 ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
 
@@ -571,8 +573,8 @@ ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancil
 @transform(starting_files_linearx2, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
 def vgt_ndvi_linearx2_diff_linearx2(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_oper_subtraction(**args)
 
@@ -582,28 +584,28 @@ def vgt_ndvi_linearx2_diff_linearx2(input_file, output_file):
 #   TODO-M.C.: STD missing !!!!
 #
 # output_sprod="STDDIFF2AVG_LINEARX2"
-# prod_ident_stddiff2avg_linearx2 = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-# subdir_stddiff2avg_linearx2 = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+# prod_ident_stddiff2avg_linearx2 = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+# subdir_stddiff2avg_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 #
 # formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident_linearx2
 # formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_stddiff2avg_linearx2+"{YYYY[0]}{MMDD[0]}"+prod_ident_stddiff2avg_linearx2]
 #
 # ancillary_sprod_1 = "10DAVG_LINEARX2"
-# ancillary_sprod_ident_1 = set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
-# ancillary_subdir_1 = set_path_sub_directory(prod, ancillary_sprod_1, 'derived', version, mapset)
+# ancillary_sprod_ident_1 = functions.set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
+# ancillary_subdir_1 = functions.set_path_sub_directory(prod, ancillary_sprod_1, 'Derived', version, mapset)
 # ancillary_input_1 ="{subpath[0][4]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
 #
 # ancillary_sprod_2 = "10DSTD_LINEARX2"
-# ancillary_sprod_ident_2 = set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
-# ancillary_subdir_2      = set_path_sub_directory(prod, ancillary_sprod_2, 'derived', version, mapset)
+# ancillary_sprod_ident_2 = functions.set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
+# ancillary_subdir_2      = functions.set_path_sub_directory(prod, ancillary_sprod_2, 'Derived', version, mapset)
 # ancillary_input_2="{subpath[0][4]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
 #
 # @active_if(activate_vgt_ndvi_comput, activate_filtered_stats, activate_linearx2_diff_linearx2)
 # @transform(starting_files_linearx2, formatter(formatter_in), add_inputs(ancillary_input_1,ancillary_input_2), formatter_out)
 # def vgt_ndvi_stddiff2avg_linearx2(input_file, output_file):
 #
-#     output_file = list_to_element(output_file)
-#     check_output_dir(os.path.dirname(output_file))
+#     output_file = functions.list_to_element(output_file)
+#     functions.check_output_dir(os.path.dirname(output_file))
 #     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
 #     raster_image_math.do_oper_subtraction(**args)
 
@@ -611,28 +613,28 @@ def vgt_ndvi_linearx2_diff_linearx2(input_file, output_file):
 #   vci (NDV - min)/(max - min)  -> min/max per dekad
 
 output_sprod="VCI"
-prod_ident_vci = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_vci = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_vci = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_vci = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
 formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_vci+"{YYYY[0]}{MMDD[0]}"+prod_ident_vci]
 
 ancillary_sprod_1 = "10DMAX_LINEARX2"
-ancillary_sprod_ident_1 = set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
-ancillary_subdir_1 = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+ancillary_sprod_ident_1 = functions.set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
+ancillary_subdir_1 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 ancillary_input_1 ="{subpath[0][4]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
 
 ancillary_sprod_2 = "10DMIN_LINEARX2"
-ancillary_sprod_ident_2 = set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
-ancillary_subdir_2      = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+ancillary_sprod_ident_2 = functions.set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
+ancillary_subdir_2      = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 ancillary_input_2="{subpath[0][4]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
 
 @active_if(activate_vgt_ndvi_comput, activate_filtered_stats, activate_vci)
 @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input_1,ancillary_input_2), formatter_out)
 def vgt_ndvi_vci(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_make_vci(**args)
 
@@ -640,28 +642,28 @@ def vgt_ndvi_vci(input_file, output_file):
 #   icn (NDV - min)/(max - min)  -> min/max absolute
 
 output_sprod="ICN"
-prod_ident_icn = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_icn = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_icn = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_icn = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
 formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_icn+"{YYYY[0]}{MMDD[0]}"+prod_ident_icn]
 
 ancillary_sprod_1 = "ABSOL_MAX_LINEARX2"
-ancillary_sprod_ident_1 = set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
-ancillary_subdir_1 = set_path_sub_directory(prod, ancillary_sprod_1, 'derived', version, mapset)
+ancillary_sprod_ident_1 = functions.set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
+ancillary_subdir_1 = functions.set_path_sub_directory(prod, ancillary_sprod_1, 'Derived', version, mapset)
 ancillary_input_1 ="{subpath[0][4]}"+os.path.sep+ancillary_subdir_1+"Overall"+ancillary_sprod_ident_1
 
 ancillary_sprod_2 = "ABSOL_MAX_LINEARX2"
-ancillary_sprod_ident_2 = set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
-ancillary_subdir_2      = set_path_sub_directory(prod, ancillary_sprod_2, 'derived', version, mapset)
+ancillary_sprod_ident_2 = functions.set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
+ancillary_subdir_2      = functions.set_path_sub_directory(prod, ancillary_sprod_2, 'Derived', version, mapset)
 ancillary_input_2="{subpath[0][4]}"+os.path.sep+ancillary_subdir_2+"Overall"+ancillary_sprod_ident_2
 
 @active_if(activate_vgt_ndvi_comput, activate_filtered_stats, activate_icn)
 @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input_1,ancillary_input_2), formatter_out)
 def vgt_ndvi_icn(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_make_vci(**args)
 
@@ -669,28 +671,28 @@ def vgt_ndvi_icn(input_file, output_file):
 #   vci_linearx2 (linearx2 - min)/(max - min)  -> min/max per dekad
 
 output_sprod="VCI_LINEARX2"
-prod_ident_vci_linearx2 = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_vci_linearx2 = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_vci_linearx2 = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_vci_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident_linearx2
 formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_vci_linearx2+"{YYYY[0]}{MMDD[0]}"+prod_ident_vci_linearx2]
 
 ancillary_sprod_1 = "10DMAX_LINEARX2"
-ancillary_sprod_ident_1 = set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
-ancillary_subdir_1 = set_path_sub_directory(prod, ancillary_sprod_1, 'derived', version, mapset)
+ancillary_sprod_ident_1 = functions.set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
+ancillary_subdir_1 = functions.set_path_sub_directory(prod, ancillary_sprod_1, 'Derived', version, mapset)
 ancillary_input_1 ="{subpath[0][4]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
 
 ancillary_sprod_2 = "10DMIN_LINEARX2"
-ancillary_sprod_ident_2 = set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
-ancillary_subdir_2      = set_path_sub_directory(prod, ancillary_sprod_2, 'derived', version, mapset)
+ancillary_sprod_ident_2 = functions.set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
+ancillary_subdir_2      = functions.set_path_sub_directory(prod, ancillary_sprod_2, 'Derived', version, mapset)
 ancillary_input_2="{subpath[0][4]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
 
 @active_if(activate_vgt_ndvi_comput, activate_filtered_stats, activate_vci)
 @transform(starting_files_linearx2, formatter(formatter_in), add_inputs(ancillary_input_1,ancillary_input_2), formatter_out)
 def vgt_ndvi_vci_linearx2(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_make_vci(**args)
 
@@ -698,28 +700,28 @@ def vgt_ndvi_vci_linearx2(input_file, output_file):
 #   icn_linearx2 (linearx2 - min)/(max - min)  -> min/max absolute
 
 output_sprod="ICN_LINEARX2"
-prod_ident_icn_linearx2 = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_icn_linearx2 = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_icn_linearx2 = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_icn_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident_linearx2
 formatter_out=["{subpath[0][4]}"+os.path.sep+subdir_icn_linearx2+"{YYYY[0]}{MMDD[0]}"+prod_ident_icn_linearx2]
 
 ancillary_sprod_1 = "ABSOL_MAX_LINEARX2"
-ancillary_sprod_ident_1 = set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
-ancillary_subdir_1 = set_path_sub_directory(prod, ancillary_sprod_1, 'derived', version, mapset)
+ancillary_sprod_ident_1 = functions.set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
+ancillary_subdir_1 = functions.set_path_sub_directory(prod, ancillary_sprod_1, 'Derived', version, mapset)
 ancillary_input_1 ="{subpath[0][4]}"+os.path.sep+ancillary_subdir_1+"Overall"+ancillary_sprod_ident_1
 
 ancillary_sprod_2 = "ABSOL_MAX_LINEARX2"
-ancillary_sprod_ident_2 = set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
-ancillary_subdir_2      = set_path_sub_directory(prod, ancillary_sprod_2, 'derived', version, mapset)
+ancillary_sprod_ident_2 = functions.set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
+ancillary_subdir_2      = functions.set_path_sub_directory(prod, ancillary_sprod_2, 'Derived', version, mapset)
 ancillary_input_2="{subpath[0][4]}"+os.path.sep+ancillary_subdir_2+"Overall"+ancillary_sprod_ident_2
 
 @active_if(activate_vgt_ndvi_comput, activate_filtered_stats, activate_icn)
 @transform(starting_files_linearx2, formatter(formatter_in), add_inputs(ancillary_input_1,ancillary_input_2), formatter_out)
 def vgt_ndvi_icn_linearx2(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_make_vci(**args)
 
@@ -727,8 +729,8 @@ def vgt_ndvi_icn_linearx2(input_file, output_file):
 #   3.a NDVI monthly product (avg)
 #   ---------------------------------------------------------------------
 output_sprod="MONNDVI"
-prod_ident_mon_ndvi = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_mon_ndvi = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_mon_ndvi = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_mon_ndvi = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="(?P<YYYYMM>[0-9]{6})(?P<DD>[0-9]{2})"+in_prod_ident_linearx2
 formatter_out="{subpath[0][4]}"+os.path.sep+subdir_mon_ndvi+"{YYYYMM[0]}"+'01'+prod_ident_mon_ndvi
@@ -737,8 +739,8 @@ formatter_out="{subpath[0][4]}"+os.path.sep+subdir_mon_ndvi+"{YYYYMM[0]}"+'01'+p
 @collate(starting_files_linearx2, formatter(formatter_in), formatter_out)
 def vgt_ndvi_monmdvi(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file,"output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_avg_image(**args)
 
@@ -746,10 +748,10 @@ def vgt_ndvi_monmdvi(input_file, output_file):
 #   3.b NDVI monthly masks
 #   ---------------------------------------------------------------------
 input_subprod_monndvi="MONNDVI"
-in_prod_ident_monndvi=set_path_filename_no_date(prod, input_subprod_monndvi, mapset, ext)
+in_prod_ident_monndvi=functions.set_path_filename_no_date(prod, input_subprod_monndvi, mapset, ext)
 
 input_dir_monndvi=locals.es2globals['data_dir']+ \
-                   set_path_sub_directory(prod, input_subprod_monndvi, 'derived', version, mapset)
+                   functions.set_path_sub_directory(prod, input_subprod_monndvi, 'Derived', version, mapset)
 
 starting_files_monndvi=input_dir_monndvi+"*"+in_prod_ident_monndvi
 
@@ -760,8 +762,8 @@ starting_files_monndvi=input_dir_monndvi+"*"+in_prod_ident_monndvi
 #   ---------------------------------------------------------------------
 #   NDV  avg x month
 output_sprod="1MONAVG"
-prod_ident_1monavg = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_1monavg  = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_1monavg = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_1monavg  = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident_monndvi
 formatter_out="{subpath[0][4]}"+os.path.sep+subdir_1monavg+"{MMDD[0]}"+prod_ident_1monavg
@@ -770,16 +772,16 @@ formatter_out="{subpath[0][4]}"+os.path.sep+subdir_1monavg+"{MMDD[0]}"+prod_iden
 @collate(starting_files_monndvi, formatter(formatter_in),formatter_out)
 def vgt_ndvi_1monavg(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_avg_image(**args)
 
 #   ---------------------------------------------------------------------
 #   NDV  min x month
 output_sprod="1MONMIN"
-prod_ident_1monmin = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_1monmin  = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_1monmin = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_1monmin  = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident_monndvi
 formatter_out="{subpath[0][4]}"+os.path.sep+subdir_1monmin+"{MMDD[0]}"+prod_ident_1monmin
@@ -788,16 +790,16 @@ formatter_out="{subpath[0][4]}"+os.path.sep+subdir_1monmin+"{MMDD[0]}"+prod_iden
 @collate(starting_files_monndvi, formatter(formatter_in),formatter_out)
 def vgt_ndvi_1monmin(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_min_image(**args)
 
 #   ---------------------------------------------------------------------
 #   NDV  max x month
 output_sprod="1MONMAX"
-prod_ident_1monmax = set_path_filename_no_date(prod, output_sprod, mapset, ext)
-subdir_1monmax  = set_path_sub_directory(prod, output_sprod, 'derived', version, mapset)
+prod_ident_1monmax = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+subdir_1monmax  = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
 formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident_monndvi
 formatter_out="{subpath[0][4]}"+os.path.sep+subdir_1monmax+"{MMDD[0]}"+prod_ident_1monmax
@@ -806,8 +808,8 @@ formatter_out="{subpath[0][4]}"+os.path.sep+subdir_1monmax+"{MMDD[0]}"+prod_iden
 @collate(starting_files_monndvi, formatter(formatter_in),formatter_out)
 def vgt_ndvi_1monmax(input_file, output_file):
 
-    output_file = list_to_element(output_file)
-    check_output_dir(os.path.dirname(output_file))
+    output_file = functions.list_to_element(output_file)
+    functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
     raster_image_math.do_max_image(**args)
 
