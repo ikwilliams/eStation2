@@ -920,7 +920,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         else:
             native_mapset = ''
 
-        native_mapset_code != 'default'
+        # ??? native_mapset_code != 'default'
         # Open input dataset in read-only
         orig_ds = gdal.Open(intermFile, gdal.GA_ReadOnly)
 
@@ -947,6 +947,9 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # -------------------------------------------------------------------------
         # Prepare output driver
         out_driver = gdal.GetDriverByName(es_constants.ES2_OUTFILE_FORMAT)
+
+        # Input data geo-referenced - OR use native mapset.
+
 
         if reprojection == 1:
 
