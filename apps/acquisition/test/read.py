@@ -2,23 +2,15 @@
 import locals
 
 outputfile='test.tif'
-file=locals.es2globals['data_dir']+'tmp/PML_EMadagascar_MODIS_oc_3daycomp_20100802_20100804.nc'
+file='/tmp/eStation2/apps.acquisition.ingestionQOvo4N_A2002185.L3m_DAY_CHL_chlor_a_4km.bz2/A2002185.L3m_DAY_CHL_chlor_a_4km'
 
 # Import third-party modules
 from osgeo.gdalconst import *
 from osgeo import gdal
 from osgeo import osr
 
-# By using pygrib
 
-#grbs = pygrib.open(file)
-#grb = grbs.select(name='Instantaneous rain rate')[0]
-#values = grb.values
-
-#print values.shape
-#print values[2200,1600]*3600.
-
-# By using GDAL -> reads values as 0.0 !!!!!!
+# By using GDAL -
 ds=gdal.Open(file)
 orig_cs=osr.SpatialReference()
 orig_cs.ImportFromWkt(ds.GetProjectionRef())
