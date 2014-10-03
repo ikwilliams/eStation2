@@ -762,15 +762,25 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 # -------------------------------------------------------------------------------------------------------
 #   Ingest one or more files (a file for each subproduct)
 #   Arguments:
-#       interm_files_list: input file full name (1 per subproduct )
+#       interm_files_list: input file full name (1 per subproduct)
 #       date: product date
 #       product: product description name (for DB insertions)
-#       subproducts: list of subproducts to be extracted from the file. Contains dictionaries such as:
-#           see ingestion() for full description
-#       datasource_descr: from the corresponding DB table (all info on in-file naming)
+#       subproducts: list of subproducts to be extracted from the file. Contains dictionaries as described in
+#           ingestion() header
+#       datasource_descr: from the corresponding DB table (all info on input-file naming)
 #       in_files[option]: list of input files
-#       echo_query[option]: force print-out from query_db funtions
+#       echo_query[option]: force print-out from query_db functions
 #
+#   NOTE: mapset management: mapset is the geo-reference information associated to datasets
+#         There is an 'native_mapset' - associated to the input product and
+#                     'target_mapset' - defined (optionally) by the user
+#
+#         'native_mapset': comes from the table -> 'datasource_description'
+#                          if it is 'native', they georeferencing is read directly from input file
+#
+#         'target_mapset": comes from table 'ingestion' ('mapsetcode')
+#                          MUST be specified.
+
 
     # TODO-M.C.: manage version
     version_undef='undefined'
@@ -785,10 +795,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
     # Instance metadata object
     sds_meta = metadata.SdsMetadata()
 
-    # -------------------------------------------------------------------------
-    # Assign dir-name
-    # -------------------------------------------------------------------------
-
+    # Printout list of intermediate files
     readablelist = [' ' + os.path.basename(elem) for elem in interm_files_list]
     logger.info('In ingest_file: Intermediate file list: ' + ''.join(map(str, readablelist)))
 
@@ -836,16 +843,6 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         out_data_type_gdal = conv_data_type_to_gdal(out_data_type)
         out_data_type_numpy = conv_data_type_to_numpy(out_data_type)
 
-        trg_mapset=mapset.MapSet()
-        trg_mapset.assigndb(subproducts[ii]['mapsetcode'])
-        # Check target-mapset
-        if trg_mapset == '':
-            logger.debug('Target mapset NOT passed: keep the native one.')
-            mapset_id = 'native'
-        else:
-            mapset_id = trg_mapset.short_name
-            logger.debug('Target mapset IS passed: ' + mapset_id)
-
         # Convert the in_date format into a convenient one for DB and file naming
         # (i.e YYYYMMDD or YYYYMMDDHHMM)
         if datasource_descr.date_type == 'YYYYMMDD':
@@ -892,6 +889,9 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             else:
                 hour = None
 
+        # Get only the short_name for output file naming
+        mapset_id = subproducts[ii]['mapsetcode']
+
         # Define output directory and make sure it exists
         output_directory = data_dir_out+ functions.set_path_sub_directory(product['productcode'],subproducts[ii]['subproduct'],
                                                                 'Ingest', version_undef, mapset_id)
@@ -910,37 +910,43 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
                                                                '.tif')
 
         # -------------------------------------------------------------------------
-        # Manage IN/OUT mapset and assess if re-projection has to be done
+        # Manage the geo-referencing associated to input file
         # -------------------------------------------------------------------------
 
         native_mapset_code = datasource_descr.native_mapset
+        orig_ds = gdal.Open(intermFile, gdal.GA_ReadOnly)
+
         if native_mapset_code != 'default':
             native_mapset = mapset.MapSet()
             native_mapset.assigndb(native_mapset_code)
+            orig_cs = osr.SpatialReference(wkt=native_mapset.spatial_ref.ExportToWkt())
+            #orig_cs.ImportFromWkt(native_mapset.spatial_ref)                     # ???
+            orig_geo_transform = native_mapset.geo_transform
+            orig_size_x = native_mapset.size_x
+            orig_size_y = native_mapset.size_y
+
+            # Complement orig_ds info (necessary to Re-project)
+            orig_ds.SetGeoTransform(native_mapset.geo_transform)
+            orig_ds.SetProjection(orig_cs.ExportToWkt())
+
         else:
-            native_mapset = ''
+            # Read geo-reference from input file
+            orig_cs = osr.SpatialReference()
+            orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
+            orig_geo_transform = orig_ds.GetGeoTransform()
+            orig_size_x = orig_ds.RasterXSize
+            orig_size_y = orig_ds.RasterYSize
 
-        # ??? native_mapset_code != 'default'
-        # Open input dataset in read-only
-        orig_ds = gdal.Open(intermFile, gdal.GA_ReadOnly)
 
-        # Import CoordSys from file
-        orig_cs = osr.SpatialReference()
-        orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
-        orig_geo_transform = orig_ds.GetGeoTransform()
-        orig_size_x = orig_ds.RasterXSize
-        orig_size_y = orig_ds.RasterYSize
+        # TODO-M.C.: add a test on the mapset id in DB table !
+        trg_mapset=mapset.MapSet()
+        trg_mapset.assigndb(mapset_id)
 
-        # Check if re-projection has to be done
-        reprojection = 1
-        # If no target mapset
-        if trg_mapset == '':
+        native_mapset_code = datasource_descr.native_mapset
+        if trg_mapset.short_name == native_mapset_code:
             reprojection = 0
         else:
-            # .. OR if both defined, and equal
-            if native_mapset != '':
-                if trg_mapset.short_name == native_mapset.short_name:
-                    reprojection = 0
+            reprojection = 1
 
         # -------------------------------------------------------------------------
         # Generate the output file
@@ -948,9 +954,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # Prepare output driver
         out_driver = gdal.GetDriverByName(es_constants.ES2_OUTFILE_FORMAT)
 
-        # Input data geo-referenced - OR use native mapset.
-
-
+        # Do re-projection, or write to GTIFF file
         if reprojection == 1:
 
             logger.debug('Doing re-projection to target mapset: %s' % trg_mapset.short_name)
@@ -968,7 +972,8 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             mem_ds.SetProjection(out_cs.ExportToWkt())
 
             # Apply Reproject-Image to the memory-driver
-            res = gdal.ReprojectImage(orig_ds, mem_ds, orig_cs.ExportToWkt(), out_cs.ExportToWkt(),
+            orig_wkt =  orig_cs.ExportToWkt()
+            res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
                                       es_constants.ES2_OUTFILE_INTERP_METHOD)
 
             logger.debug('Re-projection to target done.')
