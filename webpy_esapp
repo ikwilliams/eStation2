@@ -16,25 +16,12 @@ import datetime
 import json
 import re
 
+from config import es_constants
 from database import querydb
+from database import crud
+
 from apps.acquisition import get_eumetcast
 from apps.productmanagement.datasets import Dataset
-
-
-WEBPY_COOKIE_NAME = "webpy_session_id"
-
-urls = (
-    "/ingestion", "Ingestion",
-    "/dataacquisition", "DataAcquisition",
-    "/pa(.*)", "ProductAcquisition",
-    "/template", "TemplatePage",
-    #"/(.+)/(.+)", "EsApp",
-    #"/(.+)/", "EsApp",
-    "/", "EsApp")
-
-app = web.application(urls, globals(), autoreload=True)
-application = app.wsgifunc()
-#session = web.session.Session(app, web.session.DiskStore('../logs/mstmp/webpySessions'))
 
 
 def row2dict(row):
@@ -64,6 +51,58 @@ def checkDateFormat(myString):
     return isDate
 
 
+import urllib2
+
+def internet_on():
+    try:
+        response = urllib2.urlopen('http://74.125.228.100', timeout=1)
+        return True
+    except urllib2.URLError as err: pass
+    return False
+
+
+import socket
+REMOTE_SERVER = "www.google.com"
+def is_connected():
+  try:
+    # see if we can resolve the host name -- tells us if there is
+    # a DNS listening
+    host = socket.gethostbyname(REMOTE_SERVER)
+    # connect to the host -- tells us if the host is actually
+    # reachable
+    s = socket.create_connection((host, 80), 2)
+    return True
+  except:
+     pass
+  return False
+print is_connected()
+
+
+
+WEBPY_COOKIE_NAME = "webpy_session_id"
+
+urls = (
+    "/pa(.*)", "ProductAcquisition",
+    "/product/update", "UpdateProduct",
+
+    "/services/checkstatusall", "CheckStatusAllServices",
+    "/services/execservicetask", "ExecuteServiceTask",
+
+    "/ingestion", "Ingestion",
+    "/ingestion/update", "UpdateIngestion",
+
+    "/dataacquisition", "DataAcquisition",
+    "/dataacquisition/update", "UpdateDataAcquisition",
+
+    "/template", "TemplatePage",
+    #"/(.+)/(.+)", "EsApp",
+    #"/(.+)/", "EsApp",
+    "/", "EsApp")
+
+app = web.application(urls, globals(), autoreload=True)
+application = app.wsgifunc()
+#session = web.session.Session(app, web.session.DiskStore('../logs/mstmp/webpySessions'))
+
 
 class EsApp:
     def __init__(self):
@@ -78,6 +117,113 @@ class EsApp:
         #return render.index(getparam.lang)
 
 
+class CheckStatusAllServices:
+    def __init__(self):
+        self.lang = "en"
+
+    def POST(self):
+        #return web.ctx
+        eumetcast = "true"
+        internet = "false"
+        ingest = "true"
+        servicesstatus_json = '{"success": true, "eumetcast": ' + eumetcast + \
+                              ', "internet": ' + internet + \
+                              ', "ingest": ' + ingest + '}'
+        return servicesstatus_json
+
+
+class ExecuteServiceTask:
+    def __init__(self):
+        self.lang = "en"
+
+    def POST(self):
+        #return web.ctx
+        getparams = web.input()
+        if getparams.task == 'runinternet':
+            # if internet_on() run getinternet service
+            print 'run internet'
+        if getparams.task == 'stopinternet':
+            # if internet_on() run getinternet service
+            print 'stop internet'
+        if getparams.task == 'restartinternet':
+            # if internet_on() run getinternet service
+            print 'restart internet'
+
+
+
+        servicesstatus_json = '{"success": true, "task": "' + getparams.task + '"}'
+        return servicesstatus_json
+
+
+class UpdateProduct:
+    def __init__(self):
+        self.lang = "en"
+        self.crud_db = crud.CrudDB(schema=es_constants.dbglobals['schema_products'])
+
+    def PUT(self):
+        #return web.ctx
+        getparams = json.loads(web.data())
+        productinfo = {'productcode': getparams['products']['productcode'],
+                       'subproductcode': getparams['products']['subproductcode'],
+                       'version': getparams['products']['version'],
+                       'product_type': getparams['products']['product_type'],
+                       'defined_by': getparams['products']['defined_by'],
+                       'activated': getparams['products']['activated']}
+        print productinfo
+        if self.crud_db.update('product', productinfo):
+            updatestatus = '{"success":true, "message":"Product updated!"}'
+        else:
+            updatestatus = '{"success":false, "message":"An error occured while updating the product!"}'
+
+        return updatestatus
+
+
+class UpdateDataAcquisition:
+    def __init__(self):
+        self.lang = "en"
+        self.crud_db = crud.CrudDB(schema=es_constants.dbglobals['schema_products'])
+
+    def PUT(self):
+        #return web.ctx
+        getparams = json.loads(web.data())
+        dataacquisitioninfo = {'productcode': getparams['dataacquisitions']['productcode'],
+                               'subproductcode': getparams['dataacquisitions']['subproductcode'],
+                               'version': getparams['dataacquisitions']['version'],
+                               'data_source_id': getparams['dataacquisitions']['data_source_id'],
+                               'defined_by': getparams['dataacquisitions']['defined_by'],
+                               'activated': getparams['dataacquisitions']['activated']}
+        print dataacquisitioninfo
+        if self.crud_db.update('product_acquisition_data_source', dataacquisitioninfo):
+            updatestatus = '{"success":true, "message":"Data source updated!"}'
+        else:
+            updatestatus = '{"success":false, "message":"An error occured while updating the data source!"}'
+
+        return updatestatus
+
+
+class UpdateIngestion:
+    def __init__(self):
+        self.lang = "en"
+        self.crud_db = crud.CrudDB(schema=es_constants.dbglobals['schema_products'])
+
+    def PUT(self):
+        #return web.ctx
+        getparams = json.loads(web.data())
+        ingestioninfo = {'productcode': getparams['ingestions']['productcode'],
+                         'subproductcode': getparams['ingestions']['subproductcode'],
+                         'version': getparams['ingestions']['version'],
+                         'mapsetcode': getparams['ingestions']['mapsetcode'],
+                         'defined_by': getparams['ingestions']['defined_by'],
+                         'activated': getparams['ingestions']['activated']}
+        print ingestioninfo
+        if self.crud_db.update('ingestion', ingestioninfo):
+            updatestatus = '{"success":true, "message":"Ingestion updated!"}'
+        else:
+            updatestatus = '{"success":false, "message":"An error occured while updating the Ingestion!"}'
+
+        return updatestatus
+
+
 class Ingestion:
     def __init__(self):
         self.lang = "en"
@@ -86,51 +232,6 @@ class Ingestion:
         #return web.ctx
         ingestions = querydb.get_ingestions(echo=False)
 
-        completeness2 = {
-            #'completeness': {
-                'firstdate': '2010-01-01',
-                'lastdate': '2014-12-21',
-                'totfiles': 312,
-                'missingfiles': 4,
-                'intervals': [{
-                    'fromdate': '2010-01-01',
-                    'todate': '2013-05-21',
-                    'intervaltype': 'present',
-                    'intervalpercentage': 20
-                }, {
-                    'fromdate': '2013-06-01',
-                    'todate': '2013-06-21',
-                    'intervaltype': 'missing',
-                    'intervalpercentage': 1
-                }, {
-                    'fromdate': '2014-07-01',
-                    'todate': '2014-07-21',
-                    'intervaltype': 'present',
-                    'intervalpercentage': 35
-                }, {
-                    'fromdate': '2014-08-01',
-                    'todate': '2014-08-21',
-                    'intervaltype': 'permanent-missing',
-                    'intervalpercentage': 2
-                }, {
-                    'fromdate': '2014-09-01',
-                    'todate': '2014-12-21',
-                    'intervaltype': 'present',
-                    'intervalpercentage': 32
-                }, {
-                    'fromdate': '2014-09-01',
-                    'todate': '2014-12-21',
-                    'intervaltype': 'missing',
-                    'intervalpercentage': 1
-                }, {
-                    'fromdate': '2014-09-01',
-                    'todate': '2014-12-21',
-                    'intervaltype': 'present',
-                    'intervalpercentage': 9
-                }]
-            #}
-        }
-
         if ingestions.__len__() > 0:
             ingest_dict_all = []
             for row in ingestions:
@@ -138,16 +239,12 @@ class Ingestion:
                           'sub_product_code': row.subproductcode,
                           'version': row.version,
                           'mapset': row.mapsetcode}
-                print kwargs
                 #kwargs.update({'to_date': datetime.date(2013, 12, 31)})
                 dataset = Dataset(**kwargs)
                 completeness = dataset.get_dataset_normalized_info()
-                print completeness
                 ingest_dict = row2dict(row)
                 ingest_dict['completeness'] = completeness
                 ingest_dict_all.append(ingest_dict)
-
-            #print ingest_dict_all
 
             #ingestions_json = tojson(ingestions)
             ingestions_json = json.dumps(ingest_dict_all,

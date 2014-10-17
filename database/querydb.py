@@ -51,12 +51,15 @@ def get_ingestions(echo=False):
         s = s.alias('ingest')
         i = db.map(s, primary_key=[s.c.productID, i.c.subproductcode, i.c.mapsetcode])
 
-        where = and_(i.c.activated)
-        ingestions = i.filter(where).order_by(desc(i.productcode)).all()
+        #where = and_(i.c.activated)
+        #ingestions = i.filter(where).order_by(desc(i.productcode)).all()
+        ingestions = i.order_by(desc(i.productcode)).all()
 
         if echo:
             for row in ingestions:
                 print row
+
+        #db.session.close()
 
         return ingestions
 
@@ -66,6 +69,9 @@ def get_ingestions(echo=False):
             print traceback.format_exc()
         # Exit the script and log the error telling what happened.
         logger.error("get_ingestions: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################
@@ -103,6 +109,8 @@ def get_dataacquisitions(echo=False):
             for row in dataacquisitions:
                 print row
 
+        #db.session.close()
+
         return dataacquisitions
 
     except:
@@ -111,6 +119,9 @@ def get_dataacquisitions(echo=False):
             print traceback.format_exc()
         # Exit the script and log the error telling what happened.
         logger.error("get_dataacquisitions: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################
@@ -167,6 +178,7 @@ def get_products(echo=False, activated=True):
                     p.c.productcode,
                     p.c.subproductcode,
                     p.c.version,
+                    p.c.defined_by,
                     p.c.activated,
                     p.c.product_type,
                     p.c.descriptive_name.label('prod_descriptive_name'),
@@ -178,7 +190,7 @@ def get_products(echo=False, activated=True):
         s = s.alias('pl')
         pl = db.map(s, primary_key=[s.c.productID])
 
-        if activated or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+        if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
             where = and_(pl.c.product_type == 'Native', pl.c.activated)
         else:
             where = and_(pl.c.product_type == 'Native', pl.c.activated != 't')
@@ -189,6 +201,8 @@ def get_products(echo=False, activated=True):
             for row in productslist:
                 print row
 
+        #db.session.close()
+
         return productslist
 
     except:
@@ -197,6 +211,9 @@ def get_products(echo=False, activated=True):
             print traceback.format_exc()
         # Exit the script and log the error telling what happened.
         logger.error("get_products: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################

@@ -72,9 +72,12 @@ class ConnectDB(object):
 
             if usesqlsoup:
                 dburl = ConnectDB.get_db_url()
-                self.db = sqlsoup.SQLSoup(ConnectDB.get_db_url())
+                self.db = sqlsoup.SQLSoup(dburl)
+                self.session = self.db.session
             else:
                 self.db = self.get_db_engine()
+                Mysession = sessionmaker(bind=self.db, autoflush=True)
+                self.session = Mysession()
 
             if self.is_testing():
                 self.schema = None

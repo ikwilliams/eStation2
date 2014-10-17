@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.3.2
 -- Dumped by pg_dump version 9.3.2
--- Started on 2014-08-27 16:56:41 CEST
+-- Started on 2014-10-16 15:48:57 CEST
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -262,24 +262,6 @@ COMMENT ON COLUMN date_format.definition IS 'A text defining the date type.';
 
 
 --
--- TOC entry 208 (class 1259 OID 31325)
--- Name: dependencies; Type: TABLE; Schema: products; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE dependencies (
-    output_productcode character varying NOT NULL,
-    output_subproductcode character varying NOT NULL,
-    output_version character varying NOT NULL,
-    output_mapsetcode character varying NOT NULL,
-    input_productcode character varying NOT NULL,
-    input_subproductcode character varying NOT NULL,
-    input_version character varying NOT NULL
-);
-
-
-ALTER TABLE products.dependencies OWNER TO postgres;
-
---
 -- TOC entry 199 (class 1259 OID 20750)
 -- Name: eumetcast_source; Type: TABLE; Schema: products; Owner: estation; Tablespace: 
 --
@@ -343,7 +325,7 @@ Active/Non active';
 
 
 --
--- TOC entry 209 (class 1259 OID 32203)
+-- TOC entry 207 (class 1259 OID 32203)
 -- Name: frequency; Type: TABLE; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -360,7 +342,7 @@ ALTER TABLE products.frequency OWNER TO estation;
 
 --
 -- TOC entry 3449 (class 0 OID 0)
--- Dependencies: 209
+-- Dependencies: 207
 -- Name: COLUMN frequency.frequency_id; Type: COMMENT; Schema: products; Owner: estation
 --
 
@@ -377,7 +359,7 @@ DEKAD!=10-days
 
 --
 -- TOC entry 3450 (class 0 OID 0)
--- Dependencies: 209
+-- Dependencies: 207
 -- Name: COLUMN frequency.frequency_type; Type: COMMENT; Schema: products; Owner: estation
 --
 
@@ -528,16 +510,30 @@ COMMENT ON COLUMN mapset.defined_by IS 'values: JRC or USER';
 
 
 --
--- TOC entry 207 (class 1259 OID 31316)
--- Name: processing; Type: TABLE; Schema: products; Owner: postgres; Tablespace: 
+-- TOC entry 209 (class 1259 OID 49399)
+-- Name: process_input_product; Type: TABLE; Schema: products; Owner: estation; Tablespace: 
+--
+
+CREATE TABLE process_input_product (
+    process_id integer NOT NULL,
+    input_productcode character varying NOT NULL,
+    input_subproductcode character varying NOT NULL,
+    input_version character varying NOT NULL,
+    input_mapsetcode character varying NOT NULL
+);
+
+
+ALTER TABLE products.process_input_product OWNER TO estation;
+
+--
+-- TOC entry 208 (class 1259 OID 49385)
+-- Name: processing; Type: TABLE; Schema: products; Owner: estation; Tablespace: 
 --
 
 CREATE TABLE processing (
-    productcode character varying NOT NULL,
-    subproductcode character varying NOT NULL,
-    version character varying NOT NULL,
-    mapsetcode character varying NOT NULL,
+    process_id integer NOT NULL,
     defined_by character varying NOT NULL,
+    output_mapsetcode character varying NOT NULL,
     activated boolean DEFAULT false NOT NULL,
     derivation_method character varying NOT NULL,
     algorithm character varying NOT NULL,
@@ -545,7 +541,7 @@ CREATE TABLE processing (
 );
 
 
-ALTER TABLE products.processing OWNER TO postgres;
+ALTER TABLE products.processing OWNER TO estation;
 
 --
 -- TOC entry 203 (class 1259 OID 20787)
@@ -768,15 +764,6 @@ ALTER TABLE ONLY date_format
 
 
 --
--- TOC entry 3296 (class 2606 OID 31332)
--- Name: dependencies_pk; Type: CONSTRAINT; Schema: products; Owner: postgres; Tablespace: 
---
-
-ALTER TABLE ONLY dependencies
-    ADD CONSTRAINT dependencies_pk PRIMARY KEY (output_productcode, output_subproductcode, output_version, output_mapsetcode, input_productcode, input_subproductcode, input_version);
-
-
---
 -- TOC entry 3276 (class 2606 OID 20758)
 -- Name: eumetcast_source_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
@@ -786,7 +773,7 @@ ALTER TABLE ONLY eumetcast_source
 
 
 --
--- TOC entry 3298 (class 2606 OID 32211)
+-- TOC entry 3294 (class 2606 OID 32211)
 -- Name: frequency_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -822,12 +809,21 @@ ALTER TABLE ONLY mapset
 
 
 --
--- TOC entry 3294 (class 2606 OID 31324)
--- Name: processing_pk; Type: CONSTRAINT; Schema: products; Owner: postgres; Tablespace: 
+-- TOC entry 3298 (class 2606 OID 49406)
+-- Name: process_input_product_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
+--
+
+ALTER TABLE ONLY process_input_product
+    ADD CONSTRAINT process_input_product_pk PRIMARY KEY (process_id, input_productcode, input_subproductcode, input_version, input_mapsetcode);
+
+
+--
+-- TOC entry 3296 (class 2606 OID 49393)
+-- Name: processing_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
 ALTER TABLE ONLY processing
-    ADD CONSTRAINT processing_pk PRIMARY KEY (productcode, subproductcode, version, mapsetcode);
+    ADD CONSTRAINT processing_pk PRIMARY KEY (process_id);
 
 
 --
@@ -982,21 +978,30 @@ ALTER TABLE ONLY ingestion
 
 
 --
--- TOC entry 3313 (class 2606 OID 31333)
--- Name: mapset_processing_fk; Type: FK CONSTRAINT; Schema: products; Owner: postgres
+-- TOC entry 3314 (class 2606 OID 49407)
+-- Name: mapset_process_input_product_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
+--
+
+ALTER TABLE ONLY process_input_product
+    ADD CONSTRAINT mapset_process_input_product_fk FOREIGN KEY (input_mapsetcode) REFERENCES mapset(mapsetcode);
+
+
+--
+-- TOC entry 3313 (class 2606 OID 49394)
+-- Name: mapset_processing_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
 ALTER TABLE ONLY processing
-    ADD CONSTRAINT mapset_processing_fk FOREIGN KEY (mapsetcode) REFERENCES mapset(mapsetcode);
+    ADD CONSTRAINT mapset_processing_fk FOREIGN KEY (output_mapsetcode) REFERENCES mapset(mapsetcode);
 
 
 --
--- TOC entry 3316 (class 2606 OID 31348)
--- Name: processing_dependencies_fk; Type: FK CONSTRAINT; Schema: products; Owner: postgres
+-- TOC entry 3315 (class 2606 OID 49412)
+-- Name: processing_dependencies_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
-ALTER TABLE ONLY dependencies
-    ADD CONSTRAINT processing_dependencies_fk FOREIGN KEY (output_productcode, output_subproductcode, output_version, output_mapsetcode) REFERENCES processing(productcode, subproductcode, version, mapsetcode);
+ALTER TABLE ONLY process_input_product
+    ADD CONSTRAINT processing_dependencies_fk FOREIGN KEY (process_id) REFERENCES processing(process_id);
 
 
 --
@@ -1009,11 +1014,11 @@ ALTER TABLE ONLY product
 
 
 --
--- TOC entry 3315 (class 2606 OID 31343)
--- Name: product_dependencies_fk; Type: FK CONSTRAINT; Schema: products; Owner: postgres
+-- TOC entry 3316 (class 2606 OID 49417)
+-- Name: product_dependencies_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
-ALTER TABLE ONLY dependencies
+ALTER TABLE ONLY process_input_product
     ADD CONSTRAINT product_dependencies_fk FOREIGN KEY (input_productcode, input_subproductcode, input_version) REFERENCES product(productcode, subproductcode, version);
 
 
@@ -1024,15 +1029,6 @@ ALTER TABLE ONLY dependencies
 
 ALTER TABLE ONLY ingestion
     ADD CONSTRAINT product_ingestion_fk FOREIGN KEY (productcode, subproductcode, version) REFERENCES product(productcode, subproductcode, version) ON UPDATE CASCADE;
-
-
---
--- TOC entry 3314 (class 2606 OID 31338)
--- Name: product_processing_fk; Type: FK CONSTRAINT; Schema: products; Owner: postgres
---
-
-ALTER TABLE ONLY processing
-    ADD CONSTRAINT product_processing_fk FOREIGN KEY (productcode, subproductcode, version) REFERENCES product(productcode, subproductcode, version);
 
 
 --
@@ -1053,7 +1049,7 @@ ALTER TABLE ONLY product_acquisition_data_source
     ADD CONSTRAINT products_description_product_acquisition_data_sources_fk FOREIGN KEY (subproductcode, productcode, version) REFERENCES product(subproductcode, productcode, version) ON UPDATE CASCADE;
 
 
--- Completed on 2014-08-27 16:56:41 CEST
+-- Completed on 2014-10-16 15:48:58 CEST
 
 --
 -- PostgreSQL database dump complete
