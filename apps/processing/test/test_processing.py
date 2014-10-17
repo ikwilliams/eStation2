@@ -19,5 +19,5 @@ start = time.clock()
 #   ---------------------------------------------------------------------
 #   Run the pipeline
 
-processing_fewsnet_rfe(**args)
+#processing_fewsnet_rfe(**args)
 # processing_vgt_ndvi(**args)
