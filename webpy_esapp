@@ -16,25 +16,12 @@ import datetime
 import json
 import re
 
+from config import es_constants
 from database import querydb
+from database import crud
+
 from apps.acquisition import get_eumetcast
 from apps.productmanagement.datasets import Dataset
-
-
-WEBPY_COOKIE_NAME = "webpy_session_id"
-
-urls = (
-    "/ingestion", "Ingestion",
-    "/dataacquisition", "DataAcquisition",
-    "/pa(.*)", "ProductAcquisition",
-    "/template", "TemplatePage",
-    #"/(.+)/(.+)", "EsApp",
-    #"/(.+)/", "EsApp",
-    "/", "EsApp")
-
-app = web.application(urls, globals(), autoreload=True)
-application = app.wsgifunc()
-#session = web.session.Session(app, web.session.DiskStore('../logs/mstmp/webpySessions'))
 
 
 def row2dict(row):
@@ -64,6 +51,60 @@ def checkDateFormat(myString):
     return isDate
 
 
+import urllib2
+
+def internet_on():
+    try:
+        response = urllib2.urlopen('http://74.125.228.100', timeout=1)
+        return True
+    except urllib2.URLError as err: pass
+    return False
+
+
+import socket
+REMOTE_SERVER = "www.google.com"
+def is_connected():
+  try:
+    # see if we can resolve the host name -- tells us if there is
+    # a DNS listening
+    host = socket.gethostbyname(REMOTE_SERVER)
+    # connect to the host -- tells us if the host is actually
+    # reachable
+    s = socket.create_connection((host, 80), 2)
+    return True
+  except:
+     pass
+  return False
+print is_connected()
+
+
+
+WEBPY_COOKIE_NAME = "webpy_session_id"
+
+urls = (
+    "/pa(.*)", "ProductAcquisition",
+    "/product/update", "UpdateProduct",
+
+    "/services/checkstatusall", "CheckStatusAllServices",
+    "/services/execservicetask", "ExecuteServiceTask",
+
+    "/ingestion", "Ingestion",
+    "/ingestion/update", "UpdateIngestion",
+
+    "/dataacquisition", "DataAcquisition",
+    "/dataacquisition/update", "UpdateDataAcquisition",
+
+    "/datasets", "DataSets",
+
+    "/template", "TemplatePage",
+    #"/(.+)/(.+)", "EsApp",
+    #"/(.+)/", "EsApp",
+    "/", "EsApp")
+
+app = web.application(urls, globals(), autoreload=True)
+application = app.wsgifunc()
+#session = web.session.Session(app, web.session.DiskStore('../logs/mstmp/webpySessions'))
+
 
 class EsApp:
     def __init__(self):
@@ -78,6 +119,379 @@ class EsApp:
         #return render.index(getparam.lang)
 
 
+class DataSets:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self):
+        #return web.ctx
+        datasets = {"success": "true",
+                    "products": [{
+                        "activated": "True",
+                        "cat_descr_name": "Vegetation",
+                        "category_id": "vegetation",
+                        "defined_by": "JRC",
+                        "description": "The FAPAR is the Fraction of Absorbed Photosynthetically Active radiation. The FAPAR quantifies the fraction of the solar radiation absorbed by live leaves for the photosynthesis activity. Then, it refers only to the green and alive elements of the canopy. The FAPAR depends on the canopy structure, vegetation element optical properties, atmospheric conditions, and angular configuration. To overcome this latter dependency, a daily integrated FAPAR value is assessed. \r\nFAPAR is recognized as an Essential Climate Variable (ECV) by the Global Climate Observing System (GCOS).",
+                        "order_index": "1",
+                        "prod_descriptive_name": "FAPAR",
+                        "productID": "vgt_fapar_V1.3",
+                        "product_type": "Native",
+                        "productcode": "vgt_fapar",
+                        "subproductcode": "vgt_fapar_native",
+                        "version": "V1.3",
+
+                        "productmapsets": [{
+                            "mapsetcode": "WGS84_ECOWAS_1km",
+                            "defined_by": "JRC",
+                            "descriptive_name": "ECOWAS 1km",
+                            "description": "WGS84_ECOWAS_1km",
+                            "srs_wkt": 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],TOWGS84[0,0,0,0,0,0,0],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9108"]],AUTHORITY["EPSG","4326"]]',
+                            "upper_left_long": -19.0044642857143,
+                            "pixel_shift_long": 0.008928571428571,
+                            "rotation_factor_long": 0,
+                            "upper_left_lat": 28.0044642857143,
+                            "pixel_shift_lat": -0.008928571428571,
+                            "rotation_factor_lat": 0,
+                            "pixel_size_x": 4929,
+                            "pixel_size_y": 2689,
+                            "footprint_image": "",
+
+                            "mapsetdatasets": [{
+                                "datasetID": "vgt_fapar_V1.3_fapar",
+                                "product_type": "Ingest",
+                                "productcode": "vgt_fapar",
+                                "subproductcode": "fapar",
+                                "version": "V1.3",
+                                "activated": "True",
+                                "defined_by": "JRC",
+                                "description": "",
+                                "prod_descriptive_name": "",
+
+                                "datasetcompleteness": {
+                                    "firstdate": "2013-07-01",
+                                    "datasetintervals": [
+                                        {
+                                            "fromdate": "2013-07-01",
+                                            "intervalpercentage": 2.127659574468085,
+                                            "intervaltype": "present",
+                                            "missing": "false",
+                                            "todate": "2013-07-01",
+                                            "totfiles": 1
+                                        },
+                                        {
+                                            "fromdate": "2013-07-11",
+                                            "intervalpercentage": 97.87234042553192,
+                                            "intervaltype": "missing",
+                                            "missing": "true",
+                                            "todate": "2014-10-11",
+                                            "totfiles": 46
+                                        }
+                                    ],
+                                    "lastdate": "2014-10-11",
+                                    "missingfiles": 46,
+                                    "totfiles": 47
+                                },
+                            }]
+                        }]
+                    }, {
+                        "activated": "True",
+                        "cat_descr_name": "Vegetation",
+                        "category_id": "vegetation",
+                        "defined_by": "JRC",
+                        "description": "The NDVI can be used to measure and monitor plant growth, vegetation cover, and biomass production. It is a dimensionless variable.  The values vary between -1 and 1. Increasing positive NDVI values indicate increasing amounts of green vegetation. Moderate values represent shrub and grassland (0.2 to 0.3), while high values indicate temperate and tropical rainforests (0.6 to 0.8). NDVI values near zero and decreasing negative values indicate non-vegetated features such as barren surfaces (rock and soil) and water, snow, ice, and clouds.",
+                        "order_index": "1",
+                        "prod_descriptive_name": "Normalized Difference Vegetation Index",
+                        "productID": "vgt_ndvi_undefined",
+                        "product_type": "Native",
+                        "productcode": "vgt_ndvi",
+                        "subproductcode": "vgt_ndvi_native",
+                        "version": "undefined",
+
+                        "productmapsets": [{
+                            "mapsetcode": "WGS84_ECOWAS_1km",
+                            "defined_by": "JRC",
+                            "descriptive_name": "ECOWAS 1km",
+                            "description": "WGS84_ECOWAS_1km",
+                            "srs_wkt": 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],TOWGS84[0,0,0,0,0,0,0],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9108"]],AUTHORITY["EPSG","4326"]]',
+                            "upper_left_long": -19.0044642857143,
+                            "pixel_shift_long": 0.008928571428571,
+                            "rotation_factor_long": 0,
+                            "upper_left_lat": 28.0044642857143,
+                            "pixel_shift_lat": -0.008928571428571,
+                            "rotation_factor_lat": 0,
+                            "pixel_size_x": 4929,
+                            "pixel_size_y": 2689,
+                            "footprint_image": "",
+
+                            "mapsetdatasets": [{
+                                "datasetID": "vgt_ndvi_undefined_ndv",
+                                "product_type": "Ingest",
+                                "productcode": "vgt_ndvi",
+                                "subproductcode": "ndv",
+                                "version": "undefined",
+                                "activated": "True",
+                                "defined_by": "JRC",
+                                "description": "The NDVI can be used to measure and monitor plant growth, vegetation cover, and biomass production. It is a dimensionless variable.  The values vary between -1 and 1. Increasing positive NDVI values indicate increasing amounts of green vegetation. Moderate values represent shrub and grassland (0.2 to 0.3), while high values indicate temperate and tropical rainforests (0.6 to 0.8). NDVI values near zero and decreasing negative values indicate non-vegetated features such as barren surfaces (rock and soil) and water, snow, ice, and clouds.",
+                                "prod_descriptive_name": "Normalized Difference Vegetation Index",
+
+                                "datasetcompleteness": {
+                                    "firstdate": "2013-07-01",
+                                    "datasetintervals": [
+                                        {
+                                            "fromdate": "2013-07-01",
+                                            "intervalpercentage": 2.127659574468085,
+                                            "intervaltype": "present",
+                                            "missing": "false",
+                                            "todate": "2013-07-01",
+                                            "totfiles": 1
+                                        },
+                                        {
+                                            "fromdate": "2013-07-11",
+                                            "intervalpercentage": 97.87234042553192,
+                                            "intervaltype": "missing",
+                                            "missing": "true",
+                                            "todate": "2014-10-11",
+                                            "totfiles": 46
+                                        }
+                                    ],
+                                    "lastdate": "2014-10-11",
+                                    "missingfiles": 46,
+                                    "totfiles": 47
+                                },
+                            }, {
+                                "datasetID": "vgt_ndvi_undefined_sm",
+                                "product_type": "Ingest",
+                                "productcode": "vgt_ndvi",
+                                "subproductcode": "sm",
+                                "version": "undefined",
+                                "activated": "True",
+                                "defined_by": "JRC",
+                                "description": "Status map of the NDVI.",
+                                "prod_descriptive_name": "Status map",
+
+                                "datasetcompleteness": {
+                                    "firstdate": "2013-07-01",
+                                    "datasetintervals": [
+                                        {
+                                            "fromdate": "2013-07-01",
+                                            "intervalpercentage": 2.127659574468085,
+                                            "intervaltype": "present",
+                                            "missing": "false",
+                                            "todate": "2013-07-01",
+                                            "totfiles": 1
+                                        },
+                                        {
+                                            "fromdate": "2013-07-11",
+                                            "intervalpercentage": 97.87234042553192,
+                                            "intervaltype": "missing",
+                                            "missing": "true",
+                                            "todate": "2014-10-11",
+                                            "totfiles": 46
+                                        }
+                                    ],
+                                    "lastdate": "2014-10-11",
+                                    "missingfiles": 46,
+                                    "totfiles": 47
+                                },
+                            }]
+                        }, {
+                            "mapsetcode": "WGS84_Africa_1km",
+                            "defined_by": "JRC",
+                            "descriptive_name": "Africa 1km",
+                            "description": "Original Spot VGT 1km mapset",
+                            "srs_wkt": 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],TOWGS84[0,0,0,0,0,0,0],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9108"]],AUTHORITY["EPSG","4326"]]',
+                            "upper_left_long": -26.0044642857143,
+                            "pixel_shift_long": 0.008928571428571,
+                            "rotation_factor_long": 0,
+                            "upper_left_lat": 38.0044642857143,
+                            "pixel_shift_lat": -0.008928571428571,
+                            "rotation_factor_lat": 0,
+                            "pixel_size_x": 9633,
+                            "pixel_size_y": 8177,
+                            "footprint_image": "",
+
+                            "mapsetdatasets": [{
+                                "datasetID": "vgt_ndvi_undefined_ndv",
+                                "product_type": "Ingest",
+                                "productcode": "vgt_ndvi",
+                                "subproductcode": "ndv",
+                                "version": "undefined",
+                                "activated": "True",
+                                "defined_by": "JRC",
+                                "description": "The NDVI can be used to measure and monitor plant growth, vegetation cover, and biomass production. It is a dimensionless variable.  The values vary between -1 and 1. Increasing positive NDVI values indicate increasing amounts of green vegetation. Moderate values represent shrub and grassland (0.2 to 0.3), while high values indicate temperate and tropical rainforests (0.6 to 0.8). NDVI values near zero and decreasing negative values indicate non-vegetated features such as barren surfaces (rock and soil) and water, snow, ice, and clouds.",
+                                "prod_descriptive_name": "Normalized Difference Vegetation Index",
+
+                                "datasetcompleteness": {
+                                    "firstdate": "2013-07-01",
+                                    "datasetintervals": [
+                                        {
+                                            "fromdate": "2013-07-01",
+                                            "intervalpercentage": 2.127659574468085,
+                                            "intervaltype": "present",
+                                            "missing": "false",
+                                            "todate": "2013-07-01",
+                                            "totfiles": 1
+                                        },
+                                        {
+                                            "fromdate": "2013-07-11",
+                                            "intervalpercentage": 97.87234042553192,
+                                            "intervaltype": "missing",
+                                            "missing": "true",
+                                            "todate": "2014-10-11",
+                                            "totfiles": 46
+                                        }
+                                    ],
+                                    "lastdate": "2014-10-11",
+                                    "missingfiles": 46,
+                                    "totfiles": 47
+                                },
+                            }, {
+                                "datasetID": "vgt_ndvi_undefined_sm",
+                                "product_type": "Ingest",
+                                "productcode": "vgt_ndvi",
+                                "subproductcode": "sm",
+                                "version": "undefined",
+                                "activated": "True",
+                                "defined_by": "JRC",
+                                "description": "Status map of the NDVI.",
+                                "prod_descriptive_name": "Status map",
+
+                                "datasetcompleteness": {
+                                    "firstdate": "2013-07-01",
+                                    "datasetintervals": [
+                                        {
+                                            "fromdate": "2013-07-01",
+                                            "intervalpercentage": 2.127659574468085,
+                                            "intervaltype": "present",
+                                            "missing": "false",
+                                            "todate": "2013-07-01",
+                                            "totfiles": 1
+                                        },
+                                        {
+                                            "fromdate": "2013-07-11",
+                                            "intervalpercentage": 97.87234042553192,
+                                            "intervaltype": "missing",
+                                            "missing": "true",
+                                            "todate": "2014-10-11",
+                                            "totfiles": 46
+                                        }
+                                    ],
+                                    "lastdate": "2014-10-11",
+                                    "missingfiles": 46,
+                                    "totfiles": 47
+                                },
+                            }]
+                        }]
+                    }]}
+
+        return datasets
+
+
+class CheckStatusAllServices:
+    def __init__(self):
+        self.lang = "en"
+
+    def POST(self):
+        #return web.ctx
+        eumetcast = "true"
+        internet = "false"
+        ingest = "true"
+        servicesstatus_json = '{"success": true, "eumetcast": ' + eumetcast + \
+                              ', "internet": ' + internet + \
+                              ', "ingest": ' + ingest + '}'
+        return servicesstatus_json
+
+
+class ExecuteServiceTask:
+    def __init__(self):
+        self.lang = "en"
+
+    def POST(self):
+        #return web.ctx
+        getparams = web.input()
+        if getparams.task == 'runinternet':
+            # if internet_on() run getinternet service
+            print 'run internet'
+        if getparams.task == 'stopinternet':
+            # if internet_on() run getinternet service
+            print 'stop internet'
+        if getparams.task == 'restartinternet':
+            # if internet_on() run getinternet service
+            print 'restart internet'
+
+        servicesstatus_json = '{"success": true, "task": "' + getparams.task + '"}'
+        return servicesstatus_json
+
+
+class UpdateProduct:
+    def __init__(self):
+        self.lang = "en"
+        self.crud_db = crud.CrudDB(schema=es_constants.dbglobals['schema_products'])
+
+    def PUT(self):
+        #return web.ctx
+        getparams = json.loads(web.data())
+        productinfo = {'productcode': getparams['products']['productcode'],
+                       'subproductcode': getparams['products']['subproductcode'],
+                       'version': getparams['products']['version'],
+                       'product_type': getparams['products']['product_type'],
+                       'defined_by': getparams['products']['defined_by'],
+                       'activated': getparams['products']['activated']}
+        #print productinfo
+        if self.crud_db.update('product', productinfo):
+            updatestatus = '{"success":true, "message":"Product updated!"}'
+        else:
+            updatestatus = '{"success":false, "message":"An error occured while updating the product!"}'
+
+        return updatestatus
+
+
+class UpdateDataAcquisition:
+    def __init__(self):
+        self.lang = "en"
+        self.crud_db = crud.CrudDB(schema=es_constants.dbglobals['schema_products'])
+
+    def PUT(self):
+        #return web.ctx
+        getparams = json.loads(web.data())
+        dataacquisitioninfo = {'productcode': getparams['dataacquisitions']['productcode'],
+                               'subproductcode': getparams['dataacquisitions']['subproductcode'],
+                               'version': getparams['dataacquisitions']['version'],
+                               'data_source_id': getparams['dataacquisitions']['data_source_id'],
+                               'defined_by': getparams['dataacquisitions']['defined_by'],
+                               'activated': getparams['dataacquisitions']['activated']}
+        print dataacquisitioninfo
+        if self.crud_db.update('product_acquisition_data_source', dataacquisitioninfo):
+            updatestatus = '{"success":true, "message":"Data source updated!"}'
+        else:
+            updatestatus = '{"success":false, "message":"An error occured while updating the data source!"}'
+
+        return updatestatus
+
+
+class UpdateIngestion:
+    def __init__(self):
+        self.lang = "en"
+        self.crud_db = crud.CrudDB(schema=es_constants.dbglobals['schema_products'])
+
+    def PUT(self):
+        #return web.ctx
+        getparams = json.loads(web.data())
+        ingestioninfo = {'productcode': getparams['ingestions']['productcode'],
+                         'subproductcode': getparams['ingestions']['subproductcode'],
+                         'version': getparams['ingestions']['version'],
+                         'mapsetcode': getparams['ingestions']['mapsetcode'],
+                         'defined_by': getparams['ingestions']['defined_by'],
+                         'activated': getparams['ingestions']['activated']}
+        print ingestioninfo
+        if self.crud_db.update('ingestion', ingestioninfo):
+            updatestatus = '{"success":true, "message":"Ingestion updated!"}'
+        else:
+            updatestatus = '{"success":false, "message":"An error occured while updating the Ingestion!"}'
+
+        return updatestatus
+
+
 class Ingestion:
     def __init__(self):
         self.lang = "en"
@@ -86,51 +500,6 @@ class Ingestion:
         #return web.ctx
         ingestions = querydb.get_ingestions(echo=False)
 
-        completeness2 = {
-            #'completeness': {
-                'firstdate': '2010-01-01',
-                'lastdate': '2014-12-21',
-                'totfiles': 312,
-                'missingfiles': 4,
-                'intervals': [{
-                    'fromdate': '2010-01-01',
-                    'todate': '2013-05-21',
-                    'intervaltype': 'present',
-                    'intervalpercentage': 20
-                }, {
-                    'fromdate': '2013-06-01',
-                    'todate': '2013-06-21',
-                    'intervaltype': 'missing',
-                    'intervalpercentage': 1
-                }, {
-                    'fromdate': '2014-07-01',
-                    'todate': '2014-07-21',
-                    'intervaltype': 'present',
-                    'intervalpercentage': 35
-                }, {
-                    'fromdate': '2014-08-01',
-                    'todate': '2014-08-21',
-                    'intervaltype': 'permanent-missing',
-                    'intervalpercentage': 2
-                }, {
-                    'fromdate': '2014-09-01',
-                    'todate': '2014-12-21',
-                    'intervaltype': 'present',
-                    'intervalpercentage': 32
-                }, {
-                    'fromdate': '2014-09-01',
-                    'todate': '2014-12-21',
-                    'intervaltype': 'missing',
-                    'intervalpercentage': 1
-                }, {
-                    'fromdate': '2014-09-01',
-                    'todate': '2014-12-21',
-                    'intervaltype': 'present',
-                    'intervalpercentage': 9
-                }]
-            #}
-        }
-
         if ingestions.__len__() > 0:
             ingest_dict_all = []
             for row in ingestions:
@@ -138,16 +507,12 @@ class Ingestion:
                           'sub_product_code': row.subproductcode,
                           'version': row.version,
                           'mapset': row.mapsetcode}
-                print kwargs
                 #kwargs.update({'to_date': datetime.date(2013, 12, 31)})
                 dataset = Dataset(**kwargs)
                 completeness = dataset.get_dataset_normalized_info()
-                print completeness
                 ingest_dict = row2dict(row)
                 ingest_dict['completeness'] = completeness
                 ingest_dict_all.append(ingest_dict)
-
-            #print ingest_dict_all
 
             #ingestions_json = tojson(ingestions)
             ingestions_json = json.dumps(ingest_dict_all,
