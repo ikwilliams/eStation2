@@ -1,7 +1,5 @@
 
 
-
-#from apps.acquisition.get_internet import *
 from apps.acquisition.get_internet import *
 from apps.acquisition.get_eumetcast import *
 

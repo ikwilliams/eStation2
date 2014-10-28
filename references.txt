@@ -2,6 +2,13 @@
 #   References to python docs and online sources (examples, ...)
 #
 
+Linux packages (incl. apt-get, apt-cache)
+-----------------------------------------
+
+General description of apt-get: https://help.ubuntu.com/community/AptGet/Howto
+All dependencies of a package: http://stackoverflow.com/questions/4627158/howto-list-all-dependencies-of-a-package-on-linux
+OS installation Process: https://help.ubuntu.com/12.04/installation-guide/amd64/
+
 Python Modules
 --------------
 Installing Python modules:
