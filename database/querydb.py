@@ -305,7 +305,7 @@ def get_product_in_info(allrecs=False, echo=False,
 #          allrecs          - If True return all products. Default=False
 #          echo             - If True echo the query result in the console for debugging purposes. Default=False
 #   Output: Return the fields of all or a specific product record with product_type='Native' from the table product.
-def get_product_native(productcode='', allrecs=False, echo=False):
+def get_product_native(productcode='', version='undefined', allrecs=False, echo=False):
     try:
         if allrecs:
             where = db.product.product_type == 'Native'
@@ -314,7 +314,9 @@ def get_product_native(productcode='', allrecs=False, echo=False):
                 for row in product:
                     print row
         else:
-            where = and_(db.product.productcode == productcode, db.product.product_type == 'Native')
+            where = and_(db.product.productcode == productcode,
+                         db.product.product_type == 'Native',
+                         db.sub_datasource_description.version == version)
             product = db.product.filter(where).one()
             if echo:
                 print product

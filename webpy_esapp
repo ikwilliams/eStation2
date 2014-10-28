@@ -125,6 +125,35 @@ class DataSets:
 
     def GET(self):
         #return web.ctx
+        #datasets = {"success": "true",
+        #            "products": [{
+        #                "activated": "True",
+        #                "cat_descr_name": "Vegetation",
+        #                "category_id": "vegetation",
+        #                "defined_by": "JRC",
+        #                "description": "The FAPAR is the Fraction of Absorbed Photosynthetically Active radiation. The FAPAR quantifies the fraction of the solar radiation absorbed by live leaves for the photosynthesis activity. Then, it refers only to the green and alive elements of the canopy. The FAPAR depends on the canopy structure, vegetation element optical properties, atmospheric conditions, and angular configuration. To overcome this latter dependency, a daily integrated FAPAR value is assessed. FAPAR is recognized as an Essential Climate Variable (ECV) by the Global Climate Observing System (GCOS).",
+        #                "order_index": "1",
+        #                "prod_descriptive_name": "FAPAR",
+        #                "productID": "vgt_fapar_V1.3",
+        #                "product_type": "Native",
+        #                "productcode": "vgt_fapar",
+        #                "subproductcode": "vgt_fapar_native",
+        #                "version": "V1.3"
+        #            }, {
+        #                "activated": "True",
+        #                "cat_descr_name": "Vegetation",
+        #                "category_id": "vegetation",
+        #                "defined_by": "JRC",
+        #                "description": "The NDVI can be used to measure and monitor plant growth, vegetation cover, and biomass production. It is a dimensionless variable.  The values vary between -1 and 1. Increasing positive NDVI values indicate increasing amounts of green vegetation. Moderate values represent shrub and grassland (0.2 to 0.3), while high values indicate temperate and tropical rainforests (0.6 to 0.8). NDVI values near zero and decreasing negative values indicate non-vegetated features such as barren surfaces (rock and soil) and water, snow, ice, and clouds.",
+        #                "order_index": "1",
+        #                "prod_descriptive_name": "Normalized Difference Vegetation Index",
+        #                "productID": "vgt_ndvi_undefined",
+        #                "product_type": "Native",
+        #                "productcode": "vgt_ndvi",
+        #                "subproductcode": "vgt_ndvi_native",
+        #                "version": "undefined"
+        #            }]}
+
         datasets = {"success": "true",
                     "products": [{
                         "activated": "True",
@@ -190,7 +219,7 @@ class DataSets:
                                     "lastdate": "2014-10-11",
                                     "missingfiles": 46,
                                     "totfiles": 47
-                                },
+                                }
                             }]
                         }]
                     }, {
@@ -257,7 +286,7 @@ class DataSets:
                                     "lastdate": "2014-10-11",
                                     "missingfiles": 46,
                                     "totfiles": 47
-                                },
+                                }
                             }, {
                                 "datasetID": "vgt_ndvi_undefined_sm",
                                 "product_type": "Ingest",
@@ -292,7 +321,7 @@ class DataSets:
                                     "lastdate": "2014-10-11",
                                     "missingfiles": 46,
                                     "totfiles": 47
-                                },
+                                }
                             }]
                         }, {
                             "mapsetcode": "WGS84_Africa_1km",
@@ -344,7 +373,7 @@ class DataSets:
                                     "lastdate": "2014-10-11",
                                     "missingfiles": 46,
                                     "totfiles": 47
-                                },
+                                }
                             }, {
                                 "datasetID": "vgt_ndvi_undefined_sm",
                                 "product_type": "Ingest",
@@ -379,7 +408,7 @@ class DataSets:
                                     "lastdate": "2014-10-11",
                                     "missingfiles": 46,
                                     "totfiles": 47
-                                },
+                                }
                             }]
                         }]
                     }]}
@@ -394,8 +423,8 @@ class CheckStatusAllServices:
     def POST(self):
         #return web.ctx
         eumetcast = "true"
-        internet = "false"
-        ingest = "true"
+        internet = "true"
+        ingest = "false"
         servicesstatus_json = '{"success": true, "eumetcast": ' + eumetcast + \
                               ', "internet": ' + internet + \
                               ', "ingest": ' + ingest + '}'
