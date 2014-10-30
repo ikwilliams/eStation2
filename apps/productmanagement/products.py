@@ -54,9 +54,13 @@ class Product(object):
                     set(os.path.basename(subproduct) for subproduct in self._get_full_subproducts())]
         return _subproducts
 
-    def _get_full_subproducts(self):
+    def _get_full_subproducts(self, mapset="*"):
         return tuple(subproduct for subproduct_type in functions.dict_subprod_type_2_dir.values()
-                                for subproduct in glob.glob(os.path.join(self._fullpath, subproduct_type)))
+                                for subproduct in glob.glob(os.path.join(self._fullpath, mapset, subproduct_type)))
 
     def get_dataset(self, mapset, sub_product_code):
         return Dataset(self.product_code, sub_product_code=sub_product_code, mapset=mapset, version=self.version)
+
+    def get_subproducts(self, mapset):
+        return [subproduct for subproduct in 
+                    set(os.path.basename(subproduct) for subproduct in self._get_full_subproducts(mapset=mapset))]

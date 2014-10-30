@@ -53,6 +53,14 @@ class TestProducts(unittest.TestCase):
         self.assertEqual(len(product.subproducts), len(self.subproducts))
         self.assertEqual(set(product.subproducts), set(self.subproducts))
 
+    def test_class_get_subproduct(self):
+        product = Product(**self.kwargs)
+        product._get_full_mapsets = lambda: self.files_mapsets
+        product._get_full_subproducts = lambda mapset: self.files_subproducts
+        subproducts = product.get_subproducts(mapset=product.mapsets[0])
+        self.assertEqual(len(subproducts), len(self.subproducts))
+        self.assertEqual(set(subproducts), set(self.subproducts))
+
     def test_class_dataset(self):
         product = Product(**self.kwargs)
         product._get_full_subproducts = lambda: self.files_subproducts
