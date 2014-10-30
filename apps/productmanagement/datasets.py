@@ -203,6 +203,7 @@ class Dataset(object):
         self._path = functions.set_path_sub_directory(product_code, sub_product_code,
                 my_db_products.product_type, version, mapset)
         self._fullpath = os.path.join(locals.es2globals['data_dir'], self._path)
+        self._fullpath = os.path.join(locals.es2globals['data_dir'], self._path)
         self._db_frequency = querydb.db.frequency.get(my_db_products.frequency_id)
         if self._db_frequency is None:
             raise NoFrequencyFound(self._db_product)
