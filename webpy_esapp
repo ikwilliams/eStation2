@@ -425,9 +425,12 @@ class CheckStatusAllServices:
         eumetcast = "true"
         internet = "true"
         ingest = "false"
+        processing = "true"
         servicesstatus_json = '{"success": true, "eumetcast": ' + eumetcast + \
                               ', "internet": ' + internet + \
-                              ', "ingest": ' + ingest + '}'
+                              ', "ingest": ' + ingest + \
+                              ', "processing": ' + processing + '}'
+
         return servicesstatus_json
 
 
