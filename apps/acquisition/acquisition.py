@@ -9,14 +9,19 @@ from apps.acquisition import get_internet
 from apps.acquisition import ingestion
 from lib.python.daemon import Daemon
 
-class IngestDaemon(Daemon):
-    def run(self):
-        ingestion.drive_ingestion(dry_run=True)
+class DaemonDryRunnable(Daemon):
+    def __init__(self,*args, **kwargs):
+        self.dry_run = kwargs.pop('dry_run', True)
+        Daemon.__init__(self, *args, **kwargs)
 
-class GetEumetcastDaemon(Daemon):
+class IngestDaemon(DaemonDryRunnable):
     def run(self):
-        get_eumetcast.drive_eumetcast(dry_run=True)
+        ingestion.drive_ingestion(dry_run=self.dry_run)
 
-class GetInternetDaemon(Daemon):
+class GetEumetcastDaemon(DaemonDryRunnable):
     def run(self):
-        get_internet.drive_get_internet(dry_run=True)
+        get_eumetcast.drive_eumetcast(dry_run=self.dry_run)
+
+class GetInternetDaemon(DaemonDryRunnable):
+    def run(self):
+        get_internet.drive_get_internet(dry_run=self.dry_run)
