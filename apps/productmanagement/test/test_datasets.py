@@ -133,5 +133,4 @@ class TestDatasets(unittest.TestCase):
         self.assertEquals(completeness['totfiles'], 18289)
         self.assertEquals(completeness['missingfiles'], 18288)
         self.assertEquals(completeness['intervals'][0]['intervalpercentage'], 1.0)
-        print completeness
 

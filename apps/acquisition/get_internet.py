@@ -280,8 +280,9 @@ def get_dir_contents_from_url(remote_url_dir, target_file=None, target_dir=None,
 #   Author: Marco Clerici, JRC, European Commission
 #   Date: 2014/09/01
 #   Inputs: none
+#   Arguments: dry_run -> if 1, read tables and report activity ONLY
 
-def drive_get_internet():
+def drive_get_internet(dry_run=False):
 
     global processed_list_filename, processed_list
     global processed_info_filename, processed_info
@@ -359,18 +360,22 @@ def drive_get_internet():
                 logger.debug("Number of files to be copied for trigger %s is %i", internet_source.internet_id, len(listtoprocess))
                 if listtoprocess != set([]):
                      logger.debug("Loop on the found files.")
-                     for filename in list(listtoprocess):
-                         logger.debug("Processing file: "+os.path.basename(filename))
-                         #try:
-                         target_file=filename
-                         get_file_from_url(str(internet_source.url)+'/'+target_file, target_file=os.path.basename(target_file), target_dir=ingest_server_in_dir, userpwd=str(usr_pwd))
-                         logger.info("File %s copied.", filename)
-                         processed_list.append(os.path.basename(filename))
-                         #except:
-                         #   logger.warning("Problem while copying file: %s.", filename)
+                     if not dry_run:
+                         for filename in list(listtoprocess):
+                             logger.debug("Processing file: "+os.path.basename(filename))
+                             #try:
+                             target_file=filename
+                             get_file_from_url(str(internet_source.url)+'/'+target_file, target_file=os.path.basename(target_file), target_dir=ingest_server_in_dir, userpwd=str(usr_pwd))
+                             logger.info("File %s copied.", filename)
+                             processed_list.append(os.path.basename(filename))
+                            #except:
+                            #   logger.warning("Problem while copying file: %s.", filename)
+                     else:
+                         logger.info('Dry_run is set: do not get files')
 
-            functions.dump_obj_to_pickle(processed_list, processed_list_filename)
-            functions.dump_obj_to_pickle(processed_info, processed_info_filename)
+            if not dry_run:
+                functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+                functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
             sleep(float(user_def_sleep))
 #        except Exception, e:

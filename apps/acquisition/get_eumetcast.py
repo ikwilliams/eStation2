@@ -6,6 +6,7 @@
 #	date:	 19.02.2014
 #   descr:	 Reads the definition from eStation DB and execute the copy to local disk
 #	history: 1.0
+#   Arguments: dry_run -> if 1, read tables and report activity ONLY
 
 # Import local definitions
 import locals
@@ -79,7 +80,7 @@ def signal_handler(signal, frame):
     sys.exit(0)
 
 
-def drive_eumetcast():
+def drive_eumetcast(dry_run=False):
 
     global processed_list_filename, processed_list
     global processed_info_filename, processed_info
@@ -160,14 +161,17 @@ def drive_eumetcast():
                         if os.path.isfile(os.path.join(input_dir, filename)):
                             if os.stat(os.path.join(input_dir, filename)).st_mtime < int(time.time()):
                                 logger.debug("Processing file: "+os.path.basename(filename))
-                                if commands.getstatusoutput("cp " + filename + " " + output_dir + os.sep + os.path.basename(filename))[0] == 0:
-                                    logger.info("File %s copied.", filename)
-                                    processed_list.append(filename)
-                                    # Update processing info
-                                    processed_info['time_latest_copy']=datetime.datetime.now()
-                                    processed_info['lenght_proc_list']=len(processed_list)
+                                if not dry_run:
+                                    if commands.getstatusoutput("cp " + filename + " " + output_dir + os.sep + os.path.basename(filename))[0] == 0:
+                                        logger.info("File %s copied.", filename)
+                                        processed_list.append(filename)
+                                        # Update processing info
+                                        processed_info['time_latest_copy']=datetime.datetime.now()
+                                        processed_info['lenght_proc_list']=len(processed_list)
+                                    else:
+                                        logger.warning("Problem while copying file: %s.", filename)
                                 else:
-                                    logger.warning("Problem while copying file: %s.", filename)
+                                    logger.info('Dry_run is set: do not get files')
                         else:
                             logger.error("File %s removed by the system before being processed.", filename)
                 else:
@@ -178,8 +182,9 @@ def drive_eumetcast():
                    if not os.path.exists(infile):
                        processed_list.remove(infile)
 
-            functions.dump_obj_to_pickle(processed_list, processed_list_filename)
-            functions.dump_obj_to_pickle(processed_info, processed_info_filename)
+            if not dry_run:
+                functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+                functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
         sleep(float(user_def_sleep))
 

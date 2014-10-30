@@ -11,12 +11,12 @@ from lib.python.daemon import Daemon
 
 class IngestDaemon(Daemon):
     def run(self):
-        ingestion.drive_ingestion()
+        ingestion.drive_ingestion(dry_run=True)
 
 class GetEumetcastDaemon(Daemon):
     def run(self):
-        get_eumetcast.drive_eumetcast()
+        get_eumetcast.drive_eumetcast(dry_run=True)
 
 class GetInternetDaemon(Daemon):
     def run(self):
-        get_internet.drive_get_internet()
+        get_internet.drive_get_internet(dry_run=True)
