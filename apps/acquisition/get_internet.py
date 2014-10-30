@@ -293,91 +293,93 @@ def drive_get_internet(dry_run=False):
 
     logger.info("Starting retrieving data from INTERNET.")
 
-    output_dir = ingest_server_in_dir
-    logger.debug("Check if the Ingest Server output directory : %s exists.", output_dir)
-    if not os.path.exists(output_dir):
-        logger.fatal("The Ingest Server output directory : %s doesn't exists.", output_dir)
-        exit(1)
+    while True:
+        output_dir = ingest_server_in_dir
+        logger.debug("Check if the Ingest Server output directory : %s exists.", output_dir)
+        if not os.path.exists(output_dir):
+            logger.fatal("The Ingest Server output directory : %s doesn't exists.", output_dir)
+            exit(1)
 
-    if not os.path.exists(processed_list_int_dir):
-        os.mkdir(processed_list_int_dir)
+        if not os.path.exists(processed_list_int_dir):
+            os.mkdir(processed_list_int_dir)
 
-    while 1:
+        while 1:
 
-        try:
-            time_sleep = user_def_sleep
-            logger.debug("Sleep time set to : %s.", time_sleep)
-        except:
-            logger.warning("Sleep time not defined. Setting to default=1min. Continue.")
-            time_sleep = 60
+            try:
+                time_sleep = user_def_sleep
+                logger.debug("Sleep time set to : %s.", time_sleep)
+            except:
+                logger.warning("Sleep time not defined. Setting to default=1min. Continue.")
+                time_sleep = 60
 
-#        try:
-        logger.debug("Reading active INTERNET data sources from database")
-        internet_sources_list = querydb.get_active_internet_sources(echo=echo_query)
+    #        try:
+            logger.debug("Reading active INTERNET data sources from database")
+            internet_sources_list = querydb.get_active_internet_sources(echo=echo_query)
 
-        # Loop over active triggers
-        for internet_source in internet_sources_list:
-            logger.debug("Processing internet source  %s.", internet_source.descriptive_name)
+            # Loop over active triggers
+            for internet_source in internet_sources_list:
+                logger.debug("Processing internet source  %s.", internet_source.descriptive_name)
 
-            processed_list_filename = get_internet_processed_list_prefix+str(internet_source.internet_id)+'.list'
-            processed_info_filename = get_internet_processed_list_prefix+str(internet_source.internet_id)+'.info'
+                processed_list_filename = get_internet_processed_list_prefix+str(internet_source.internet_id)+'.list'
+                processed_info_filename = get_internet_processed_list_prefix+str(internet_source.internet_id)+'.info'
 
-            # Create objects for list and info
-            processed_list = []
-            processed_info = {'lenght_proc_list': 0,
-                              'time_latest_exec': datetime.datetime.now(),
-                              'time_latest_copy': datetime.datetime.now()}
-            # Restore/Create List
-            processed_list=functions.restore_obj_from_pickle(processed_list, processed_list_filename)
-            # Restore/Create Info
-            processed_info=functions.restore_obj_from_pickle(processed_info, processed_info_filename)
-            # Update processing time (in case it is restored)
-            processed_info['time_latest_exec']=datetime.datetime.now()
+                # Create objects for list and info
+                processed_list = []
+                processed_info = {'lenght_proc_list': 0,
+                                  'time_latest_exec': datetime.datetime.now(),
+                                  'time_latest_copy': datetime.datetime.now()}
+                # Restore/Create List
+                processed_list=functions.restore_obj_from_pickle(processed_list, processed_list_filename)
+                # Restore/Create Info
+                processed_info=functions.restore_obj_from_pickle(processed_info, processed_info_filename)
+                # Update processing time (in case it is restored)
+                processed_info['time_latest_exec']=datetime.datetime.now()
 
-            logger.debug("Create current list of file to process for source %s.", internet_source.internet_id)
-            #if isinstance(internet_source.user_name,str) and isinstance(internet_source.password,str):
-            usr_pwd = str(internet_source.user_name)+':'+internet_source.password
-            #else:
-            #    usr_pwd =''
+                logger.debug("Create current list of file to process for source %s.", internet_source.internet_id)
+                #if isinstance(internet_source.user_name,str) and isinstance(internet_source.password,str):
+                usr_pwd = str(internet_source.user_name)+':'+internet_source.password
+                #else:
+                #    usr_pwd =''
 
-            logger.debug("              Url is %s.", internet_source.url)
-            logger.debug("              usr/pwd is %s.", usr_pwd)
-            logger.debug("              regex   is %s.", internet_source.include_files_expression)
+                logger.debug("              Url is %s.", internet_source.url)
+                logger.debug("              usr/pwd is %s.", usr_pwd)
+                logger.debug("              regex   is %s.", internet_source.include_files_expression)
 
-            current_list = get_list_matching_files_dir_ftp(str(internet_source.url), str(usr_pwd), str(internet_source.include_files_expression))
+                current_list = get_list_matching_files_dir_ftp(str(internet_source.url), str(usr_pwd), str(internet_source.include_files_expression))
 
-            logger.debug("Number of files currently available for source %s is %i", internet_source.internet_id, len(current_list))
-            if len(current_list) > 0:
-                logger.debug("Number of files already copied for trigger %s is %i", internet_source.internet_id, len(processed_list))
-                listtoprocess = []
-                for current_file in current_list:
-                    if len(processed_list) == 0:
-                        listtoprocess.append(current_file)
-                    else:
-                        if os.path.basename(current_file) not in processed_list:
+                logger.debug("Number of files currently available for source %s is %i", internet_source.internet_id, len(current_list))
+                if len(current_list) > 0:
+                    logger.debug("Number of files already copied for trigger %s is %i", internet_source.internet_id, len(processed_list))
+                    listtoprocess = []
+                    for current_file in current_list:
+                        if len(processed_list) == 0:
                             listtoprocess.append(current_file)
+                        else:
+                            if os.path.basename(current_file) not in processed_list:
+                                listtoprocess.append(current_file)
 
-                logger.debug("Number of files to be copied for trigger %s is %i", internet_source.internet_id, len(listtoprocess))
-                if listtoprocess != set([]):
-                     logger.debug("Loop on the found files.")
-                     if not dry_run:
-                         for filename in list(listtoprocess):
-                             logger.debug("Processing file: "+os.path.basename(filename))
-                             #try:
-                             target_file=filename
-                             get_file_from_url(str(internet_source.url)+'/'+target_file, target_file=os.path.basename(target_file), target_dir=ingest_server_in_dir, userpwd=str(usr_pwd))
-                             logger.info("File %s copied.", filename)
-                             processed_list.append(os.path.basename(filename))
-                            #except:
-                            #   logger.warning("Problem while copying file: %s.", filename)
-                     else:
-                         logger.info('Dry_run is set: do not get files')
+                    logger.debug("Number of files to be copied for trigger %s is %i", internet_source.internet_id, len(listtoprocess))
+                    if listtoprocess != set([]):
+                         logger.debug("Loop on the found files.")
+                         if not dry_run:
+                             for filename in list(listtoprocess):
+                                 logger.debug("Processing file: "+os.path.basename(filename))
+                                 #try:
+                                 target_file=filename
+                                 get_file_from_url(str(internet_source.url)+'/'+target_file, target_file=os.path.basename(target_file), target_dir=ingest_server_in_dir, userpwd=str(usr_pwd))
+                                 logger.info("File %s copied.", filename)
+                                 processed_list.append(os.path.basename(filename))
+                                #except:
+                                #   logger.warning("Problem while copying file: %s.", filename)
+                         else:
+                             logger.info('Dry_run is set: do not get files')
 
-            if not dry_run:
-                functions.dump_obj_to_pickle(processed_list, processed_list_filename)
-                functions.dump_obj_to_pickle(processed_info, processed_info_filename)
+                if not dry_run:
+                    functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+                    functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
-            sleep(float(user_def_sleep))
+                sleep(float(user_def_sleep))
+
 #        except Exception, e:
 #            logger.fatal(str(e))
 #            exit(1)
