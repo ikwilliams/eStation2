@@ -27,7 +27,7 @@ class ConnectDB(object):
     def is_testing():
         # Force connecting to sqlite db
         if getattr(ConnectDB, "_testing", None) is None:
-            setattr(ConnectDB, "_testing", sys.argv[0].lower().endswith('nosetests'))
+            setattr(ConnectDB, "_testing", "nosetests" in sys.argv[0].lower())
         # Force through a global variable
         if locals.es2globals.get('db_test_mode'):
             setattr(ConnectDB, "_testing", 1)

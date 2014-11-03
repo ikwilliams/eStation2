@@ -54,6 +54,7 @@ class Frequency(object):
     class DATEFORMAT:
         DATETIME = 'YYYYMMDDHHMM'
         DATE = 'YYYYMMDD'
+        MONTHDAY = 'MMDD'
 
     @classmethod
     def dateformat_default(class_, unit):
@@ -75,6 +76,8 @@ class Frequency(object):
     def format_date(self, date):
         if self.dateformat == self.DATEFORMAT.DATE:
             return date.strftime("%Y%m%d")
+        elif self.dateformat == self.DATEFORMAT.MONTHDAY:
+            return date.strftime("%m%d")
         elif self.dateformat == self.DATEFORMAT.DATETIME:
             return date.strftime("%Y%m%d%H%M")
         else:
@@ -110,19 +113,25 @@ class Frequency(object):
         return self.format_date(date) + mapset
 
     def check_date(self, date_datetime):
-        if type(date_datetime) is datetime.datetime and self.dateformat == self.DATEFORMAT.DATE:
+        if type(date_datetime) is datetime.datetime and (
+                self.dateformat in (self.DATEFORMAT.DATE, self.DATEFORMAT.MONTHDAY)):
             return False
         if type(date_datetime) is datetime.date and self.dateformat == self.DATEFORMAT.DATETIME:
             return False
         return True
 
     def extract_date(self, filename):
-        date_parts = (int(filename[:4]), int(filename[4:6]), int(filename[6:8]))
-        if self.dateformat == self.DATEFORMAT.DATE:
+        if self.dateformat == self.DATEFORMAT.MONTHDAY:
+            date_parts = (datetime.date.today().year, int(filename[:2]), int(filename[2:4]))
             date = datetime.date(*date_parts)
+            print date
         else:
-            date_parts += (int(filename[8:10]), int(filename[10:12]))
-            date = datetime.datetime(*date_parts)
+            date_parts = (int(filename[:4]), int(filename[4:6]), int(filename[6:8]))
+            if self.dateformat == self.DATEFORMAT.DATE:
+                date = datetime.date(*date_parts)
+            else:
+                date_parts += (int(filename[8:10]), int(filename[10:12]))
+                date = datetime.datetime(*date_parts)
         return date
 
     def next_date(self, date):
@@ -196,20 +205,18 @@ class Dataset(object):
         if self._db_product is None or self._db_product == []:
             raise NoProductFound(kwargs)
         if isinstance(self._db_product, list):
-            my_db_products = self._db_product[0]
-        else:
-            my_db_products = self._db_product
-
+            self._db_product = self._db_product[0]
         self._path = functions.set_path_sub_directory(product_code, sub_product_code,
-                my_db_products.product_type, version, mapset)
+                self._db_product.product_type, version, mapset)
         self._fullpath = os.path.join(locals.es2globals['data_dir'], self._path)
         self._fullpath = os.path.join(locals.es2globals['data_dir'], self._path)
-        self._db_frequency = querydb.db.frequency.get(my_db_products.frequency_id)
+        self._db_frequency = querydb.db.frequency.get(self._db_product.frequency_id)
         if self._db_frequency is None:
             raise NoFrequencyFound(self._db_product)
-        self._frequency = Frequency(value=self._db_frequency.frequency, 
-                                    unit=self._db_frequency.time_unit, 
-                                    frequency_type=self._db_frequency.frequency_type)
+        self._frequency = Frequency(value=self._db_frequency.frequency,
+                                    unit=self._db_frequency.time_unit,
+                                    frequency_type=self._db_frequency.frequency_type,
+                                    dateformat=self._db_product.date_format)
         self.from_date = from_date or None
         self.to_date = to_date or self._frequency.today()
 
@@ -260,5 +267,3 @@ class Dataset(object):
             _intervals = [Interval(**self._extract_kwargs(interval)) for interval in self.find_intervals()]
             setattr(self, "_intervals", _intervals)
         return _intervals
-
-        #return [Interval(**self._extract_kwargs(interval)) for interval in self.find_intervals()]
