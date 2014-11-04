@@ -27,7 +27,7 @@ class Product(object):
     def __init__(self, product_code, version=None):
         self.product_code = product_code
         kwargs = {'productcode': self.product_code}
-        self.version=version
+        self.version = version
         if not version is None:
             kwargs['version'] = version
         self._db_product = querydb.get_product_native(**kwargs)

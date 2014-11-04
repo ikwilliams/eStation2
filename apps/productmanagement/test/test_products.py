@@ -22,6 +22,14 @@ from lib.python import functions
 from database import querydb
 import json
 
+
+def row2dict(row):
+    d = {}
+    for column in row.c._all_cols:
+        d[column.name] = str(getattr(row, column.name))
+    return d
+
+
 class TestProducts(unittest.TestCase):
     def setUp(self):
         self.kwargs = {'product_code':"fewsnet_rfe"}
@@ -64,5 +72,59 @@ class TestProducts(unittest.TestCase):
     def test_class_dataset(self):
         product = Product(**self.kwargs)
         product._get_full_subproducts = lambda: self.files_subproducts
-        self.assertIsInstance(product.get_dataset(sub_product_code=product.subproducts[-1], mapset=self.mapsets[0]),
-            Dataset)
+        self.assertIsInstance(product.get_dataset(sub_product_code=product.subproducts[-1],
+                                                  mapset=self.mapsets[0]), Dataset)
+
+    def test_all_products_to_json(self):
+       # get full distinct list of products (native only)
+        db_products = querydb.get_product_native(allrecs=True, echo=False)
+        if db_products.__len__() > 0:
+            products_dict_all = []
+            # loop the products list
+            for row in db_products:
+                prod_dict = row2dict(row)
+                productcode = prod_dict['productcode']
+                version = prod_dict['version']
+                p = Product(product_code=prod_dict['productcode'], version=version)
+
+                # does the product have mapsets AND subproducts?
+                all_prod_mapsets = p.mapsets
+                all_prod_subproducts = p.subproducts
+                if all_prod_mapsets.__len__() > 0 and all_prod_subproducts.__len__() > 0:
+                    prod_dict['productmapsets'] = []
+                    for mapset in all_prod_mapsets:
+                        mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
+                        mapset_dict = row2dict(mapset_info)
+                        mapset_dict['mapsetdatasets'] = []
+                        all_mapset_datasets = p.get_subproducts(mapset=mapset)
+                        for subproductcode in all_mapset_datasets:
+                            dataset_info = querydb.get_subproduct(productcode=productcode,
+                                                                  version=version,
+                                                                  subproductcode=subproductcode,
+                                                                  echo=False)
+                            dataset_dict = row2dict(dataset_info)
+                            if dataset_dict['product_type'] != 'Derived':
+                                dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                                completeness = dataset.get_dataset_normalized_info()
+                                dataset_dict['datasetcompleteness'] = completeness
+                            else:
+                                dataset_dict['datasetcompleteness'] = {}
+
+                            mapset_dict['mapsetdatasets'].append(dataset_dict)
+                        prod_dict['productmapsets'].append(mapset_dict)
+                    products_dict_all.append(prod_dict)
+
+            prod_json = json.dumps(products_dict_all,
+                                   ensure_ascii=False,
+                                   sort_keys=True,
+                                   indent=4,
+                                   separators=(', ', ': '))
+
+            datamanagement_json = '{"success":true, "total":'\
+                                  + str(db_products.__len__())\
+                                  + ',"products":'+prod_json+'}'
+        else:
+            datamanagement_json = '{"success":false, "error":"No data sets defined!"}'
+
+        print datamanagement_json
+        self.assertEquals(1, 1)

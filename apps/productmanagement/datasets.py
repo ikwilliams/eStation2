@@ -179,6 +179,7 @@ class Interval(object):
     def missing(self):
         return self.interval_type == INTERVAL_TYPE.MISSING
 
+
 class Dataset(object):
     def _check_date(self, date):
         if not isinstance(date, datetime.date):
