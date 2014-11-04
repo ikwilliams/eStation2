@@ -125,7 +125,6 @@ class TestDatasets(unittest.TestCase):
         self.assertEquals(intervals[3].interval_type, INTERVAL_TYPE.MISSING)
         self.assertEquals(intervals[4].interval_type, INTERVAL_TYPE.PRESENT)
 
-
     def test_number_files(self):
         kwargs = self.kwargs.copy()
         kwargs.update({'to_date': datetime.date(2014, 12, 31)})
@@ -155,7 +154,6 @@ class TestDatasets(unittest.TestCase):
         self.assertEquals(segments[1]['intervalpercentage'], 25.0)
         self.assertEquals(segments[2]['intervalpercentage'], 25.0)
 
-
     def test_normalized_info_15_minutes(self):
         kwargs = self.kwargs.copy()
         kwargs.update({
@@ -174,3 +172,27 @@ class TestDatasets(unittest.TestCase):
         self.assertEquals(completeness['missingfiles'], 18288)
         self.assertEquals(completeness['intervals'][0]['intervalpercentage'], 1.0)
 
+    def test_product_only_month_year(self):
+        kwargs = self.kwargs.copy()
+        kwargs.update({
+            'to_date': None,
+            'product_code': "fewsnet_rfe",
+            'sub_product_code': "1monmax",
+            'mapset': 'WGS84_Africa_1km'
+        })
+        files = [
+            "0101_fewsnet_rfe_1monavg_FEWSNET_Africa_8km.tif",
+            "0201_fewsnet_rfe_1monavg_FEWSNET_Africa_8km.tif",
+            "0301_fewsnet_rfe_1monavg_FEWSNET_Africa_8km.tif",
+            "0401_fewsnet_rfe_1monavg_FEWSNET_Africa_8km.tif",
+            "0501_fewsnet_rfe_1monavg_FEWSNET_Africa_8km.tif",
+            "0601_fewsnet_rfe_1monavg_FEWSNET_Africa_8km.tif",
+            "0701_fewsnet_rfe_1monavg_FEWSNET_Africa_8km.tif",
+            "0801_fewsnet_rfe_1monavg_FEWSNET_Africa_8km.tif",
+            "0901_fewsnet_rfe_1monavg_FEWSNET_Africa_8km.tif",
+                ]
+        dataset = Dataset(**kwargs)
+        dataset.get_filenames = lambda: files
+        completeness = dataset.get_dataset_normalized_info()
+        self.assertEquals(completeness['totfiles'], 11)
+        self.assertEquals(completeness['missingfiles'], 2)
