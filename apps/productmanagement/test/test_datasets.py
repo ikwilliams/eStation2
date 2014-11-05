@@ -21,83 +21,43 @@ import json
 
 class TestDatasets(unittest.TestCase):
     def setUp(self):
-        #self.kwargs = {'product_code':"fewsnet_rfe", 'sub_product_code': "rfe", 'mapset': 'FEWSNET_Africa_8km'}
-        #self.files_dekad = [
-        #        "20140101_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20140111_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20140121_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20140201_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20140211_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20140221_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20140301_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20140311_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20140321_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20140401_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20140411_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20140421_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20140501_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20140511_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20140521_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20140601_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.missing",
-        #        "20140611_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.missing",
-        #        "20140621_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.missing",
-        #        "20140701_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20140711_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20140721_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        # Here 3 holes
-        #        "20140901_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20140911_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20140921_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20141001_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20141011_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20141021_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20141101_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20141111_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20141121_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20141201_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20141211_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        "20141221_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
-        #        ]
-
-        self.kwargs = {'product_code': "fewsnet_rfe", 'sub_product_code': "10davg", 'mapset': 'FEWSNET_Africa_8km'}
+        self.kwargs = {'product_code':"fewsnet_rfe", 'sub_product_code': "rfe", 'mapset': 'FEWSNET_Africa_8km'}
         self.files_dekad = [
-            "0101_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0111_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0121_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0201_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0211_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0221_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0301_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0311_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0321_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0401_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0411_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0421_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0501_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0511_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0521_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0601_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0611_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0621_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0701_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0711_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0721_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0801_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0811_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0821_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0901_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0911_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "0921_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "1001_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "1011_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "1021_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "1101_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "1111_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "1121_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "1201_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "1211_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif",
-            "1221_fewsnet_rfe_10davg_FEWSNET_Africa_8km.tif"
-        ]
+                "20140101_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140111_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140121_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140201_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140211_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140221_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140301_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140311_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140321_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140401_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140411_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140421_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140501_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140511_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140521_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140601_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.missing",
+                "20140611_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.missing",
+                "20140621_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.missing",
+                "20140701_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140711_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140721_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                # Here 3 holes
+                "20140901_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140911_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20140921_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20141001_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20141011_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20141021_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20141101_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20141111_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20141121_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20141201_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20141211_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                "20141221_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",
+                ]
 
     def test_class(self):
         self.assertIsInstance(Dataset(**self.kwargs), Dataset)
@@ -145,7 +105,6 @@ class TestDatasets(unittest.TestCase):
         dataset = Dataset(**kwargs)
         dataset.get_filenames = lambda: files_dekad
         segments = dataset.get_dataset_normalized_info()['intervals']
-
         total = 0
         for segment in segments:
             total += segment['intervalpercentage']
