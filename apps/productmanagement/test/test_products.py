@@ -76,16 +76,21 @@ class TestProducts(unittest.TestCase):
                                                   mapset=self.mapsets[0]), Dataset)
 
     def test_all_products_to_json(self):
-       # get full distinct list of products (native only)
+        def row2dict(row):
+            d = {}
+            for column_name in row.c.keys(): #_all_cols:
+                d[column_name] = str(getattr(row, column_name))
+            return d
+        # get full distinct list of products (native only)
         db_products = querydb.get_product_native(allrecs=True, echo=False)
-        if db_products.__len__() > 0:
-            products_dict_all = []
-            # loop the products list
-            for row in db_products:
-                prod_dict = row2dict(row)
-                productcode = prod_dict['productcode']
-                version = prod_dict['version']
-                p = Product(product_code=prod_dict['productcode'], version=version)
+        self.assertTrue(db_products.__len__() > 0)
+        products_dict_all = []
+        # loop the products list
+        for row in db_products:
+            prod_dict = row2dict(row)
+            productcode = prod_dict['productcode']
+            version = prod_dict['version']
+            p = Product(product_code=prod_dict['productcode'], version=version)
 
                 # does the product have mapsets AND subproducts?
                 all_prod_mapsets = p.mapsets
