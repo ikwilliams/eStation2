@@ -9,6 +9,7 @@
 from __future__ import absolute_import
 
 import unittest
+import datetime
 
 from ..datasets import Frequency
 from ..exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
@@ -38,3 +39,15 @@ class TestFrequency(unittest.TestCase):
 
     def test_wrong_dataformat(self):
         self.assertRaises(WrongFrequencyDateFormat, Frequency, *(4, Frequency.UNIT.HOUR, Frequency.TYPE.PER, '-' + Frequency.DATEFORMAT.DATETIME))
+
+    def test_today_datetime(self):
+        frequency =  Frequency(4, Frequency.UNIT.HOUR, Frequency.TYPE.PER, dateformat=Frequency.DATEFORMAT.DATETIME)
+        self.assertEqual(type(frequency.today()), type(datetime.datetime.today()))
+
+    def test_today_date(self):
+        frequency =  Frequency(4, Frequency.UNIT.HOUR, Frequency.TYPE.PER, dateformat=Frequency.DATEFORMAT.DATE)
+        self.assertEqual(type(frequency.today()), type(datetime.date.today()))
+
+    def test_today_monthday(self):
+        frequency =  Frequency(4, Frequency.UNIT.HOUR, Frequency.TYPE.PER, dateformat=Frequency.DATEFORMAT.MONTHDAY)
+        self.assertEqual(type(frequency.today()), type(datetime.date.today()))

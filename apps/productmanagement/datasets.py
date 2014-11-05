@@ -63,7 +63,7 @@ class Frequency(object):
         return class_.DATEFORMAT.DATE
 
     def today(self):
-        if Frequency.dateformat_default(self.unit) == self.DATEFORMAT.DATETIME:
+        if self.dateformat == self.DATEFORMAT.DATETIME:
             return datetime.datetime.today()
         return datetime.date.today()
 
@@ -124,7 +124,6 @@ class Frequency(object):
         if self.dateformat == self.DATEFORMAT.MONTHDAY:
             date_parts = (datetime.date.today().year, int(filename[:2]), int(filename[2:4]))
             date = datetime.date(*date_parts)
-            print date
         else:
             date_parts = (int(filename[:4]), int(filename[4:6]), int(filename[6:8]))
             if self.dateformat == self.DATEFORMAT.DATE:

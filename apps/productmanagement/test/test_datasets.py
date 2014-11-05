@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 #
-#	purpose: Test dataset functions
-#	author:  Marco Beri marcoberi@gmail.com
-#	date:	 09.07.2014
+#   purpose: Test dataset functions
+#   author:  Marco Beri marcoberi@gmail.com
+#   date:    09.07.2014
 #
 
 from __future__ import absolute_import
@@ -135,7 +135,7 @@ class TestDatasets(unittest.TestCase):
     def test_product_only_month_year(self):
         kwargs = self.kwargs.copy()
         kwargs.update({
-            'to_date': None,
+            'to_date': datetime.date(2014, 11, 1),
             'product_code': "fewsnet_rfe",
             'sub_product_code': "1monmax",
             'mapset': 'WGS84_Africa_1km'
@@ -156,3 +156,21 @@ class TestDatasets(unittest.TestCase):
         completeness = dataset.get_dataset_normalized_info()
         self.assertEquals(completeness['totfiles'], 11)
         self.assertEquals(completeness['missingfiles'], 2)
+
+    def test_product_vgt_fapar(self):
+        kwargs = self.kwargs.copy()
+        kwargs.update({
+            'to_date': datetime.datetime(2014, 11, 1),
+            'product_code': "vgt_fapar",
+            'sub_product_code': "fapar",
+            'version': "V1.3",
+            'mapset': 'WGS84_Africa_1km'
+        })
+        files = [
+            "201406230000_vgt_fapar_fapar_WGS84_Africa_1km.tif",
+                ]
+        dataset = Dataset(**kwargs)
+        dataset.get_filenames = lambda: files
+        completeness = dataset.get_dataset_normalized_info()
+        self.assertEquals(completeness['totfiles'], 13)
+        self.assertEquals(completeness['missingfiles'], 12)
