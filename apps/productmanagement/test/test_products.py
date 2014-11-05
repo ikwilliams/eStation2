@@ -103,7 +103,8 @@ class TestProducts(unittest.TestCase):
                                                                   subproductcode=subproductcode,
                                                                   echo=False)
                             dataset_dict = row2dict(dataset_info)
-                            if dataset_dict['product_type'] != 'Derived':
+                            #if dataset_dict['product_type'] != 'Derived':
+                            if dataset_dict['productcode'] != 'vgt_fapar':
                                 dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
                                 completeness = dataset.get_dataset_normalized_info()
                                 dataset_dict['datasetcompleteness'] = completeness
