@@ -31,8 +31,8 @@ db = connectdb.ConnectDB().db
 #
 #   Output: Return the product ingestion list of all products ordered by productcode.
 #
-#    SELECT productcode, subproductcode, version, mapsetcode, defined_by,  activated
-#    FROM products.product_acquisition_data_source;
+#    SELECT productcode, subproductcode, version, mapsetcode, defined_by,  activated, mapsetname
+#    FROM products.ingestion;
 #
 def get_ingestions(echo=False):
     try:
@@ -58,8 +58,6 @@ def get_ingestions(echo=False):
         if echo:
             for row in ingestions:
                 print row
-
-        #db.session.close()
 
         return ingestions
 
@@ -109,8 +107,6 @@ def get_dataacquisitions(echo=False):
             for row in dataacquisitions:
                 print row
 
-        #db.session.close()
-
         return dataacquisitions
 
     except:
@@ -140,7 +136,7 @@ def get_dataacquisitions(echo=False):
 #   WHERE p.product_type = 'Native'
 #   ORDER BY pc.order_index, productcode
 #
-def get_products(echo=False, activated=True):
+def get_products(echo=False, activated=None):
     try:
         #session = db.session
 
@@ -192,16 +188,16 @@ def get_products(echo=False, activated=True):
 
         if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
             where = and_(pl.c.product_type == 'Native', pl.c.activated)
-        else:
+        elif activated is False or activated in ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
             where = and_(pl.c.product_type == 'Native', pl.c.activated != 't')
+        else:
+            where = and_(pl.c.product_type == 'Native')
 
         productslist = pl.filter(where).order_by(asc(pl.c.order_index), asc(pl.c.productcode)).all()
 
         if echo:
             for row in productslist:
                 print row
-
-        #db.session.close()
 
         return productslist
 
@@ -296,12 +292,13 @@ def get_product_in_info(allrecs=False, echo=False,
 
 
 ######################################################################################
-#   get_product_native(pkid='', allrecs=False, echo=False)
+#   get_product_native(productcode='', version='undefined', allrecs=False, echo=False)
 #   Purpose: Query the database to get the records of all products or one specific product
 #            with product_type='Native' from the table product.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/05/16
 #   Input: productcode      - The productcode of the specific product info requested. Default=''
+#          version          - The product version
 #          allrecs          - If True return all products. Default=False
 #          echo             - If True echo the query result in the console for debugging purposes. Default=False
 #   Output: Return the fields of all or a specific product record with product_type='Native' from the table product.
@@ -316,11 +313,41 @@ def get_product_native(productcode='', version='undefined', allrecs=False, echo=
         else:
             where = and_(db.product.productcode == productcode,
                          db.product.product_type == 'Native',
-                         db.sub_datasource_description.version == version)
+                         db.product.version == version)
             product = db.product.filter(where).one()
             if echo:
                 print product
         return product
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_product_native: Database query error!\n -> {}".format(exceptionvalue))
+        #raise Exception("get_product_native: Database query error!\n ->%s" % exceptionvalue)
+
+
+######################################################################################
+#   get_subproduct(productcode='', version='undefined', subproductcode='', echo=False)
+#   Purpose: Query the database to get the records of all products or one specific product
+#            with product_type='Native' from the table product.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2014/05/16
+#   Input: productcode      - The productcode of the specific product info requested. Default=''
+#          version          - The product version
+#          allrecs          - If True return all products. Default=False
+#          echo             - If True echo the query result in the console for debugging purposes. Default=False
+#   Output: Return the fields of all or a specific product record with product_type='Native' from the table product.
+def get_subproduct(productcode='', version='undefined', subproductcode='', echo=False):
+    try:
+        where = and_(db.product.productcode == productcode,
+                     db.product.subproductcode == subproductcode,
+                     db.product.version == version)
+        subproduct = db.product.filter(where).one()
+        if echo:
+            print subproduct
+
+        return subproduct
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         if echo:
@@ -634,6 +661,7 @@ def get_eumetcast_sources(echo=False):
         logger.error("get_eumetcast_sources: Database query error!\n -> {}".format(exceptionvalue))
         #raise Exception("get_ingestion: Database query error!\n ->%s" % exceptionvalue)
 
+
 ######################################################################################
 #   get_active_internet_sources(echo=False)
 #   Purpose: Query the database to get the internet_id of all the active product INTERNET data sources.
@@ -653,19 +681,19 @@ def get_active_internet_sources(echo=False):
         # The columns on the subquery "es" are accessible through an attribute called "c"
         # e.g. es.c.filter_expression_jrc
 
-        args = tuple(x for x in (pads, es.c.internet_id, es.c.defined_by ,
+        args = tuple(x for x in (pads, es.c.internet_id, es.c.defined_by,
                                  es.c.descriptive_name, es.c.description,
                                  es.c.modified_by, es.c.update_datetime,
                                  es.c.url, es.c.user_name, es.c.password,
-                                 es.c.list, es.c.period, es.c.scope ,
-                                 es.c.include_files_expression ,
+                                 es.c.list, es.c.period, es.c.scope,
+                                 es.c.include_files_expression,
                                  es.c.exclude_files_expression,
-                                 es.c.status, es.c.pull_frequency ,
+                                 es.c.status, es.c.pull_frequency,
                                  es.c.datasource_descr_id)
-                    if x != es.c.update_datetime )
+                     if x != es.c.update_datetime)
 
-        internet_sources = session.query(*args).outerjoin(es,
-                pads.data_source_id == es.c.internet_id).filter(and_(pads.type == 'INTERNET', pads.activated)).all()
+        internet_sources = session.query(*args).outerjoin(es, pads.data_source_id == es.c.internet_id).\
+            filter(and_(pads.type == 'INTERNET', pads.activated)).all()
 
         if echo:
             for row in internet_sources:
