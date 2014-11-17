@@ -65,7 +65,7 @@ class Daemon:
         os.remove(self.pidfile)
 
     def status(self):
-        #If : pid exists + process run -> ON - ok
+        #If : pid exists + process run -> ON - return True
         #if : pid exists but process not run -> OFF - warning (and remove pid with ERROR message)
         #if: no pid -> check process (later on -> on production machine)
         pid = self.getpid_from_file()
