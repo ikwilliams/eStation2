@@ -25,12 +25,16 @@ class ConnectDB(object):
 
     @staticmethod
     def is_testing():
-        # Force connecting to sqlite db
+        # Define _testing from a global variable
+        # if _testing == True -> connect to sqlite
+        #                else -> connect to postgresql
+
         if getattr(ConnectDB, "_testing", None) is None:
-            setattr(ConnectDB, "_testing", "nosetests" in sys.argv[0].lower())
+            # setattr(ConnectDB, "_testing", "nosetests" in sys.argv[0].lower())
+            setattr(ConnectDB, "_testing",locals.es2globals.get('db_test_mode' == 1))
         # Force through a global variable
-        if locals.es2globals.get('db_test_mode'):
-            setattr(ConnectDB, "_testing", 1)
+        #if locals.es2globals.get('db_test_mode'):
+        #    setattr(ConnectDB, "_testing", 1)
         return ConnectDB._testing
 
     @staticmethod
@@ -69,7 +73,7 @@ class ConnectDB(object):
 
         try:
             self.schema = schema or es_constants.dbglobals['schema_products']
-
+            logger.debug("Usesqlsoup is: %s " % usesqlsoup)
             if usesqlsoup:
                 dburl = ConnectDB.get_db_url()
                 self.db = sqlsoup.SQLSoup(dburl)
@@ -79,6 +83,7 @@ class ConnectDB(object):
                 Mysession = sessionmaker(bind=self.db, autoflush=True)
                 self.session = Mysession()
 
+            logger.debug("is_testing is: %s " % self.is_testing())
             if self.is_testing():
                 self.schema = None
             else:
