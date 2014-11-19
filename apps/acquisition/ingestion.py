@@ -144,8 +144,16 @@ def drive_ingestion(dry_run=False):
                     # Pass list of files to ingestion routine
                     if (not dry_run):
                         ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, echo_query=echo_query)
+                        # TODO-M.C.: add a switch in db.ingestion table to enable file deletion ?
+                        #            also add the management of temporary file and dirs
+                        for file_to_remove in date_fileslist:
+                            logger.debug("     --> now deleting input files: %s" % file_to_remove)
+                            os.remove(file_to_remove)
                     else:
                         time.sleep(10)
+
+        # Wait at the end of the loop
+        time.sleep(10)
 
 def ingestion(input_files, in_date, product, subproducts, datasource_descr, echo_query=False):
 #   Manages ingestion of 1/more file/files for a given date
