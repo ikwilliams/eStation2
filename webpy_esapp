@@ -96,6 +96,8 @@ urls = (
 
     "/datasets", "DataSets",
 
+    "/getlayer", "getLayer",
+
     "/template", "TemplatePage",
     #"/(.+)/(.+)", "EsApp",
     #"/(.+)/", "EsApp",
@@ -125,8 +127,6 @@ class DataSets:
 
     def GET(self):
         # return web.ctx
-
-        #db_products = querydb.get_product_native(allrecs=True, echo=False)
         db_products = querydb.get_products(echo=False)
 
         if db_products.__len__() > 0:
@@ -155,27 +155,27 @@ class DataSets:
                                                                   echo=False)
                             dataset_dict = row2dict(dataset_info)
                             #if dataset_dict['product_type'] != 'Derived':
-                            if dataset_dict['productcode'] != 'vgt_fapar':
-                                dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
-                                completeness = dataset.get_dataset_normalized_info()
-                                dataset_dict['datasetcompleteness'] = completeness
-                            else:
-                                dataset_dict['datasetcompleteness'] = {
-                                    "firstdate": "01-01",
-                                    "lastdate": "01-12",
-                                    "missingfiles": 12,
-                                    "totfiles": 12,
-                                    "intervals": [
-                                        {
-                                            "fromdate": "01-01",
-                                            "intervalpercentage": 100,
-                                            "intervaltype": "missing",
-                                            "missing": "true",
-                                            "todate": "01-12",
-                                            "totfiles": 12
-                                        }
-                                    ]
-                                }
+                            #if dataset_dict['productcode'] != 'vgt_fapar':
+                            dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                            completeness = dataset.get_dataset_normalized_info()
+                            dataset_dict['datasetcompleteness'] = completeness
+                            #else:
+                            #    dataset_dict['datasetcompleteness'] = {
+                            #        "firstdate": "01-01",
+                            #        "lastdate": "01-12",
+                            #        "missingfiles": 12,
+                            #        "totfiles": 12,
+                            #        "intervals": [
+                            #            {
+                            #                "fromdate": "01-01",
+                            #                "intervalpercentage": 100,
+                            #                "intervaltype": "missing",
+                            #                "missing": "true",
+                            #                "todate": "01-12",
+                            #                "totfiles": 12
+                            #            }
+                            #        ]
+                            #    }
 
                             mapset_dict['mapsetdatasets'].append(dataset_dict)
                         prod_dict['productmapsets'].append(mapset_dict)
@@ -194,267 +194,6 @@ class DataSets:
             datamanagement_json = '{"success":false, "error":"No data sets defined!"}'
 
         return datamanagement_json
-
-        #datasets = {"success": "true",
-        #            "products": [{
-        #                "activated": "True",
-        #                "cat_descr_name": "Vegetation",
-        #                "category_id": "vegetation",
-        #                "defined_by": "JRC",
-        #                "description": "The FAPAR is the Fraction of Absorbed Photosynthetically Active radiation. The FAPAR quantifies the fraction of the solar radiation absorbed by live leaves for the photosynthesis activity. Then, it refers only to the green and alive elements of the canopy. The FAPAR depends on the canopy structure, vegetation element optical properties, atmospheric conditions, and angular configuration. To overcome this latter dependency, a daily integrated FAPAR value is assessed. \r\nFAPAR is recognized as an Essential Climate Variable (ECV) by the Global Climate Observing System (GCOS).",
-        #                "order_index": "1",
-        #                "prod_descriptive_name": "FAPAR",
-        #                "productID": "vgt_fapar_V1.3",
-        #                "product_type": "Native",
-        #                "productcode": "vgt_fapar",
-        #                "subproductcode": "vgt_fapar_native",
-        #                "version": "V1.3",
-        #
-        #                "productmapsets": [{
-        #                    "mapsetcode": "WGS84_ECOWAS_1km",
-        #                    "defined_by": "JRC",
-        #                    "descriptive_name": "ECOWAS 1km",
-        #                    "description": "WGS84_ECOWAS_1km",
-        #                    "srs_wkt": 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],TOWGS84[0,0,0,0,0,0,0],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9108"]],AUTHORITY["EPSG","4326"]]',
-        #                    "upper_left_long": -19.0044642857143,
-        #                    "pixel_shift_long": 0.008928571428571,
-        #                    "rotation_factor_long": 0,
-        #                    "upper_left_lat": 28.0044642857143,
-        #                    "pixel_shift_lat": -0.008928571428571,
-        #                    "rotation_factor_lat": 0,
-        #                    "pixel_size_x": 4929,
-        #                    "pixel_size_y": 2689,
-        #                    "footprint_image": "",
-        #
-        #                    "mapsetdatasets": [{
-        #                        "datasetID": "vgt_fapar_V1.3_fapar",
-        #                        "product_type": "Ingest",
-        #                        "productcode": "vgt_fapar",
-        #                        "subproductcode": "fapar",
-        #                        "version": "V1.3",
-        #                        "activated": "True",
-        #                        "defined_by": "JRC",
-        #                        "description": "",
-        #                        "prod_descriptive_name": "",
-        #
-        #                        "datasetcompleteness": {
-        #                            "firstdate": "2013-07-01",
-        #                            "datasetintervals": [
-        #                                {
-        #                                    "fromdate": "2013-07-01",
-        #                                    "intervalpercentage": 2.127659574468085,
-        #                                    "intervaltype": "present",
-        #                                    "missing": "false",
-        #                                    "todate": "2013-07-01",
-        #                                    "totfiles": 1
-        #                                },
-        #                                {
-        #                                    "fromdate": "2013-07-11",
-        #                                    "intervalpercentage": 97.87234042553192,
-        #                                    "intervaltype": "missing",
-        #                                    "missing": "true",
-        #                                    "todate": "2014-10-11",
-        #                                    "totfiles": 46
-        #                                }
-        #                            ],
-        #                            "lastdate": "2014-10-11",
-        #                            "missingfiles": 46,
-        #                            "totfiles": 47
-        #                        }
-        #                    }]
-        #                }]
-        #            }, {
-        #                "activated": "True",
-        #                "cat_descr_name": "Vegetation",
-        #                "category_id": "vegetation",
-        #                "defined_by": "JRC",
-        #                "description": "The NDVI can be used to measure and monitor plant growth, vegetation cover, and biomass production. It is a dimensionless variable.  The values vary between -1 and 1. Increasing positive NDVI values indicate increasing amounts of green vegetation. Moderate values represent shrub and grassland (0.2 to 0.3), while high values indicate temperate and tropical rainforests (0.6 to 0.8). NDVI values near zero and decreasing negative values indicate non-vegetated features such as barren surfaces (rock and soil) and water, snow, ice, and clouds.",
-        #                "order_index": "1",
-        #                "prod_descriptive_name": "Normalized Difference Vegetation Index",
-        #                "productID": "vgt_ndvi_undefined",
-        #                "product_type": "Native",
-        #                "productcode": "vgt_ndvi",
-        #                "subproductcode": "vgt_ndvi_native",
-        #                "version": "undefined",
-        #
-        #                "productmapsets": [{
-        #                    "mapsetcode": "WGS84_ECOWAS_1km",
-        #                    "defined_by": "JRC",
-        #                    "descriptive_name": "ECOWAS 1km",
-        #                    "description": "WGS84_ECOWAS_1km",
-        #                    "srs_wkt": 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],TOWGS84[0,0,0,0,0,0,0],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9108"]],AUTHORITY["EPSG","4326"]]',
-        #                    "upper_left_long": -19.0044642857143,
-        #                    "pixel_shift_long": 0.008928571428571,
-        #                    "rotation_factor_long": 0,
-        #                    "upper_left_lat": 28.0044642857143,
-        #                    "pixel_shift_lat": -0.008928571428571,
-        #                    "rotation_factor_lat": 0,
-        #                    "pixel_size_x": 4929,
-        #                    "pixel_size_y": 2689,
-        #                    "footprint_image": "",
-        #
-        #                    "mapsetdatasets": [{
-        #                        "datasetID": "vgt_ndvi_undefined_ndv",
-        #                        "product_type": "Ingest",
-        #                        "productcode": "vgt_ndvi",
-        #                        "subproductcode": "ndv",
-        #                        "version": "undefined",
-        #                        "activated": "True",
-        #                        "defined_by": "JRC",
-        #                        "description": "The NDVI can be used to measure and monitor plant growth, vegetation cover, and biomass production. It is a dimensionless variable.  The values vary between -1 and 1. Increasing positive NDVI values indicate increasing amounts of green vegetation. Moderate values represent shrub and grassland (0.2 to 0.3), while high values indicate temperate and tropical rainforests (0.6 to 0.8). NDVI values near zero and decreasing negative values indicate non-vegetated features such as barren surfaces (rock and soil) and water, snow, ice, and clouds.",
-        #                        "prod_descriptive_name": "Normalized Difference Vegetation Index",
-        #
-        #                        "datasetcompleteness": {
-        #                            "firstdate": "2013-07-01",
-        #                            "datasetintervals": [
-        #                                {
-        #                                    "fromdate": "2013-07-01",
-        #                                    "intervalpercentage": 2.127659574468085,
-        #                                    "intervaltype": "present",
-        #                                    "missing": "false",
-        #                                    "todate": "2013-07-01",
-        #                                    "totfiles": 1
-        #                                },
-        #                                {
-        #                                    "fromdate": "2013-07-11",
-        #                                    "intervalpercentage": 97.87234042553192,
-        #                                    "intervaltype": "missing",
-        #                                    "missing": "true",
-        #                                    "todate": "2014-10-11",
-        #                                    "totfiles": 46
-        #                                }
-        #                            ],
-        #                            "lastdate": "2014-10-11",
-        #                            "missingfiles": 46,
-        #                            "totfiles": 47
-        #                        }
-        #                    }, {
-        #                        "datasetID": "vgt_ndvi_undefined_sm",
-        #                        "product_type": "Ingest",
-        #                        "productcode": "vgt_ndvi",
-        #                        "subproductcode": "sm",
-        #                        "version": "undefined",
-        #                        "activated": "True",
-        #                        "defined_by": "JRC",
-        #                        "description": "Status map of the NDVI.",
-        #                        "prod_descriptive_name": "Status map",
-        #
-        #                        "datasetcompleteness": {
-        #                            "firstdate": "2013-07-01",
-        #                            "datasetintervals": [
-        #                                {
-        #                                    "fromdate": "2013-07-01",
-        #                                    "intervalpercentage": 2.127659574468085,
-        #                                    "intervaltype": "present",
-        #                                    "missing": "false",
-        #                                    "todate": "2013-07-01",
-        #                                    "totfiles": 1
-        #                                },
-        #                                {
-        #                                    "fromdate": "2013-07-11",
-        #                                    "intervalpercentage": 97.87234042553192,
-        #                                    "intervaltype": "missing",
-        #                                    "missing": "true",
-        #                                    "todate": "2014-10-11",
-        #                                    "totfiles": 46
-        #                                }
-        #                            ],
-        #                            "lastdate": "2014-10-11",
-        #                            "missingfiles": 46,
-        #                            "totfiles": 47
-        #                        }
-        #                    }]
-        #                }, {
-        #                    "mapsetcode": "WGS84_Africa_1km",
-        #                    "defined_by": "JRC",
-        #                    "descriptive_name": "Africa 1km",
-        #                    "description": "Original Spot VGT 1km mapset",
-        #                    "srs_wkt": 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],TOWGS84[0,0,0,0,0,0,0],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9108"]],AUTHORITY["EPSG","4326"]]',
-        #                    "upper_left_long": -26.0044642857143,
-        #                    "pixel_shift_long": 0.008928571428571,
-        #                    "rotation_factor_long": 0,
-        #                    "upper_left_lat": 38.0044642857143,
-        #                    "pixel_shift_lat": -0.008928571428571,
-        #                    "rotation_factor_lat": 0,
-        #                    "pixel_size_x": 9633,
-        #                    "pixel_size_y": 8177,
-        #                    "footprint_image": "",
-        #
-        #                    "mapsetdatasets": [{
-        #                        "datasetID": "vgt_ndvi_undefined_ndv",
-        #                        "product_type": "Ingest",
-        #                        "productcode": "vgt_ndvi",
-        #                        "subproductcode": "ndv",
-        #                        "version": "undefined",
-        #                        "activated": "True",
-        #                        "defined_by": "JRC",
-        #                        "description": "The NDVI can be used to measure and monitor plant growth, vegetation cover, and biomass production. It is a dimensionless variable.  The values vary between -1 and 1. Increasing positive NDVI values indicate increasing amounts of green vegetation. Moderate values represent shrub and grassland (0.2 to 0.3), while high values indicate temperate and tropical rainforests (0.6 to 0.8). NDVI values near zero and decreasing negative values indicate non-vegetated features such as barren surfaces (rock and soil) and water, snow, ice, and clouds.",
-        #                        "prod_descriptive_name": "Normalized Difference Vegetation Index",
-        #
-        #                        "datasetcompleteness": {
-        #                            "firstdate": "2013-07-01",
-        #                            "datasetintervals": [
-        #                                {
-        #                                    "fromdate": "2013-07-01",
-        #                                    "intervalpercentage": 2.127659574468085,
-        #                                    "intervaltype": "present",
-        #                                    "missing": "false",
-        #                                    "todate": "2013-07-01",
-        #                                    "totfiles": 1
-        #                                },
-        #                                {
-        #                                    "fromdate": "2013-07-11",
-        #                                    "intervalpercentage": 97.87234042553192,
-        #                                    "intervaltype": "missing",
-        #                                    "missing": "true",
-        #                                    "todate": "2014-10-11",
-        #                                    "totfiles": 46
-        #                                }
-        #                            ],
-        #                            "lastdate": "2014-10-11",
-        #                            "missingfiles": 46,
-        #                            "totfiles": 47
-        #                        }
-        #                    }, {
-        #                        "datasetID": "vgt_ndvi_undefined_sm",
-        #                        "product_type": "Ingest",
-        #                        "productcode": "vgt_ndvi",
-        #                        "subproductcode": "sm",
-        #                        "version": "undefined",
-        #                        "activated": "True",
-        #                        "defined_by": "JRC",
-        #                        "description": "Status map of the NDVI.",
-        #                        "prod_descriptive_name": "Status map",
-        #
-        #                        "datasetcompleteness": {
-        #                            "firstdate": "2013-07-01",
-        #                            "datasetintervals": [
-        #                                {
-        #                                    "fromdate": "2013-07-01",
-        #                                    "intervalpercentage": 2.127659574468085,
-        #                                    "intervaltype": "present",
-        #                                    "missing": "false",
-        #                                    "todate": "2013-07-01",
-        #                                    "totfiles": 1
-        #                                },
-        #                                {
-        #                                    "fromdate": "2013-07-11",
-        #                                    "intervalpercentage": 97.87234042553192,
-        #                                    "intervaltype": "missing",
-        #                                    "missing": "true",
-        #                                    "todate": "2014-10-11",
-        #                                    "totfiles": 46
-        #                                }
-        #                            ],
-        #                            "lastdate": "2014-10-11",
-        #                            "missingfiles": 46,
-        #                            "totfiles": 47
-        #                        }
-        #                    }]
-        #                }]
-        #            }]}
-
-        #return datasets
 
 
 class CheckStatusAllServices:

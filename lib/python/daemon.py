@@ -4,6 +4,7 @@ import sys, os, time, atexit
 import psutil
 from signal import SIGTERM
 
+
 class Daemon:
     """
     A generic daemon class.
@@ -31,7 +32,7 @@ class Daemon:
             sys.stderr.write("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
             sys.exit(1)
 
-        # decouple from parent environment
+        ## decouple from parent environment
         os.chdir("/")
         os.setsid()
         os.umask(0)
@@ -46,6 +47,8 @@ class Daemon:
             sys.stderr.write("fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
             sys.exit(1)
 
+        # Now I am a daemon!
+
         # redirect standard file descriptors
         sys.stdout.flush()
         sys.stderr.flush()
@@ -59,7 +62,7 @@ class Daemon:
         # write pidfile
         atexit.register(self.delpid)
         pid = str(os.getpid())
-        file(self.pidfile,'w+').write("%s\n" % pid)
+        file(self.pidfile, 'w+').write("%s\n" % pid)
 
     def delpid(self):
         os.remove(self.pidfile)

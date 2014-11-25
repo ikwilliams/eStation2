@@ -57,9 +57,9 @@ get_internet_processed_list_prefix = processed_list_int_dir + 'get_internet_proc
 
 poll_frequency = 5
 
-get_internet_pid_filename=base_tmp_dir+'/services/get-internet.pid'
-get_eumetcast_pid_filename=base_tmp_dir+'/services/get-eumetcast.pid'
-ingest_pid_filename=base_tmp_dir+'/services/ingest.pid'
+get_internet_pid_filename=base_tmp_dir+'services/get-internet.pid'
+get_eumetcast_pid_filename=base_tmp_dir+'services/get-eumetcast.pid'
+ingest_pid_filename=base_tmp_dir+'services/ingest.pid'
 
 #umask 0002
 # Python libs paths

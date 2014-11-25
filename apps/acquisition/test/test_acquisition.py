@@ -5,7 +5,8 @@ from config import es_constants
 from apps.acquisition import acquisition
 from lib.python import es_logging as log
 logger = log.my_logger(__name__)
-#
+
+
 class TestDaemon(unittest.TestCase):
 
     #   ---------------------------------------------------------------------------
@@ -23,6 +24,7 @@ class TestDaemon(unittest.TestCase):
             logger.info('Ingest pid file exist: stop daemon')
             try:
                 daemon.stop()
+                self.assertEqual(daemon.status(), 0)
             except:
                 pass
             self.assertEqual(os.path.isfile(pid_file), 0)
@@ -30,6 +32,7 @@ class TestDaemon(unittest.TestCase):
             logger.info('Ingest pid file does NOT exist: start daemon')
             try:
                 daemon.start()
+                self.assertEqual(daemon.status(), 1)
             except:
                 pass
             time.sleep(1)
@@ -58,7 +61,7 @@ class TestDaemon(unittest.TestCase):
                 pass
             time.sleep(1)
             self.assertEqual(os.path.isfile(pid_file), 1)
-    #
+
     def TestGetEumetcastDaemon(self):
 
         logger.info('Test GetEumetcast daemon')
