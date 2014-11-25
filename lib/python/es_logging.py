@@ -52,23 +52,23 @@ def my_logger(name):
     logger.addHandler(null_handler)
     console_handler = logging.StreamHandler()
 
-    #file_handler = logging.handlers.RotatingFileHandler(log_dir+name+'.log', maxBytes=100, backupCount=5)
-    #file_handler = logging.FileHandler(log_dir+name+'.log')
+    file_handler = logging.handlers.RotatingFileHandler(log_dir+name+'.log', maxBytes=10000, backupCount=5)
+    file_handler = logging.FileHandler(log_dir+name+'.log')
 
     # Create formatter
     plain_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%d %H:%M:%S")
 
     # Add formatter to handlers
     console_handler.setFormatter(plain_formatter)
-    #file_handler.setFormatter(plain_formatter)
+    file_handler.setFormatter(plain_formatter)
 
     #handler=logging.FileHandler(os.path.join('/some/path/',name+'.log'),'w')
-    #logger.addHandler(file_handler)
+    logger.addHandler(file_handler)
     logger.addHandler(console_handler)
 
     # Define log handlers
     console_handler.setLevel(logging.DEBUG)
-    #file_handler.setLevel(logging.DEBUG)
+    file_handler.setLevel(logging.DEBUG)
 
     return logger
 
