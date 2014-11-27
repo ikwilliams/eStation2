@@ -137,7 +137,7 @@ class DataSets:
                 prod_dict = row2dict(row)
                 productcode = prod_dict['productcode']
                 version = prod_dict['version']
-                p = Product(product_code=prod_dict['productcode'], version=version)
+                p = Product(product_code=productcode, version=version)
 
                 # does the product have mapsets AND subproducts?
                 all_prod_mapsets = p.mapsets
@@ -180,7 +180,7 @@ class DataSets:
 
                             mapset_dict['mapsetdatasets'].append(dataset_dict)
                         prod_dict['productmapsets'].append(mapset_dict)
-                    products_dict_all.append(prod_dict)
+                products_dict_all.append(prod_dict)
 
             prod_json = json.dumps(products_dict_all,
                                    ensure_ascii=False,
@@ -291,7 +291,7 @@ class UpdateDataAcquisition:
                                'data_source_id': getparams['dataacquisitions']['data_source_id'],
                                'defined_by': getparams['dataacquisitions']['defined_by'],
                                'activated': getparams['dataacquisitions']['activated']}
-        print dataacquisitioninfo
+        #print dataacquisitioninfo
         if self.crud_db.update('product_acquisition_data_source', dataacquisitioninfo):
             updatestatus = '{"success":true, "message":"Data source updated!"}'
         else:
@@ -314,7 +314,7 @@ class UpdateIngestion:
                          'mapsetcode': getparams['ingestions']['mapsetcode'],
                          'defined_by': getparams['ingestions']['defined_by'],
                          'activated': getparams['ingestions']['activated']}
-        print ingestioninfo
+        #print ingestioninfo
         if self.crud_db.update('ingestion', ingestioninfo):
             updatestatus = '{"success":true, "message":"Ingestion updated!"}'
         else:
