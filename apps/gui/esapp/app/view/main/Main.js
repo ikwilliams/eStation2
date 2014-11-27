@@ -63,7 +63,7 @@ Ext.define('esapp.view.main.Main', {
             xtype: 'tabpanel',
             layout: 'fit',
             deferredRender: false,
-            activeTab: 'analysistab',     // first tab initially active
+            activeTab: 'dashboardtab',     // first tab initially active
 
 //            tbar: { xtype: 'app-main-toolbar' },
 //            dockedItems: [{
@@ -74,6 +74,7 @@ Ext.define('esapp.view.main.Main', {
 
             items: [{
                 title: 'Dashboard',
+                id:'dashboardtab',
                 xtype:'container',
                 autoScroll: true,
                 layout : 'center',
@@ -110,6 +111,7 @@ Ext.define('esapp.view.main.Main', {
                 }
             }, {
                 title: 'Processing',
+                id:'processingmaintab',
                 xtype:'container',
                 autoScroll: true,
                 listeners: {
