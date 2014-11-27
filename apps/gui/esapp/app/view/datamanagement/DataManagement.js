@@ -20,7 +20,6 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         'Ext.XTemplate'
     ],
 
-
     store: 'DataSetsStore',
 
     // title: 'Data Management Dashboard',

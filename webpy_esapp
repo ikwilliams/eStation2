@@ -21,6 +21,7 @@ from database import querydb
 from database import crud
 
 from apps.acquisition import get_eumetcast
+from apps.acquisition import acquisition
 from apps.productmanagement.datasets import Dataset
 from apps.productmanagement.products import Product
 
@@ -202,10 +203,28 @@ class CheckStatusAllServices:
 
     def POST(self):
         #return web.ctx
-        eumetcast = "true"
+        dry_run = True
+
+        ingest = "false"
+        pid_file = es_constants.ingest_pid_filename
+        ingest_daemon = acquisition.IngestDaemon(pid_file, dry_run=dry_run)
+        if ingest_daemon.status():
+            ingest = "true"
+
         internet = "false"
-        ingest = "true"
-        processing = "true"
+        pid_file = es_constants.get_internet_pid_filename
+        getinternet_daemon = acquisition.GetInternetDaemon(pid_file, dry_run=dry_run)
+        if getinternet_daemon.status():
+            internet = "true"
+
+        eumetcast = "false"
+        pid_file = es_constants.get_eumetcast_pid_filename
+        geteumetcast_daemon = acquisition.GetEumetcastDaemon(pid_file, dry_run=dry_run)
+        if geteumetcast_daemon.status():
+            eumetcast = "true"
+
+        processing = "false"
+
         servicesstatus_json = '{"success": true, "eumetcast": ' + eumetcast + \
                               ', "internet": ' + internet + \
                               ', "ingest": ' + ingest + \
