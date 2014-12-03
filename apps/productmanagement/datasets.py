@@ -193,7 +193,8 @@ class Dataset(object):
             raise WrongDateType(date, datetime.date)
 
     def __init__(self, product_code, sub_product_code, mapset, version=None, from_date=None, to_date=None):
-        kwargs = {'productcode': product_code, 'subproductcode': sub_product_code}
+        kwargs = {'productcode': product_code,
+                'subproductcode': sub_product_code.lower() if sub_product_code else None}
         if not version is None:
             kwargs['version'] = version
         if from_date:
