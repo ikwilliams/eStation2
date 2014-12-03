@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 #
-#	purpose: Dataset functions
-#	author:  Marco Beri marcoberi@gmail.com
-#	date:	 09.07.2014
+#    purpose: Dataset functions
+#    author:  Marco Beri marcoberi@gmail.com
+#    date:    09.07.2014
 #
-#   TODO-M.C.: improve the error handling
 
 from __future__ import absolute_import
 
