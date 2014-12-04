@@ -44,6 +44,10 @@ base_tmp_dir = os.path.sep+'tmp'+os.path.sep+'eStation2'+os.path.sep
 eumetcast_files_dir = data_dir+'my_eumetcast_dir/'
 ingest_server_in_dir = data_dir+'my_data_ingest_dir/'
 
+
+template_mapfile = apps_dir+'analysis/MAP_main.map'
+
+
 # ---------------------------------------------------------------
 # Services: GET/INGEST
 # ---------------------------------------------------------------

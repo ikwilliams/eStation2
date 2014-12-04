@@ -64,6 +64,32 @@ def checkDateFormat(myString):
     return isDate
 
 
+import urllib2
+def internet_on():
+    try:
+        response = urllib2.urlopen('http://74.125.228.100', timeout=1)
+        return True
+    except urllib2.URLError as err: pass
+    return False
+
+
+import socket
+REMOTE_SERVER = "www.google.com"
+def is_connected():
+  try:
+    # see if we can resolve the host name -- tells us if there is
+    # a DNS listening
+    host = socket.gethostbyname(REMOTE_SERVER)
+    # connect to the host -- tells us if the host is actually
+    # reachable
+    s = socket.create_connection((host, 80), 2)
+    return True
+  except:
+     pass
+  return False
+print is_connected()
+
+
 ######################################################################################
 #                            DATE FUNCTIONS
 ######################################################################################

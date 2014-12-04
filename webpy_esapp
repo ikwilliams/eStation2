@@ -24,60 +24,12 @@ from apps.acquisition import get_eumetcast
 from apps.acquisition import acquisition
 from apps.productmanagement.datasets import Dataset
 from apps.productmanagement.products import Product
+from apps.analysis import mapserver
 
+from lib.python import functions
+from lib.python import es_logging as log
 
-def row2dict(row):
-    d = {}
-    for column in row.c._all_cols:
-        d[column.name] = str(getattr(row, column.name))
-
-    return d
-
-
-def tojson(queryresult):
-    jsonresult = ''
-    for row in queryresult:
-        da = row2dict(row)
-        jsonresult = jsonresult + json.dumps(da,
-                                             ensure_ascii=False,
-                                             sort_keys=True,
-                                             indent=4,
-                                             separators=(',', ': ')) + ', '
-    jsonresult = jsonresult[:-2]
-    return jsonresult
-
-
-# Return True if the date is in the correct format
-def checkDateFormat(myString):
-    isDate = re.match('[0-1][0-9]\/[0-3][0-9]\/[1-2][0-9]{3}', myString)
-    return isDate
-
-
-import urllib2
-def internet_on():
-    try:
-        response = urllib2.urlopen('http://74.125.228.100', timeout=1)
-        return True
-    except urllib2.URLError as err: pass
-    return False
-
-
-import socket
-REMOTE_SERVER = "www.google.com"
-def is_connected():
-  try:
-    # see if we can resolve the host name -- tells us if there is
-    # a DNS listening
-    host = socket.gethostbyname(REMOTE_SERVER)
-    # connect to the host -- tells us if the host is actually
-    # reachable
-    s = socket.create_connection((host, 80), 2)
-    return True
-  except:
-     pass
-  return False
-print is_connected()
-
+logger = log.my_logger(__name__)
 
 
 WEBPY_COOKIE_NAME = "webpy_session_id"
@@ -97,7 +49,7 @@ urls = (
 
     "/datasets", "DataSets",
 
-    "/getlayer", "getLayer",
+    "/getlayer", "GetLayer",
 
     "/template", "TemplatePage",
     #"/(.+)/(.+)", "EsApp",
@@ -122,6 +74,84 @@ class EsApp:
         #return render.index(getparam.lang)
 
 
+class GetLayer:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self):
+        #import StringIO
+        import mapscript
+
+        #web.header('Content-type', 'image/png')
+        #web.header('Content-transfer-encoding', 'binary')
+        #buf = StringIO.StringIO()
+        #mapscript.msIO_installStdoutToBuffer()
+        #map = mapserver.getmap()
+        ##map.save to a file fname.png
+        ##web.header('Content-Disposition', 'attachment; filename="fname.png"')
+        #contents = buf.getvalue()
+        #return contents
+
+
+        projlib = "/usr/share/proj/"
+        errorfile = es_constants.apps_dir+"analysis/ms_tmp/ms_errors.log"
+        imagepath = es_constants.apps_dir+"analysis/ms_tmp/"
+        productfile = '/data/processing/vgt_ndvi/WGS84_Africa_1km/tif/ndv/20130701_vgt_ndvi_ndv_WGS84_Africa_1km.tif'
+
+        #ows = mapscript.OWSRequest()
+        #for k, v in web.input():
+        #    if k.lower() in ['image', 'coverage']:
+        #        continue
+        #    ows.setParameter(k, v)
+
+        #ows.setParameter("LAYERS", "image")
+        #ows.setParameter("COVERAGE", "image")
+        productmap = mapscript.mapObj(es_constants.template_mapfile)
+        productmap.setConfigOption("PROJ_LIB", projlib)
+        productmap.setConfigOption("MS_ERRORFILE", errorfile)
+        productmap.setConfigOption("DEBUG ", 5)
+
+        outputformat = mapscript.outputFormatObj()
+        outputformat.extension = 'PNG'
+        outputformat.imagemode = mapscript.MS_IMAGEMODE_INT16
+        outputformat.mimetype = 'image/png'
+
+        productmap.setOutputFormat(outputformat)
+        productmap.setProjection("+init=epsg:4326")
+        productmap.debug = mapscript.MS_TRUE
+        productmap.status = mapscript.MS_ON
+        productmap.setSize(736, 782)
+        productmap.setExtent(-4863270.2540311385, -7205400.673576976, 9538688.86734863, 8096680.892889029)
+        productmap.units = mapscript.MS_DD
+
+        raster = mapscript.layerObj(productmap)
+        raster.name = 'vgt_ndvi_ndv_WGS84_Africa_1km'
+        raster.type = mapscript.MS_RASTER   # MS_LAYER_RASTER
+        raster.status = mapscript.MS_ON     # MS_DEFAULT
+        raster.data = productfile
+        #raster.setProjection("+init=epsg:4326")
+        raster.dump = mapscript.MS_TRUE
+
+        result_map_file = es_constants.apps_dir+'analysis/MAP_result.map'
+        if os.path.isfile(result_map_file):
+            os.remove(result_map_file)
+        productmap.save(result_map_file)
+        image = productmap.draw()
+        image.save(es_constants.apps_dir+'analysis/20130701_vgt_ndvi_ndv_WGS84_Africa_1km.png')
+
+        #raster.metadata.set("wcs_formats", "GEOTIFF JPEG2000")
+        logger.debug("MapServer: Installing stdout to buffer.")
+        mapscript.msIO_installStdoutToBuffer()
+        #contents = productmap.OWSDispatch(ows)
+        content_type = mapscript.msIO_stripStdoutBufferContentType()
+        content = mapscript.msIO_getStdoutBufferBytes()
+        print content
+        #web.header = "Content-Type","%s; charset=utf-8"%content_type
+        web.header('Content-type', 'image/jpeg')
+        #web.header('Content-transfer-encoding', 'binary')
+        return content
+
+
 class DataSets:
     def __init__(self):
         self.lang = "en"
@@ -134,7 +164,7 @@ class DataSets:
             products_dict_all = []
             # loop the products list
             for row in db_products:
-                prod_dict = row2dict(row)
+                prod_dict = functions.row2dict(row)
                 productcode = prod_dict['productcode']
                 version = prod_dict['version']
                 p = Product(product_code=productcode, version=version)
@@ -146,7 +176,7 @@ class DataSets:
                     prod_dict['productmapsets'] = []
                     for mapset in all_prod_mapsets:
                         mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
-                        mapset_dict = row2dict(mapset_info)
+                        mapset_dict = functions.row2dict(mapset_info)
                         mapset_dict['mapsetdatasets'] = []
                         all_mapset_datasets = p.get_subproducts(mapset=mapset)
                         for subproductcode in all_mapset_datasets:
@@ -154,29 +184,12 @@ class DataSets:
                                                                   version=version,
                                                                   subproductcode=subproductcode,
                                                                   echo=False)
-                            dataset_dict = row2dict(dataset_info)
+                            dataset_dict = functions.row2dict(dataset_info)
                             #if dataset_dict['product_type'] != 'Derived':
                             #if dataset_dict['productcode'] != 'vgt_fapar':
                             dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
                             completeness = dataset.get_dataset_normalized_info()
                             dataset_dict['datasetcompleteness'] = completeness
-                            #else:
-                            #    dataset_dict['datasetcompleteness'] = {
-                            #        "firstdate": "01-01",
-                            #        "lastdate": "01-12",
-                            #        "missingfiles": 12,
-                            #        "totfiles": 12,
-                            #        "intervals": [
-                            #            {
-                            #                "fromdate": "01-01",
-                            #                "intervalpercentage": 100,
-                            #                "intervaltype": "missing",
-                            #                "missing": "true",
-                            #                "todate": "01-12",
-                            #                "totfiles": 12
-                            #            }
-                            #        ]
-                            #    }
 
                             mapset_dict['mapsetdatasets'].append(dataset_dict)
                         prod_dict['productmapsets'].append(mapset_dict)
@@ -341,7 +354,7 @@ class Ingestion:
                 #kwargs.update({'to_date': datetime.date(2013, 12, 31)})
                 dataset = Dataset(**kwargs)
                 completeness = dataset.get_dataset_normalized_info()
-                ingest_dict = row2dict(row)
+                ingest_dict = functions.row2dict(row)
                 ingest_dict['completeness'] = completeness
                 ingest_dict_all.append(ingest_dict)
 
@@ -372,7 +385,7 @@ class DataAcquisition:
 
             acq_dict_all = []
             for row in dataacquisitions:
-                acq_dict = row2dict(row)
+                acq_dict = functions.row2dict(row)
                 # Retrieve datetime of latest acquired file and lastest datetime
                 # the acquisition was active of a specific eumetcast id
                 acq_dates = get_eumetcast.get_eumetcast_info(row.data_source_id)
@@ -412,7 +425,7 @@ class ProductAcquisition:
         #return web.ctx
         getparams = web.input()
         products = querydb.get_products(echo=False, activated=getparams.activated)
-        products_json = tojson(products)
+        products_json = functions.tojson(products)
         products_json = '{"success":true, "total":'+str(products.__len__())+',"products":['+products_json+']}'
         return products_json
 
