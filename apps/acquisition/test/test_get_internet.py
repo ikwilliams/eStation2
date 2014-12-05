@@ -77,8 +77,21 @@ class TestGetInternet(unittest.TestCase):
     #   Get contents of a directory (HTTP)  -> MODIS_SST_8D
     #   An html document is returned
     #   ---------------------------------------------------------------------------
+    def TestRemoteHttp_MODIS_SST_8D(self):
+        filename='A20100012010008.L3m_8D_SST_4.bz2'
+        remote_url='http://oceandata.sci.gsfc.nasa.gov/'
+        UserPwd='anonymous:anonymous'
+        filepath = get_dir_contents_from_url(remote_url, target_file=filename, userpwd=UserPwd)
+
+        logger.info('File downloaded to: '+filepath)
+        self.assertEqual(1,1)
+
+    #   ---------------------------------------------------------------------------
+    #   Get contents of a directory (HTTP)  -> MODIS_SST_8D
+    #   An html document is returned
+    #   ---------------------------------------------------------------------------
     def TestHttpDir(self):
-        filename='modis_sst_8d.txt'
+        filename=''
         remote_url='http://oceandata.sci.gsfc.nasa.gov/'
         UserPwd='anonymous:anonymous'
         filepath = get_dir_contents_from_url(remote_url, target_file=filename, userpwd=UserPwd)
