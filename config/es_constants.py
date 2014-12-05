@@ -67,8 +67,10 @@ ingest_pid_filename=pid_file_dir+'ingest.pid'
 #export PYTHONPATH = /opt/extern/gdal/lib/python2.6/site-packages/:/opt/extern/gdal/lib/python2.6/site-packages/osgeo
 #export LD_LIBRARY_PATH = /opt/extern/gdal/lib:/usr/share/szip-2.1/lib/usr/local/lib
 
-# GDAL netcdf _directory
-#GDALnc_dir = /opt/extern/gdal_netcdf/bin/
+# GDAL directory and commands
+GDAL_dir='/usr/bin/'
+GDAL_merge=GDAL_dir+'gdal_merge.py'
+
 # Additional processing generic product _directories
 #processing__dir = "archive tif xml derived"
 
