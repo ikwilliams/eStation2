@@ -6,7 +6,6 @@
 
 from __future__ import absolute_import
 
-import datetime
 import os
 import glob
 
@@ -15,10 +14,7 @@ from lib.python import es_logging as log
 from lib.python import functions
 from database import querydb
 
-from .exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
-                         WrongFrequencyType, WrongFrequencyDateFormat,
-                         NoProductFound, NoFrequencyFound,
-                         WrongDateType)
+from .exceptions import (NoProductFound, MissingMapset)
 from .datasets import Dataset
 
 logger = log.my_logger(__name__)
@@ -64,3 +60,26 @@ class Product(object):
     def get_subproducts(self, mapset):
         return [subproduct for subproduct in 
                     set(os.path.basename(subproduct) for subproduct in self._get_full_subproducts(mapset=mapset))]
+
+    def get_missing_dataset_subproduct(self, mapset, sub_product_code):
+        missing = {
+                'product': self.product_code,
+                'version': self.version,
+                'mapset': mapset,
+                'subproduct': sub_product_code,
+                }
+        dataset = Dataset(self.product_code, sub_product_code=sub_product_code, mapset=mapset, version=self.version)
+        missing['info'] = dataset.get_dataset_normalized_info()
+        return missing
+
+    def get_missing_datasets(self, mapset=None, sub_product_code=None):
+        missings = []
+        if sub_product_code:
+            if not mapset:
+                raise MissingMapset(sub_product_code)
+            missings.append(self.get_missing_dataset_subproduct(mapset, sub_product_code))
+        else:
+            for mapset in [mapset] if mapset else self.mapsets:
+                for sub_product_code in self.get_subproducts(mapset):
+                    missings.append(self.get_missing_dataset_subproduct(mapset, sub_product_code))
+        return missings

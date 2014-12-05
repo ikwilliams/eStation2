@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.3.2
 -- Dumped by pg_dump version 9.3.2
--- Started on 2014-10-16 15:48:57 CEST
+-- Started on 2014-11-24 15:47:32 CET
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -105,7 +105,7 @@ CREATE TABLE datasource_description (
     area_type character varying,
     area_position character varying,
     area_length integer,
-    compose_area_type character varying,
+    preproc_type character varying,
     product_release character varying,
     release_position character varying,
     release_length integer,
@@ -1049,7 +1049,7 @@ ALTER TABLE ONLY product_acquisition_data_source
     ADD CONSTRAINT products_description_product_acquisition_data_sources_fk FOREIGN KEY (subproductcode, productcode, version) REFERENCES product(subproductcode, productcode, version) ON UPDATE CASCADE;
 
 
--- Completed on 2014-10-16 15:48:58 CEST
+-- Completed on 2014-11-24 15:47:32 CET
 
 --
 -- PostgreSQL database dump complete

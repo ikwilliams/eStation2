@@ -1,0 +1,64 @@
+body {
+	font-family:Arial;
+	font-size:90%
+}
+
+table.amesd {
+	border-width: 1px 1px 1px 1px;
+	border-spacing: 2px;
+	border-style: double double double double;
+	border-color: #ff6000 #ff6000 #ff6000 #ff6000;
+	border-collapse: separate;
+	background-color: white;
+}
+table.amesd th {
+	border-width: 1px 1px 1px 1px;
+	padding: 1px 1px 1px 1px;
+	border-style: inset inset inset inset;
+	border-color: #ff6000 #ff6000 #ff6000 #ff6000;
+	background-color: white;
+	-moz-border-radius: 0px 0px 0px 0px;
+}
+table.amesd td {
+	border-width: 1px 1px 1px 1px;
+	padding: 1px 1px 1px 1px;
+	border-style: inset inset inset inset;
+	border-color: #ff6000 #ff6000 #ff6000 #ff6000;
+	background-color: white;
+	-moz-border-radius: 0px 0px 0px 0px;
+}
+
+.logo {
+    height: 117px; background: url('../image/logo_AUC-AMESD-EU.jpg') no-repeat center !important;
+}
+
+#title {
+    position:relative;
+	top: 10px;
+	left: 10px;
+}
+
+#content {
+	text-align: center;
+}
+
+#menu {
+    position:absolute;
+	top: 0px;
+	left: 0px;
+}
+
+#doc {
+    position:absolute;
+	top: 20px;
+	right: 30px;
+}
+
+body {
+	margin: 10px;
+	padding-left: 5px;
+}
+
+h1 {
+	text-align: center;
+}
