@@ -85,9 +85,9 @@ def drive_ingestion(dry_run=False):
                     for eumetcast_filter, datasource_descr in querydb.get_datasource_descr(echo=echo_query,
                                                                                            source_type=source.type,
                                                                                            source_id=source.data_source_id):
-                        # TODO-M.C.: replace with a glob function ? this loop can be very long ...
-                        files = [f for f in os.listdir(ingest_dir_in) if re.match(str(eumetcast_filter), f)]
-                        #files = glob.glob(ingest_dir_in+eumetcast_filter)
+                        # TODO-M.C.: check the most performing options in real-cases
+                       #files = [f for f in os.listdir(ingest_dir_in) if re.match(str(eumetcast_filter), f)]
+                        files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(eumetcast_filter, os.path.basename(f))]
 
                 if source.type == 'INTERNET':
                     # Implement file name filtering for INTERNET data source.
@@ -96,9 +96,9 @@ def drive_ingestion(dry_run=False):
                                                                                           source_id=source.data_source_id):
                     # TODO-Jurvtk: complete/verified
                         temp_internet_filter = internet_filter.include_files_expression
-                        # TODO-M.C.: replace with a glob function ? this loop can be very long ...
-                        files = [f for f in os.listdir(ingest_dir_in) if re.match(temp_internet_filter, f)]
-                        #files = glob.glob(ingest_dir_in+temp_internet_filter)
+                        # TODO-M.C.: check the most performing options in real-cases
+                        #files = [f for f in os.listdir(ingest_dir_in) if re.match(temp_internet_filter, f)]
+                        files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(temp_internet_filter, os.path.basename(f))]
 
                 logger.info("Number of files found for product [%s] is: %s" % (active_product_ingest[0], len(files)))
 
@@ -278,8 +278,8 @@ def pre_process_modis_hdf4_tile (subproducts, tmpdir , input_files):
             out_tmp_file_gtiff = tmpdir + os.path.sep + id_subproduct + '_' + id_mapset + '.tif.merged'
 
             file_to_merge = glob.glob(tmpdir + os.path.sep + id_subproduct + '*.tif')
-            # TODO-M.C.: How to locate gdal_merge.py ???
-            command = '/usr/bin/gdal_merge.py -init 9999 -co \"compress=lzw\" -o '
+            # Take gdal_merge.py from es2globals
+            command = locals.es2globals['GDAL_merge'] + ' -init 9999 -co \"compress=lzw\" -o '
             command += out_tmp_file_gtiff
             for file_add in file_to_merge:
                 command += ' '
@@ -441,8 +441,8 @@ def pre_process_pml_netcdf (subproducts, tmpdir , input_files):
             id_mapset = sprod['mapsetcode']
             out_tmp_file_gtiff = tmpdir + os.path.sep + id_subproduct + '_' + id_mapset + '.tif.merged'
 
-            # TODO-M.C.: How to locate gdal_merge.py ???
-            command = '/usr/bin/gdal_merge.py -init 9999 -co \"compress=lzw\" -o '
+            # Take gdal_merge.py from es2globals
+            command = locals.es2globals['GDAL_merge'] + ' -init 9999 -co \"compress=lzw\" -o '
             command += out_tmp_file_gtiff
             for file_add in geotiff_files:
                 command += ' '
@@ -554,7 +554,8 @@ def pre_process_bz2_hdf4 (subproducts, tmpdir, input_files):
         list_input_files = []
         list_input_files.append(input_files)
 
-    # Bz2 unzips to my_bunzip2_file (TODO-M.C.: re-use the method above ??)
+    # Bz2 unzips to my_bunzip2_file
+    # TODO-M.C.: re-use the method above ??
     for input_file in list_input_files:
         bz2file = bz2.BZ2File(input_file)               # Create ZipFile object
         data = bz2file.read()                           # Get the list of its contents
@@ -1078,36 +1079,6 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # -------------------------------------------------------------------------
 
         filename = os.path.basename(output_filename)
-
-        # TODO-M.C.: completely remove ???
-        # cruddb = crud.CrudDB()
-        # recordkey = {'productcode': product['productcode'],
-        #              'subproductcode': subproducts[ii]['subproduct'],
-        #              'version': product['version'],
-        #              'mapsetcode': subproducts[ii]['mapsetcode'],
-        #              'product_datetime': output_date_str}
-        #
-        # record = {'productcode': product['productcode'],
-        #           'subproductcode': subproducts[ii]['subproduct'],
-        #           'version': product['version'],
-        #           'mapsetcode': subproducts[ii]['mapsetcode'],
-        #           'product_datetime': output_date_str,
-        #           'directory': output_directory,
-        #           'filename': filename,
-        #           'year': year,
-        #           'month': month,
-        #           'day': day,
-        #           'hour': hour,
-        #           'file_role': 'active',
-        #           'file_type': 'GTiff'}
-        # if len(cruddb.read('products.products_data', **recordkey)) > 0:
-        #     logger.debug('Updating products_data record: ' + str(recordkey))
-        #     cruddb.update('products.products_data', record)
-        # else:
-        #     cruddb.create('products.products_data', record)
-
-        #,'creation_datetime': 'now()'
-
         # Loop on interm_files
         ii += 1
 
