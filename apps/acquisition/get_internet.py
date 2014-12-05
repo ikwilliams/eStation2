@@ -46,7 +46,7 @@ user_def_sleep = poll_frequency
 #   Purpose: properly terminate the service, in case of interruption (copied from old get_eumetcast)
 #   Author: Marco Clerici, JRC, European Commission
 #   Date: 2014/09/01
-#   Inputs: defaults for signa_handler
+#   Inputs: defaults for signal_handler
 
 def signal_handler(signal, frame):
 
@@ -248,7 +248,6 @@ def get_file_from_url(remote_url_file, target_file=None, target_dir=None, userpw
 
 #   Target dir is created as 'tmpdir' if not passed
 #   Full pathname is returned (or positive number for error)
-#   TODO-M.C.: return in a python object rather than writing in a file
 
 def get_dir_contents_from_url(remote_url_dir, target_file=None, target_dir=None, userpwd=''):
 
