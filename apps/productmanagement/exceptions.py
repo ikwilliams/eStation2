@@ -61,3 +61,9 @@ class NoFrequencyFound(Exception):
     def __init__(self, product):
         super(NoFrequencyFound, self).__init__(u"No Frequency Found for Product %s: %s"
                 % (unicode(product), unicode(product.frequency_id)))
+
+
+class MissingMapset(Exception):
+    def __init__(self, subproduct):
+        super(MissingMapset, self).__init__(u"Missing mapset for subproduct %s"
+                % (unicode(subproduct)))
