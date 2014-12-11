@@ -230,10 +230,12 @@ class Dataset(object):
         return list(os.path.basename(filename) for filename in self.get_filenames())
 
     def find_intervals(self, from_date=None, to_date=None, only_intervals=True):
-        return find_gaps(self.get_basenames(), self._frequency, only_intervals, from_date=from_date or self.from_date, to_date=to_date or self.to_date)
+        return find_gaps(self.get_basenames(), self._frequency, only_intervals,
+                from_date=from_date or self.from_date, to_date=to_date or self.to_date)
 
     def find_gaps(self, from_date=None, to_date=None):
-        return find_gaps(self.get_basenames(), self._frequency, only_intervals=False, from_date=from_date or self.from_date, to_date=to_date or self.to_date)
+        return find_gaps(self.get_basenames(), self._frequency, only_intervals=False,
+                from_date=from_date or self.from_date, to_date=to_date or self.to_date)
 
     def _extract_kwargs(self, interval):
         return {
@@ -245,13 +247,21 @@ class Dataset(object):
         }
 
     def get_dataset_normalized_info(self, from_date=None, to_date=None):
+        refresh = False
+        if from_date and (not self.from_date or from_date < self.from_date):
+            self.from_date = from_date
+            refresh = True
+        if to_date and (not self.to_date or to_date < self.to_date):
+            self.to_date = to_date
+            refresh = True
+        if refresh:
+            self._clean_cache()
         interval_list = list({'totfiles': interval.length,
                      'fromdate': interval.from_date.strftime("%Y-%m-%d"),
                      'todate': interval.to_date.strftime("%Y-%m-%d"),
                      'intervaltype': interval.interval_type,
                      'missing': interval.missing,
                      'intervalpercentage': interval.percentage} for interval in self.intervals)
-
         return {
                 'firstdate': interval_list[0]['fromdate'] if interval_list else '',
                 'lastdate': interval_list[-1]['todate'] if interval_list else '',
@@ -259,6 +269,9 @@ class Dataset(object):
                 'missingfiles': sum(i['totfiles'] for i in interval_list if i['missing']),
                 'intervals': interval_list
         }
+
+    def _clean_cache(self):
+        setattr(self, "_intervals", None)
 
     @property
     def intervals(self):

@@ -61,17 +61,20 @@ get_internet_processed_list_prefix = processed_list_int_dir + 'get_internet_proc
 
 poll_frequency = 5
 
-get_internet_pid_filename=base_tmp_dir+'services/get-internet.pid'
-get_eumetcast_pid_filename=base_tmp_dir+'services/get-eumetcast.pid'
-ingest_pid_filename=base_tmp_dir+'services/ingest.pid'
+pid_file_dir=base_tmp_dir+'services'+os.path.sep
+get_internet_pid_filename=pid_file_dir+'get-internet.pid'
+get_eumetcast_pid_filename=pid_file_dir+'get-eumetcast.pid'
+ingest_pid_filename=pid_file_dir+'ingest.pid'
 
 #umask 0002
 # Python libs paths
 #export PYTHONPATH = /opt/extern/gdal/lib/python2.6/site-packages/:/opt/extern/gdal/lib/python2.6/site-packages/osgeo
 #export LD_LIBRARY_PATH = /opt/extern/gdal/lib:/usr/share/szip-2.1/lib/usr/local/lib
 
-# GDAL netcdf _directory
-#GDALnc_dir = /opt/extern/gdal_netcdf/bin/
+# GDAL directory and commands
+GDAL_dir='/usr/bin/'
+GDAL_merge=GDAL_dir+'gdal_merge.py'
+
 # Additional processing generic product _directories
 #processing__dir = "archive tif xml derived"
 

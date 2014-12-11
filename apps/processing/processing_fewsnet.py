@@ -6,7 +6,6 @@
 #	history: 1.0
 #
 #   Still to be done
-#   TODO-M.C.ok: Add metadata to the output
 #   TODO-M.C.: more checks on the IN/OUT
 #   TODO-M.C.test: Activate/deactivate according to DB settings
 #   TODO-M.C.test: Add a mechanism to extract/visualize the 'status' -> pipeline_printout(verbose=3)+grep-like function ?
