@@ -33,6 +33,8 @@ logger = log.my_logger(__name__)
 #   General definitions
 c = pycurl.Curl()
 buffer = StringIO.StringIO()
+if not os.path.isdir(locals.es2globals['temp_dir']):
+    os.makedirs(locals.es2globals['temp_dir'])
 tmpdir = tempfile.mkdtemp(prefix=__name__, dir=locals.es2globals['temp_dir'])
 echo_query = False
 user_def_sleep = poll_frequency

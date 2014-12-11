@@ -19,6 +19,117 @@ from database import connectdb
 logger = log.my_logger(__name__)
 
 db = connectdb.ConnectDB().db
+dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
+
+
+######################################################################################
+#   get_legend_steps(legendid, echo=False)
+#   Purpose: Query the database to get the legend info needed for mapserver mapfile SCALE_BUCKETS setting.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2014/07/31
+#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
+#
+#   Output: Return legend steps of the given legendid, needed for mapserver mapfile LAYER CLASS settings.
+#
+#    SELECT ls.*
+#    FROM analysis.legend_step ls
+#    WHERE ls.legend_id = legendid
+#    ORDER BY from_step
+#
+def get_legend_steps(legendid=None, echo=False):
+    try:
+
+        ls = dbschema_analysis.legend_step._table
+
+        s = select([ls.c.legend_id,
+                    ls.c.from_step,
+                    ls.c.to_step,
+                    ls.c.color_rgb,
+                    ls.c.color_label,
+                    ls.c.group_label
+                    ]
+                   )
+
+        s = s.alias('legend_steps')
+        ls = dbschema_analysis.map(s, primary_key=[s.c.legend_id, s.c.from_step, s.c.to_step])
+
+        where = and_(ls.c.legend_id == legendid)
+        legend_steps = ls.filter(where).all()
+
+        if echo:
+            for row in legend_steps:
+                print row
+
+        return legend_steps
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and log the error telling what happened.
+        logger.error("get_legend_steps: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
+######################################################################################
+#   get_legend_info(legendid, echo=False)
+#   Purpose: Query the database to get the legend info needed for mapserver mapfile SCALE_BUCKETS setting.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2014/07/31
+#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
+#
+#   Output: Return legend info of the given legendid, needed for mapserver mapfile SCALE_BUCKETS setting.
+#
+#    SELECT MIN(analysis.legend_step.from_step) AS minstep,
+#           MAX(analysis.legend_step.to_step) AS maxstep,
+#           MIN(analysis.legend_step.to_step - analysis.legend_step.from_step) AS minstepwidth,
+#           MAX(analysis.legend_step.to_step - analysis.legend_step.from_step) AS maxstepwidth,
+#           MAX(analysis.legend_step.to_step) - MIN(analysis.legend_step.from_step) AS totwidth,
+#           COUNT(analysis.legend_step.legend_id) AS totsteps,
+#           analysis.legend_step.legend_id
+#    FROM analysis.legend_step
+#    WHERE analysis.legend_step.legend_id = legendid
+#    GROUP BY analysis.legend_step.legend_id
+#
+def get_legend_info(legendid=None, echo=False):
+    try:
+
+        ls = dbschema_analysis.legend_step._table
+
+        s = select([func.MIN(ls.c.from_step).label('minstep'),
+                    func.MAX(ls.c.to_step).label('maxstep'),
+                    func.MIN(ls.c.to_step-ls.c.from_step).label('minstepwidth'),
+                    func.MAX(ls.c.to_step-ls.c.from_step).label('maxstepwidth'),
+                    (func.MAX(ls.c.to_step)-func.MIN(ls.c.from_step)).label('totwidth'),
+                    func.COUNT(ls.c.legend_id).label('totsteps'),
+                    ls.c.legend_id
+                    ],
+                    group_by=[ls.c.legend_id]
+                   )
+
+        s = s.alias('legend_info')
+        ls = dbschema_analysis.map(s, primary_key=[s.c.legend_id])
+
+        where = and_(ls.c.legend_id == legendid)
+        legend_info = ls.filter(where).all()
+
+        if echo:
+            for row in legend_info:
+                print row
+
+        return legend_info
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and log the error telling what happened.
+        logger.error("get_legend_info: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################
