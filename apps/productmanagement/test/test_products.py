@@ -10,6 +10,7 @@ from __future__ import absolute_import
 
 import unittest
 import os
+import datetime
 from ..products import Product
 from ..datasets import Dataset
 from ..exceptions import (NoProductFound, MissingMapset)
@@ -113,7 +114,17 @@ class TestProducts(unittest.TestCase):
         mapsets = product.mapsets
         subproducts = product.subproducts
         self.assertEqual(len(product.get_missing_datasets(mapset=mapsets[0], sub_product_code=subproducts[0])), 1)
-        self.assertEqual(len(product.get_missing_datasets(mapset=mapsets[0])), 2)
+        missing = product.get_missing_datasets(mapset=mapsets[0])
+        self.assertEqual(len(missing), 2)
+        self.assertEqual(missing[0]['info']['missingfiles'], 1)
         self.assertEqual(len(product.get_missing_datasets()), 4)
         self.assertRaisesRegexp(MissingMapset, "(?i).*mapset.*%s*" % subproducts[0], product.get_missing_datasets,
                 **{'sub_product_code': subproducts[0]})
+
+    def test_get_missing_from_date_to_date(self):
+        product = self.get_product()
+        mapsets = product.mapsets
+        from_date=datetime.date(2000, 1, 1)
+        to_date=datetime.date(2040, 1, 1)
+        missing = product.get_missing_datasets(mapset=mapsets[0], from_date=from_date, to_date=to_date)
+        self.assertEqual(missing[0]['info']['missingfiles'], 1441)

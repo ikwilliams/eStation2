@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-#	purpose: Product functions
-#	author:  Marco Beri marcoberi@gmail.com
-#	date:	 27.10.2014
+# purpose: Product functions
+# author:  Marco Beri marcoberi@gmail.com
+# date:  27.10.2014
 
 from __future__ import absolute_import
 
@@ -46,7 +46,7 @@ class Product(object):
     def subproducts(self):
         _subproducts = getattr(self, "_subproducts", None)
         if _subproducts is None:
-            _subproducts = [subproduct for subproduct in 
+            _subproducts = [subproduct for subproduct in
                     set(os.path.basename(subproduct) for subproduct in self._get_full_subproducts())]
         return _subproducts
 
@@ -58,28 +58,29 @@ class Product(object):
         return Dataset(self.product_code, sub_product_code=sub_product_code, mapset=mapset, version=self.version)
 
     def get_subproducts(self, mapset):
-        return [subproduct for subproduct in 
+        return [subproduct for subproduct in
                     set(os.path.basename(subproduct) for subproduct in self._get_full_subproducts(mapset=mapset))]
 
-    def get_missing_dataset_subproduct(self, mapset, sub_product_code):
+    def get_missing_dataset_subproduct(self, mapset, sub_product_code, from_date=None, to_date=None):
         missing = {
                 'product': self.product_code,
                 'version': self.version,
                 'mapset': mapset,
                 'subproduct': sub_product_code,
                 }
-        dataset = Dataset(self.product_code, sub_product_code=sub_product_code, mapset=mapset, version=self.version)
-        missing['info'] = dataset.get_dataset_normalized_info()
+        dataset = Dataset(self.product_code, sub_product_code=sub_product_code,
+                mapset=mapset, version=self.version, from_date=from_date, to_date=to_date)
+        missing['info'] = dataset.get_dataset_normalized_info(from_date, to_date)
         return missing
 
-    def get_missing_datasets(self, mapset=None, sub_product_code=None):
+    def get_missing_datasets(self, mapset=None, sub_product_code=None, from_date=None, to_date=None):
         missings = []
         if sub_product_code:
             if not mapset:
                 raise MissingMapset(sub_product_code)
-            missings.append(self.get_missing_dataset_subproduct(mapset, sub_product_code))
+            missings.append(self.get_missing_dataset_subproduct(mapset, sub_product_code, from_date, to_date))
         else:
             for mapset in [mapset] if mapset else self.mapsets:
                 for sub_product_code in self.get_subproducts(mapset):
-                    missings.append(self.get_missing_dataset_subproduct(mapset, sub_product_code))
+                    missings.append(self.get_missing_dataset_subproduct(mapset, sub_product_code, from_date, to_date))
         return missings
