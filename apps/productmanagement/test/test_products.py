@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 #
-#	purpose: Test products functions
-#	author:  Marco Beri marcoberi@gmail.com
-#	date:	 27.10.2014
+#    purpose: Test products functions
+#    author:  Marco Beri marcoberi@gmail.com
+#    date:     27.10.2014
 #
 
 from __future__ import absolute_import
@@ -11,6 +11,7 @@ from __future__ import absolute_import
 import unittest
 import os
 import datetime
+import glob
 from ..products import Product
 from ..datasets import Dataset
 from ..exceptions import (NoProductFound, MissingMapset)
@@ -19,6 +20,8 @@ import locals
 from lib.python import functions
 from database import querydb
 
+def glob_monkey(path):
+    return []
 
 class TestProducts(unittest.TestCase):
     def setUp(self):
@@ -31,6 +34,11 @@ class TestProducts(unittest.TestCase):
                 for file_mapset in self.files_mapsets
                 for subproduct_type in functions.dict_subprod_type_2_dir.values()
                 for subproduct in self.subproducts]
+        self.old_glob = glob.glob
+        glob.glob = glob_monkey
+
+    def tearDown(self):
+        glob.glob = self.old_glob
 
     def get_product(self):
         product = Product(**self.kwargs)
