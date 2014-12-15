@@ -1,0 +1,36 @@
+[Fri Dec  5 17:52:15 2014].486831 msDrawMap(): rendering using outputformat named png (AGG/PNG).
+[Fri Dec  5 17:45:40 2014].975351 msDrawMap(): rendering using outputformat named png (AGG/PNG).
+[Fri Dec  5 17:09:32 2014].964606 msDrawMap(): rendering using outputformat named gif (GD/PNG).
+[Fri Dec  5 16:52:19 2014].359861 msDrawMap(): rendering using outputformat named gif (GD/GIF).
+[Fri Dec  5 15:50:01 2014].611111 msDrawMap(): rendering using outputformat named gif (GD/GIF).
+[Fri Dec  5 09:19:49 2014].240520 msDrawMap(): rendering using outputformat named png32 (AGG/PNG).
+[Thu Dec  4 18:03:10 2014].576570 msDrawMap(): rendering using outputformat named png32 (AGG/PNG).
+[Thu Dec  4 17:16:14 2014].623138 msDrawMap(): rendering using outputformat named png32 (AGG/PNG).
+[Thu Dec  4 17:16:14 2014].623335 msShapefileOpen(): Unable to access file. (/data/processing/vgt_ndvi/WGS84_Africa_1km/tif/ndv/20130701_vgt_ndvi_ndv_WGS84_Africa_1km.tif)
+[Thu Dec  4 17:16:14 2014].623353 msShapefileOpen(): Unable to access file. (/data/processing/vgt_ndvi/WGS84_Africa_1km/tif/ndv/20130701_vgt_ndvi_ndv_WGS84_Africa_1km.tif)
+[Thu Dec  4 17:16:14 2014].623372 msDrawMap(): Image handling error. Failed to draw layer named 'vgt_ndvi_ndv_WGS84_Africa_1km'.
+[Thu Dec  4 17:10:02 2014].28340 msDrawMap(): rendering using outputformat named png32 (AGG/PNG).
+[Thu Dec  4 17:10:02 2014].28467 msShapefileOpen(): Unable to access file. (/data/processing/vgt_ndvi/WGS84_Africa_1km/tif/ndv/20130701_vgt_ndvi_ndv_WGS84_Africa_1km.tif)
+[Thu Dec  4 17:10:02 2014].28490 msShapefileOpen(): Unable to access file. (/data/processing/vgt_ndvi/WGS84_Africa_1km/tif/ndv/20130701_vgt_ndvi_ndv_WGS84_Africa_1km.tif)
+[Thu Dec  4 17:10:02 2014].28499 msDrawMap(): Image handling error. Failed to draw layer named 'vgt_ndvi_ndv_WGS84_Africa_1km'.
+[Thu Dec  4 16:56:51 2014].61027 msSaveMap(): Unable to access file. (/srv/www/JurDev/eStation2//apps/analysis/MAP_result.map)
+[Fri Dec  5 17:20:31 2014].170189 msDrawMap(): rendering using outputformat named png (AGG/PNG).
+[Fri Dec  5 16:57:11 2014].24887 msDrawMap(): rendering using outputformat named gif (GD/PNG).
+[Fri Dec  5 16:01:01 2014].726421 msDrawMap(): rendering using outputformat named gif (GD/GIF).
+[Fri Dec  5 15:43:40 2014].532856 msDrawMap(): rendering using outputformat named gif (GD/GIF).
+[Fri Dec  5 15:43:26 2014].493304 msDrawMap(): rendering using outputformat named gif (GD/GIF).
+[Fri Dec  5 15:42:21 2014].987284 msDrawMap(): rendering using outputformat named gif (GD/GIF).
+[Fri Dec  5 09:26:44 2014].489275 msDrawMap(): rendering using outputformat named png32 (AGG/PNG).
+[Fri Dec  5 09:26:46 2014].944334 msDrawMap(): rendering using outputformat named png32 (AGG/PNG).
+[Fri Dec  5 09:26:51 2014].43430 msDrawMap(): rendering using outputformat named png32 (AGG/PNG).
+[Thu Dec  4 18:02:15 2014].362054 msDrawMap(): rendering using outputformat named png32 (AGG/PNG).
+[Thu Dec  4 17:11:37 2014].642903 msDrawMap(): rendering using outputformat named png32 (AGG/PNG).
+[Thu Dec  4 17:11:37 2014].642980 msShapefileOpen(): Unable to access file. (/data/processing/vgt_ndvi/WGS84_Africa_1km/tif/ndv/20130701_vgt_ndvi_ndv_WGS84_Africa_1km.tif)
+[Thu Dec  4 17:11:37 2014].643004 msShapefileOpen(): Unable to access file. (/data/processing/vgt_ndvi/WGS84_Africa_1km/tif/ndv/20130701_vgt_ndvi_ndv_WGS84_Africa_1km.tif)
+[Thu Dec  4 17:11:37 2014].643013 msDrawMap(): Image handling error. Failed to draw layer named 'vgt_ndvi_ndv_WGS84_Africa_1km'.
+[Thu Dec  4 17:07:06 2014].936654 msDrawMap(): rendering using outputformat named png32 (AGG/PNG).
+[Thu Dec  4 17:07:06 2014].936758 msShapefileOpen(): Unable to access file. (/data/processing/vgt_ndvi/WGS84_Africa_1km/tif/ndv/20130701_vgt_ndvi_ndv_WGS84_Africa_1km.tif)
+[Thu Dec  4 17:07:06 2014].936784 msShapefileOpen(): Unable to access file. (/data/processing/vgt_ndvi/WGS84_Africa_1km/tif/ndv/20130701_vgt_ndvi_ndv_WGS84_Africa_1km.tif)
+[Thu Dec  4 17:07:06 2014].936793 msDrawMap(): Image handling error. Failed to draw layer named 'vgt_ndvi_ndv_WGS84_Africa_1km'.
+[Fri Dec  5 17:55:34 2014].855813 msDrawMap(): rendering using outputformat named png (AGG/PNG).
+[Fri Dec  5 17:48:15 2014].285414 msDrawMap(): rendering using outputformat named png (AGG/PNG).

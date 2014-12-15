@@ -58,6 +58,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
         me.html = '<div id="backgroundmap_' + me.id + '"></div>';
 
         me.commonMapView = new ol.View({
+//            projection:"EPSG:4326",
             center: ol.proj.transform([21, 4], 'EPSG:4326', 'EPSG:3857'),
             zoom: 3
         });
@@ -81,6 +82,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                   this.backgroundLayers.push(new ol.layer.Tile({
                     visible: true,
                     preload: Infinity,
+                    projection: 'EPSG:4326',
                     source: new ol.source.BingMaps({
                         // My personal key jurvtk@gmail.com for http://h05-dev-vm19.ies.jrc.it/esapp/ created on www.bingmapsportal.com
                         key: 'Alp8PmGAclkgN_QJQTjgrkPlyRdkFfTnayMuMobAxMha_QF1ikefhdMlUQPdxNS3',
@@ -118,6 +120,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                         })
                     }).extend([mousePositionControl])
                 });
+
             }
             // The resize handle is necessary to set the map!
             ,resize: function () {
@@ -134,9 +137,11 @@ Ext.define("esapp.view.analysis.analysisMain",{
             autoShow : true,
             layers: [
                 new ol.layer.Tile({
-                    source: new ol.source.MapQuest({layer: 'sat'})
+                    source: new ol.source.MapQuest({layer: 'sat'}),
+                    projection: 'EPSG:4326'
                 })
-            ]
+            ],
+            epsg: 'EPSG:3857'
         },{
             xtype: 'mapview-window',
             title: '<span class="panel-title-style">MAP 2</span>',
@@ -145,9 +150,11 @@ Ext.define("esapp.view.analysis.analysisMain",{
             autoShow : true,
             layers: [
                 new ol.layer.Tile({
-                    source: new ol.source.OSM()
+                    source: new ol.source.OSM(),
+                    projection: 'EPSG:4326'
                 })
-            ]
+            ],
+            epsg: 'EPSG:3857'
 
 //            xtype: 'window',
 //            title: '<span class="panel-title-style">MAP 2</span>',

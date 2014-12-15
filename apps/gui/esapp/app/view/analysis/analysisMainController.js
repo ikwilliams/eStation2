@@ -18,28 +18,13 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                         })],
                         params: {
                             // 'LAYERS': 'ch.swisstopo.pixelkarte-farbe-pk1000.noscale',
-                            'FORMAT': 'image/jpeg'
+                            'FORMAT': 'image/png'
                         },
-                        serverType: /** @type {ol.source.wms.ServerType} */ ('mapserver')
+                        serverType: 'mapserver' /** @type {ol.source.wms.ServerType}  ('mapserver') */
                     })
                 })
-//                Request URL:
-//                  http://h05-dev-vm19.ies.jrc.it/esapp/getlayer?
-//                  SERVICE=WMS&
-//                  VERSION=1.3.0&
-//                  REQUEST=GetMap&
-//                  FORMAT=image%2Fjpeg&
-//                  TRANSPARENT=true&
-//                  CRS=EPSG%3A3857&
-//                  STYLES=&
-//                  WIDTH=736&
-//                  HEIGHT=782&
-//                  BBOX=-4863270.2540311385%2C-7205400.673576976%2C9538688.86734863%2C8096680.892889029
-
-//                new ol.layer.Tile({
-//                    source: new ol.source.MapQuest({layer: 'sat'})
-//                })
-            ]
+            ],
+            epsg: 'EPSG:4326'
         });
         analysismain.add(newMapViewWin);
         newMapViewWin.show();

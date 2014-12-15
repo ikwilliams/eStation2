@@ -159,4 +159,21 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
+    def Test_get_legend_info(self):
 
+        legend_info = querydb.get_legend_info(legendid=6)
+        logger.info("Legend info: %s", legend_info)
+        if legend_info.__len__() > 0:
+            for row in legend_info:
+                print row
+
+        self.assertEqual(1, 1)
+
+    def Test_get_legend_steps(self):
+
+        legend_steps = querydb.get_legend_steps(legendid=6)
+        logger.info("Legend info: %s", legend_steps)
+        for row in legend_steps:
+            print row
+
+        self.assertEqual(1, 1)

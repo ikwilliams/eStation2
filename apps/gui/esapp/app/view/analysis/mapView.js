@@ -32,6 +32,7 @@ Ext.define("esapp.view.analysis.mapView",{
     border: false,
 
     layers: [],
+    epsg: 'EPSG:4326',
 
     tools: [
     {
@@ -107,6 +108,7 @@ Ext.define("esapp.view.analysis.mapView",{
         });
 
         me.mapView = new ol.View({
+            projection:me.epsg,
             center: ol.proj.transform([21, 4], 'EPSG:4326', 'EPSG:3857'),
             zoom: 3
         });
@@ -171,6 +173,7 @@ Ext.define("esapp.view.analysis.mapView",{
                         })
                     }).extend([mousePositionControl])
                 });
+                this.map.getView().projection = this.epsg;
 
 //                console.info(Ext.getCmp('opacityslider'+ this.id));
 //                console.info(this.layers[0]);

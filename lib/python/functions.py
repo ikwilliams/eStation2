@@ -87,7 +87,6 @@ def is_connected():
   except:
      pass
   return False
-print is_connected()
 
 
 ######################################################################################
