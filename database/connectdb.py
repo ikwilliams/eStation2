@@ -30,8 +30,8 @@ class ConnectDB(object):
         #                else -> connect to postgresql
 
         if getattr(ConnectDB, "_testing", None) is None:
-            # setattr(ConnectDB, "_testing", "nosetests" in sys.argv[0].lower())
-            setattr(ConnectDB, "_testing",locals.es2globals.get('db_test_mode' == 1))
+            setattr(ConnectDB, "_testing",locals.es2globals.get('db_test_mode' == 1)
+                    or "nosetests" in sys.argv[0].lower())
         # Force through a global variable
         #if locals.es2globals.get('db_test_mode'):
         #    setattr(ConnectDB, "_testing", 1)

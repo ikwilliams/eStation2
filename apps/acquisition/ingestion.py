@@ -153,6 +153,7 @@ def drive_ingestion(dry_run=False):
                         time.sleep(10)
 
         # Wait at the end of the loop
+        logger.info("Entering sleep time of  %s seconds" % str(10) )
         time.sleep(10)
 
 def ingestion(input_files, in_date, product, subproducts, datasource_descr, echo_query=False):
@@ -169,8 +170,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, echo
 #
 #       datasource_descr: datasource description object (incl. native_mapset, compose_area_method, ..)
 #
-#      TODO-M.C.: change compose_area_type to preproc_type in the table and associated structure
-#
+
     logger.info("Entering routine %s for prod: %s and date: %s" % ('ingestion', product['productcode'], in_date))
 
     preproc_type =  datasource_descr.compose_area_type
