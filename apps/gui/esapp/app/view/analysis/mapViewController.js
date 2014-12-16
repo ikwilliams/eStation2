@@ -4,10 +4,6 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
     ,toggleLink: function(btn, event) {
         var mapviewwin = btn.up().up();
-        console.info(mapviewwin);
-        console.info(mapviewwin.up());
-        console.info(mapviewwin.mapView);
-        console.info(mapviewwin.commonMapView);
 
         if (btn.pressed) {
             mapviewwin.map.setView(mapviewwin.mapView);

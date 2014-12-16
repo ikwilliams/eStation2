@@ -21,6 +21,7 @@ Ext.define('esapp.Application', {
         'header.Header',
 
         'dashboard.Dashboard',
+        'dashboard.PC1',
 
         'acquisition.Acquisition',
         'acquisition.DataAcquisition',
