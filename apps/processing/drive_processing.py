@@ -1,49 +1,45 @@
-__author__ = "Marco Clerici"
+__author__ = "Marco Clerici & Jurriann van't Klooster"
 
+import locals
+import os, time
+from config import es_constants
+from apps.processing import processing
+from lib.python import es_logging as log
+logger = log.my_logger(__name__)
 
-import time
-from apps.processing.processing_switches import *
-
-#from apps.processing.processing_fewsnet import *
-#from apps.processing.processing_ndvi import *
-
-from apps.processing.processing_generic import *
+from apps.processing import processing
 start = time.clock()
 
-#   ---------------------------------------------------------------------
-#   Run the pipeline
+# Manual Switch for START/STOP
+do_start = False
+dry_run = True
+service  = False
 
-# General definitions/switches
-starting_sprod='rfe'
-prod="fewsnet_rfe"
-mapset='FEWSNET_Africa_8km'
-version='undefined'
+if service:
+    # Make sure the pid dir exists
+    if not os.path.isdir(es_constants.pid_file_dir):
+        try:
+            os.makedirs(es_constants.pid_file_dir)
+        except os.error:
+            logger.error("Cannot create pid directory")
 
-args = {'pipeline_run_level':pipeline_run_level, \
-        'pipeline_run_touch_only':pipeline_run_touch_only, \
-        'pipeline_printout_level':pipeline_printout_level, \
-        'pipeline_printout_graph_level':pipeline_printout_graph_level, \
-        'starting_sprod': starting_sprod, \
-        'prod':prod, \
-        'mapset':mapset,\
-        'version':version}
+    # Define pid file and create daemon
+    pid_file = es_constants.get_eumetcast_pid_filename
+    daemon = processing.ProcessingDaemon(pid_file, dry_run=dry_run)
 
-
-# do second fork
-import os, sys
-pid = os.fork()
-if pid == 0:
-    # Qui sono il figlio
-    processing_generic(**args)
-    sys.exit(0)
+    if do_start:
+        if daemon.status():
+            logger.info('Processing service is running: Exit')
+        else:
+            logger.info('Processing service is NOT running: Start it.')
+            daemon.start()
+    else:
+        if not daemon.status():
+            logger.info('Processing service is NOT running: Exit')
+        else:
+            logger.info('Processing service is running: Stop it.')
+            daemon.stop()
 else:
-    # Qui sono il padre
-    os.wait()
+    processing.loop_processing(dry_run=dry_run)
 
-pid = os.fork()
-if pid == 0:
-    args['mapset']='WGS84_Africa_1km'
-    processing_generic(**args)
-    sys.exit(0)
 
-#processing_vgt_ndvi(**args)
