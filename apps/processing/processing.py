@@ -9,6 +9,7 @@ _author__ = "Marco Clerici"
 
 # source eStation2 base definitions
 import locals, os, sys
+import shutil
 
 # import standard modules
 import time
@@ -36,8 +37,8 @@ def loop_processing(dry_run=False):
 #    Arguments: dry_run -> if > 0, it triggers pipeline_printout() rather than pipeline_run()
 #                       -> if < 0, it triggers pipeline_printout_graph() rather than pipeline_run()
 
-    # TODO-M.C.: clean dir with locks !!
-
+    # Clean dir with locks
+    shutil.rmtree(es_constants.processing_tasks_dir)
     logger.info("Entering routine %s" % 'loop_processing')
     echo_query = False
     functions.check_output_dir(es_constants.processing_tasks_dir)
