@@ -38,7 +38,7 @@ logger = log.my_logger(__name__)
 ingest_dir_in = locals.es2globals['ingest_dir']
 data_dir_out= locals.es2globals['data_dir']
 
-def drive_ingestion(dry_run=False):
+def loop_ingestion(dry_run=False):
 
 #    Driver of the ingestion process
 #    Reads configuration from the database
@@ -203,7 +203,7 @@ def pre_process_msg_mpe (subproducts, tmpdir , input_files):
     for ifile in input_files:
         if not os.path.isfile(ifile):
             logger.error('Input file does not exist')
-            return 1
+            raise Exception("Input file does not exist: %s" % ifile)
 
     # Remove small header and concatenate to 'grib' output
     input_files.sort()
@@ -254,7 +254,7 @@ def pre_process_modis_hdf4_tile (subproducts, tmpdir , input_files):
         # Test the file exists
         if not os.path.isfile(ifile):
             logger.error('Input file does not exist ' + ifile)
-            return 1
+            raise Exception("Input file does not exist: %s" % ifile)
 
         # Test the hdf file and read list of datasets
         hdf = gdal.Open(ifile)
@@ -307,7 +307,7 @@ def pre_process_lsasaf_hdf5 (subproducts, tmpdir , input_files):
         # Test the file exists
         if not os.path.isfile(ifile):
             logger.error('Input file does not exist ' + ifile)
-            return 1
+            raise Exception("Input file does not exist: %s" % ifile)
         # Unzip to tmpdir and add to list
         if re.match('.*\.bz2', ifile):
             logger.debug('Decompressing bz2 file: ' + ifile)
@@ -338,7 +338,7 @@ def pre_process_lsasaf_hdf5 (subproducts, tmpdir , input_files):
         # Test the file exists
         if not os.path.isfile(unzipped_file):
             logger.error('Input file does not exist ' + unzipped_file)
-            return 1
+            raise Exception("Input file does not exist: %s" % unzipped_file)
 
         # Test the hdf file and read list of datasets
         hdf = gdal.Open(unzipped_file)
@@ -387,7 +387,7 @@ def pre_process_pml_netcdf (subproducts, tmpdir , input_files):
         # Test the file exists
         if not os.path.isfile(ifile):
             logger.error('Input file does not exist ' + ifile)
-            return 1
+            raise Exception("Input file does not exist: %s" % ifile)
 
         # Unzip to tmpdir and add to list
         if re.match('.*\.bz2', ifile):
@@ -462,7 +462,7 @@ def pre_process_unzip (subproducts, tmpdir , input_files):
     if isinstance(input_files, list):
         if len(input_files) > 1:
             logger.error('Only 1 file expected. Exit')
-            return 1
+            raise Exception("Only 1 file expected. Exit")
         else:
             input_file = input_files[0]
 
@@ -494,7 +494,8 @@ def pre_process_unzip (subproducts, tmpdir , input_files):
 
     else:
         logger.error("File %s is not a valid zipfile. Exit", input_files)
-        return 1
+        raise Exception("File %s is not a valid zipfile. Exit", input_files)
+
 
         # TODO-M.C.:Check all datasets have been found (len(intermFile) ==len(subprods)))
         # Remove tempDir -> not here: tmpfile still to be used
@@ -732,33 +733,39 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 
     georef_already_done = False
 
-    if preproc_type == 'MSG_MPE':
-        interm_files = pre_process_msg_mpe (subproducts, tmpdir , input_files)
+    try:
+        if preproc_type == 'MSG_MPE':
+            interm_files = pre_process_msg_mpe (subproducts, tmpdir , input_files)
 
-    if preproc_type == 'MODIS_HDF4_TILE':
-        interm_files = pre_process_modis_hdf4_tile (subproducts, tmpdir, input_files)
+        if preproc_type == 'MODIS_HDF4_TILE':
+            interm_files = pre_process_modis_hdf4_tile (subproducts, tmpdir, input_files)
 
-    if preproc_type == 'LSASAF_HDF5':
-        interm_files = pre_process_lsasaf_hdf5 (subproducts, tmpdir, input_files)
+        if preproc_type == 'LSASAF_HDF5':
+            interm_files = pre_process_lsasaf_hdf5 (subproducts, tmpdir, input_files)
 
-    if preproc_type == 'PML_NETCDF':
-        interm_files = pre_process_pml_netcdf (subproducts, tmpdir, input_files)
+        if preproc_type == 'PML_NETCDF':
+            interm_files = pre_process_pml_netcdf (subproducts, tmpdir, input_files)
 
-    if preproc_type == 'UNZIP':
-        interm_files = pre_process_unzip (subproducts, tmpdir, input_files)
+        if preproc_type == 'UNZIP':
+            interm_files = pre_process_unzip (subproducts, tmpdir, input_files)
 
-    if preproc_type == 'BZIP2':
-        interm_files = pre_process_bzip2 (subproducts, tmpdir, input_files)
+        if preproc_type == 'BZIP2':
+            interm_files = pre_process_bzip2 (subproducts, tmpdir, input_files)
 
-    if preproc_type == 'GEOREF_NETCDF':
-        interm_files = pre_process_georef_netcdf(subproducts, native_mapset_code, tmpdir, input_files)
-        georef_already_done = True
+        if preproc_type == 'GEOREF_NETCDF':
+            interm_files = pre_process_georef_netcdf(subproducts, native_mapset_code, tmpdir, input_files)
+            georef_already_done = True
 
-    if preproc_type == 'BZ2_HDF4':
-        interm_files = pre_process_bz2_hdf4 (subproducts, tmpdir, input_files)
+        if preproc_type == 'BZ2_HDF4':
+            interm_files = pre_process_bz2_hdf4 (subproducts, tmpdir, input_files)
 
-    if preproc_type == 'HDF5_ZIP':
-        interm_files = pre_process_hdf5_zip (subproducts, tmpdir, input_files)
+        if preproc_type == 'HDF5_ZIP':
+            interm_files = pre_process_hdf5_zip (subproducts, tmpdir, input_files)
+
+    except:
+        logger.error('Error in pre-processing routine. Exit')
+        return 1
+
 
     # Make sure it is a list (if only a string is returned, it loops over chars)
     if isinstance(interm_files,list):
