@@ -16,6 +16,7 @@ from database import querydb
 
 from .exceptions import (NoProductFound, MissingMapset)
 from .datasets import Dataset
+from .mapsets import Mapset
 
 logger = log.my_logger(__name__)
 
@@ -62,10 +63,12 @@ class Product(object):
                     set(os.path.basename(subproduct) for subproduct in self._get_full_subproducts(mapset=mapset))]
 
     def get_missing_dataset_subproduct(self, mapset, sub_product_code, from_date=None, to_date=None):
+        mapset_obj = Mapset(mapset_code=mapset)
         missing = {
                 'product': self.product_code,
                 'version': self.version,
                 'mapset': mapset,
+                'mapset_data': mapset_obj.to_dict(),
                 'subproduct': sub_product_code,
                 }
         dataset = Dataset(self.product_code, sub_product_code=sub_product_code,
