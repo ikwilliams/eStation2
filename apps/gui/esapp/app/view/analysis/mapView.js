@@ -32,7 +32,7 @@ Ext.define("esapp.view.analysis.mapView",{
     border: false,
 
     layers: [],
-    epsg: 'EPSG:4326',
+    projection: 'EPSG:4326',
 
     tools: [
     {
@@ -108,7 +108,7 @@ Ext.define("esapp.view.analysis.mapView",{
         });
 
         me.mapView = new ol.View({
-            projection:me.epsg,
+//            projection:me.projection,
             center: ol.proj.transform([21, 4], 'EPSG:4326', 'EPSG:3857'),
             zoom: 3
         });
@@ -143,7 +143,7 @@ Ext.define("esapp.view.analysis.mapView",{
             },
             listeners: {
                 change: function( slider, newValue, thumb, eOpts ){
-                    console.info(me.map.getLayers());
+//                    console.info(me.map.getLayers());
                     var _layers = me.map.getLayers();
                     _layers.a[0].setOpacity(newValue/100)
                 }
@@ -164,6 +164,8 @@ Ext.define("esapp.view.analysis.mapView",{
 
                 this.map = new ol.Map({
                     target: 'mapview_'+ this.id,
+                    projection:me.projection,
+                    displayProjection:"EPSG:4326",
                     layers: this.layers,
                     view: this.up().commonMapView,
                     controls: ol.control.defaults({
@@ -173,7 +175,7 @@ Ext.define("esapp.view.analysis.mapView",{
                         })
                     }).extend([mousePositionControl])
                 });
-                this.map.getView().projection = this.epsg;
+//                this.map.getView().projection = me.projection;
 
 //                console.info(Ext.getCmp('opacityslider'+ this.id));
 //                console.info(this.layers[0]);

@@ -67,3 +67,9 @@ class MissingMapset(Exception):
     def __init__(self, subproduct):
         super(MissingMapset, self).__init__(u"Missing mapset for subproduct %s"
                 % (unicode(subproduct)))
+
+
+class NoMapsetFound(Exception):
+    def __init__(self, mapset_code):
+        super(NoMapsetFound, self).__init__(u"No Mapset Found for mapset code %s"
+                % (unicode(mapset_code)))
