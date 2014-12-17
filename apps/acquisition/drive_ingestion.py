@@ -38,6 +38,6 @@ if service:
             logger.info('Ingest process is running: Stop it.')
             daemon.stop()
 else:
-    ingestion.drive_ingestion(dry_run=dry_run)
+    ingestion.loop_ingestion(dry_run=dry_run)
 
 
