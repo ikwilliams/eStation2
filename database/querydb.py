@@ -821,3 +821,53 @@ def get_active_internet_sources(echo=False):
         #raise Exception("get_ingestion: Database query error!\n ->%s" % exceptionvalue)
 
 
+######################################################################################
+#   get_processing_chains(allrecs=False, echo=False, productcode_in='', version_in='')
+#   Purpose: Query the database to get the COUNT of all processing definitions or one specific
+#            product definition at product level from the table processing (and related).
+#   Author: Jurriaan van 't Klooster
+#   Date: 2014/12/17
+#   Input: allrecs          - If True return all processing. Default=False
+#          echo             - If True echo the query result in the console for debugging purposes. Default=False
+#          productcode      - The productcode of the specific product ingestion definition requested. Default=''
+#          version          - The version of the specific product ingestion definition requested. Default='undefined'
+#   ??? Output: Return the productcode, version and count() of subproducts of all [or a specific product ingestion definition] from the table
+#           ingestion.
+def get_processing_chains(allrecs=False, echo=False, productcode='', version='undefined'):
+
+    active_processing_chains = []
+    try:
+        session = db.session
+        # ingest = aliased(db.ingestion)
+        #
+        # # Get all defined ingestion definitions with the amount of subproducts per product/version (count).
+        # ingestion_product = session.query(ingest.productcode,
+        #                                   ingest.version,
+        #                                   func.count(ingest.subproductcode), ). \
+        #     group_by(ingest.productcode, ingest.version)
+        #
+        # active_ingestions = []
+        # if allrecs:
+        #     ingestion_product = ingestion_product.filter(ingest.activated == True)
+        #
+        #     if ingestion_product.count() >= 1:      # At least 1 product ingestion definition has to exist.
+        #         active_ingestions = ingestion_product.all()
+        #         if echo:
+        #             for row in active_ingestions:
+        #                 print row
+        #else:
+            # where = and_(ingest.productcode == productcode,
+            #              ingest.activated == True,
+            #              ingest.version == version)
+            # if ingestion_product.filter(where).count() == 1:    # Exactly 1 product ingestion definition has to exist.
+            #     active_ingestions = ingestion_product.filter(where).one()
+               #if echo:
+               # print active_processing_chains
+        print 1
+        return active_processing_chains
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_processing_chains: Database query error!\n -> {}".format(exceptionvalue))
