@@ -142,3 +142,9 @@ class Daemon:
         except IOError:
             pid = None
         return pid
+
+#    Moved here as it is used by acquisition.py and processing.py
+class DaemonDryRunnable(Daemon):
+    def __init__(self, *args, **kwargs):
+        self.dry_run = kwargs.pop('dry_run', True)
+        Daemon.__init__(self, *args, **kwargs)
