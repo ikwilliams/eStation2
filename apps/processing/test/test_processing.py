@@ -2,19 +2,25 @@ __author__ = "Marco Clerici"
 
 
 import time
-from apps.processing.processing_switches import *
 
 # General definitions/switches
+starting_sprod='rfe'
+prod="fewsnet_rfe"
+mapset='FEWSNET_Africa_8km'
+version='undefined'
 
-args = {'pipeline_run_level':pipeline_run_level, \
-        'pipeline_run_touch_only':pipeline_run_touch_only, \
-        'pipeline_printout_level':pipeline_printout_level, \
-        'pipeline_printout_graph_level':pipeline_printout_graph_level}
+# General definitions/switches
+args = {'pipeline_run_level':0, \
+        'pipeline_run_touch_only':0, \
+        'pipeline_printout_level':0, \
+        'pipeline_printout_graph_level':0}
 
-from apps.processing.processing_fewsnet import *
-#from apps.processing.processing_ndvi import *
+from apps.processing.processing_std_precip import *
 
 start = time.clock()
+
+#list_prods = processing_std_precip(**args)
+list_sprods = get_subprods_std_precip()
 
 #   ---------------------------------------------------------------------
 #   Run the pipeline
