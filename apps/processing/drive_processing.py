@@ -3,7 +3,6 @@ __author__ = "Marco Clerici & Jurriann van't Klooster"
 import locals
 import os, time
 from config import es_constants
-from apps.processing import processing
 from lib.python import es_logging as log
 logger = log.my_logger(__name__)
 
@@ -41,5 +40,3 @@ if service:
             daemon.stop()
 else:
     processing.loop_processing(dry_run=dry_run)
-
-
