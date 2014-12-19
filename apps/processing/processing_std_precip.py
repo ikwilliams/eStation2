@@ -1,16 +1,13 @@
 #
-#	purpose: Define the processing service (by using ruffus)
+#	purpose: Define a processing chain for 'precipitation-like' products (by using ruffus)
 #	author:  M.Clerici & Jurriaan van't Klooster
 #	date:	 11.06.2014
-#   descr:	 Generate additional derived products / implements processing chains
+#   descr:	 Generate additional derived products/implements processing chains
 #	history: 1.0
 #
 #   Still to be done
 #   TODO-M.C.: more checks on the IN/OUT
 #   TODO-M.C.test: Add a mechanism to extract/visualize the 'status' -> pipeline_printout(verbose=3)+grep-like function ?
-#   TODO-M.C.: create unittest-like functions for validating the chain
-#   TODO-M.C.: multiprocessing does not work -> VM issue ?
-#   TODO-M.C.test: add the Np anomalies
 #   TODO-M.C.test: find a robust method to solve the tuple/string issue in filename (fttb: return_as_element_of_list() ?)
 #   TODO-M.C.: add management of 'version' !!
 #
@@ -21,17 +18,13 @@ import locals
 import os, sys
 
 # Import eStation2 modules
-#from config import es_constants
-#from database import querydb
 from lib.python import functions
 from lib.python import metadata
 from lib.python.image_proc import raster_image_math
 from lib.python.image_proc import recode
 from database import crud
 from lib.python import es_logging as log
-
-# This is temporary .. to be replace with a DB call
-from apps.processing.processing_switches import *
+from config import es_constants
 
 # Import third-party modules
 from ruffus import *
@@ -41,7 +34,7 @@ logger = log.my_logger(__name__)
 # Delete a file for re-creating
 
 #   General definitions for this processing chain
-ext='.tif'
+ext=es_constants.ES2_OUTFILE_EXTENSION
 
 #   switch wrt groups
 activate_10dstats_comput=1
@@ -72,18 +65,29 @@ class Subprod:
         self.group = group
         self.final = final
         self.active_default=active_default
-        #self.active_user = active_user
+        self.active_user = True
+
+class SubprodGroup:
+    def __init__(self, group, active_default=True):
+        self.group = group
+        self.active_default=active_default
+        self.active_user = True
+
 
 def create_subprod(sprod, group, final=False, active_default=True):
     list_subprods.append(Subprod(sprod, group, final, active_default=True))
     return sprod
+
+
+def create_subprod_group(sprod_group, active_default=True):
+    list_subprod_groups.append(SubprodGroup(sprod_group, active_default=True))
+    return sprod_group
 
 def create_pipeline(prod, starting_sprod, mapset, version):
 
     #   ---------------------------------------------------------------------
     #   Define input files
     in_prod_ident = functions.set_path_filename_no_date(prod, starting_sprod, mapset, ext)
-
 
     input_dir = locals.es2globals['data_dir']+ \
                 functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
@@ -92,6 +96,7 @@ def create_pipeline(prod, starting_sprod, mapset, version):
 
     #   ---------------------------------------------------------------------
     #   Average
+    output_sproduct_group=cr
     output_sprod=create_subprod("10davg", "10dstats", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
@@ -454,8 +459,10 @@ def create_pipeline(prod, starting_sprod, mapset, version):
 def processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version=''):
 
-    global list_subprods
+    global list_subprods, list_subprod_groups
+
     list_subprods = []
+    list_subprod_groups = []
     create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version)
 
     logger.info("Entering routine %s" % 'processing_std_precip')
@@ -468,17 +475,20 @@ def processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0, pipeli
     if pipeline_printout_graph_level > 0:
         pipeline_printout_graph('flowchart.jpg')
 
-    return list_subprods
+    return list_subprods, list_subprod_groups
 
 def get_subprods_std_precip():
 
-    list_subprods = []
+    #list_subprods = []
+    #list_subprod_groups = {}
     pid = os.fork()
     if pid == 0:
         # Qui sono il figlio
-        list_subprods = processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
-                          pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='')
-        return list_subprods
+        [list_subprods, list_subprod_groups]  = processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0,
+                          pipeline_printout_level=0, pipeline_printout_graph_level=0,
+                          prod='', starting_sprod='', mapset='', version='')
+
+        return list_subprods, list_subprod_groups
         sys.exit(0)
     else:
         # Qui sono il padre

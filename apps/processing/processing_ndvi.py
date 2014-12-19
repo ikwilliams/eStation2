@@ -32,7 +32,7 @@ logger = log.my_logger(__name__)
 
 #   General definitions for this processing chain
 prod = "vgt_ndvi"
-mapset = 'WGS84_Sahel_1km'
+mapset = 'WGS84_Africa_1km'
 ext = '.tif'
 version = 'undefined'
 
@@ -514,7 +514,7 @@ def vgt_ndvi_absol_max_linearx2(input_file, output_file):
     output_file = functions.list_to_element(output_file)
     functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
-    raster_image_math.do_min_image(**args)
+    raster_image_math.do_max_image(**args)
     #upsert_processed_ruffus(output_file)
 
 #   ---------------------------------------------------------------------
@@ -656,7 +656,7 @@ def vgt_ndvi_vci(input_file, output_file):
 
     output_file = functions.list_to_element(output_file)
     functions.check_output_dir(os.path.dirname(output_file))
-    args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+    args = {"input_file": input_file[0], "max_file": input_file[1],"min_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
     raster_image_math.do_make_vci(**args)
 
 #  ---------------------------------------------------------------------
@@ -674,7 +674,7 @@ ancillary_sprod_ident_1 = functions.set_path_filename_no_date(prod, ancillary_sp
 ancillary_subdir_1 = functions.set_path_sub_directory(prod, ancillary_sprod_1, 'Derived', version, mapset)
 ancillary_input_1  = "{subpath[0][4]}"+os.path.sep+ancillary_subdir_1+"Overall"+ancillary_sprod_ident_1
 
-ancillary_sprod_2 = "absol_max_linearx2"
+ancillary_sprod_2 = "absol_min_linearx2"
 ancillary_sprod_ident_2 = functions.set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
 ancillary_subdir_2     = functions.set_path_sub_directory(prod, ancillary_sprod_2, 'Derived', version, mapset)
 ancillary_input_2 = "{subpath[0][4]}"+os.path.sep+ancillary_subdir_2+"Overall"+ancillary_sprod_ident_2
@@ -686,7 +686,7 @@ def vgt_ndvi_icn(input_file, output_file):
 
     output_file = functions.list_to_element(output_file)
     functions.check_output_dir(os.path.dirname(output_file))
-    args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+    args = {"input_file": input_file[0],"max_file": input_file[1], "min_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
     raster_image_math.do_make_vci(**args)
 
 #  ---------------------------------------------------------------------
@@ -716,7 +716,7 @@ def vgt_ndvi_vci_linearx2(input_file, output_file):
 
     output_file = functions.list_to_element(output_file)
     functions.check_output_dir(os.path.dirname(output_file))
-    args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+    args = {"input_file": input_file[0], "max_file": input_file[1], "min_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
     raster_image_math.do_make_vci(**args)
 
 #  ---------------------------------------------------------------------
@@ -734,7 +734,7 @@ ancillary_sprod_ident_1 = functions.set_path_filename_no_date(prod, ancillary_sp
 ancillary_subdir_1 = functions.set_path_sub_directory(prod, ancillary_sprod_1, 'Derived', version, mapset)
 ancillary_input_1 = "{subpath[0][4]}"+os.path.sep+ancillary_subdir_1+"Overall"+ancillary_sprod_ident_1
 
-ancillary_sprod_2 = "absol_max_linearx2"
+ancillary_sprod_2 = "absol_min_linearx2"
 ancillary_sprod_ident_2 = functions.set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
 ancillary_subdir_2 = functions.set_path_sub_directory(prod, ancillary_sprod_2, 'Derived', version, mapset)
 ancillary_input_2 = "{subpath[0][4]}"+os.path.sep+ancillary_subdir_2+"Overall"+ancillary_sprod_ident_2
@@ -746,7 +746,7 @@ def vgt_ndvi_icn_linearx2(input_file, output_file):
 
     output_file = functions.list_to_element(output_file)
     functions.check_output_dir(os.path.dirname(output_file))
-    args = {"input_file": input_file[0], "min_file": input_file[1], "max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+    args = {"input_file": input_file[0], "max_file": input_file[1], "min_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
     raster_image_math.do_make_vci(**args)
 
 #   ---------------------------------------------------------------------
@@ -848,7 +848,7 @@ def vgt_ndvi_1monmax(input_file, output_file):
 
 #   ---------------------------------------------------------------------
 #   Run the pipeline
-def processing_vgt_ndvi(pipeline_run_level=0, pipeline_run_touch_only=0, pipeline_printout_level=0,
+def processing_ndvi(pipeline_run_level=0, pipeline_run_touch_only=0, pipeline_printout_level=0,
                            pipeline_printout_graph_level=0):
 
     logger.info("Entering routine %s" % 'processing_vgt_ndvi')

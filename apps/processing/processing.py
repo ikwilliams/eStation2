@@ -61,9 +61,9 @@ def loop_processing(dry_run=False):
         processing_unique_id='0000001'
         processing_unique_lock=es_constants.processing_tasks_dir+processing_unique_id
 
-        args = {'pipeline_run_level':0, \
+        args = {'pipeline_run_level':1, \
                 'pipeline_run_touch_only':0, \
-                'pipeline_printout_level':1, \
+                'pipeline_printout_level':0, \
                 'pipeline_printout_graph_level':0, \
                 'starting_sprod': 'rfe', \
                 'prod':"fewsnet_rfe", \
@@ -77,9 +77,12 @@ def loop_processing(dry_run=False):
             pid = os.fork()
             if pid == 0:
                 # Call to the processing pipeline
-                processing_std_precip.processing_std_precip(**args)
+                [l1,l2] = processing_std_precip.get_subprods_std_precip()
+                print l1
+                print l2
+                #processing_std_precip.processing_std_precip(**args)
                 # Simulate longer processing (TEMP)
-                time.sleep(10)
+                time.sleep(1)
                 os.remove(processing_unique_lock)
                 sys.exit(0)
             else:
@@ -90,36 +93,36 @@ def loop_processing(dry_run=False):
             logger.debug("Processing already running for ID: %s " % processing_unique_id)
 
         # Second processing (to be removed - do a loop)
-        processing_unique_id='0000002'
-        processing_unique_lock=es_constants.processing_tasks_dir+processing_unique_id
-
-        args = {'pipeline_run_level':0, \
-                'pipeline_run_touch_only':0, \
-                'pipeline_printout_level':1, \
-                'pipeline_printout_graph_level':0, \
-                'starting_sprod': 'rfe', \
-                'prod':"fewsnet_rfe", \
-                'mapset':'FEWSNET_AFRICA_8km',\
-                'version':'undefined'}
-
-        if not os.path.isfile(processing_unique_lock):
-            logger.debug("Launching processing for ID: %s" % processing_unique_id)
-            open(processing_unique_lock,'a').close()
-            # fork and call the std_precip 'generic' processing
-            pid = os.fork()
-            if pid == 0:
-                # Call to the processing pipeline
-                processing_std_precip.processing_std_precip(**args)
-                # Simulate longer processing (TEMP)
-                time.sleep(7)
-                os.remove(processing_unique_lock)
-                sys.exit(0)
-            else:
-                # Qui sono il padre
-                pass
-                #os.wait()
-        else:
-            logger.debug("Processing already running for ID: %s " % processing_unique_id)
+        # processing_unique_id='0000002'
+        # processing_unique_lock=es_constants.processing_tasks_dir+processing_unique_id
+        #
+        # args = {'pipeline_run_level':0, \
+        #         'pipeline_run_touch_only':0, \
+        #         'pipeline_printout_level':1, \
+        #         'pipeline_printout_graph_level':0, \
+        #         'starting_sprod': 'rfe', \
+        #         'prod':"fewsnet_rfe", \
+        #         'mapset':'FEWSNET_AFRICA_8km',\
+        #         'version':'undefined'}
+        #
+        # if not os.path.isfile(processing_unique_lock):
+        #     logger.debug("Launching processing for ID: %s" % processing_unique_id)
+        #     open(processing_unique_lock,'a').close()
+        #     # fork and call the std_precip 'generic' processing
+        #     pid = os.fork()
+        #     if pid == 0:
+        #         # Call to the processing pipeline
+        #         processing_std_precip.processing_std_precip(**args)
+        #         # Simulate longer processing (TEMP)
+        #         time.sleep(7)
+        #         os.remove(processing_unique_lock)
+        #         sys.exit(0)
+        #     else:
+        #         # Qui sono il padre
+        #         pass
+        #         #os.wait()
+        # else:
+        #     logger.debug("Processing already running for ID: %s " % processing_unique_id)
 
         time.sleep(1)
 
