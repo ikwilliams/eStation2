@@ -11,8 +11,18 @@ import os
 import datetime
 import operator
 
-from .exceptions import WrongSequence, WrongDateParameter
+from .exceptions import WrongSequence, WrongDateParameter, BadDate
 
+
+def str_to_date(value):
+    parts = value.split("-")
+    if len(parts) == 2:
+        return datetime.date(*([datetime.date.today().year] + [int(x) for x in parts]))
+    elif len(parts) == 3:
+        return datetime.date(*[int(x) for x in parts])
+    elif len(parts) == 5:
+        return datetime.datetime(*[int(x) for x in parts])
+    raise BadDate(value)
 
 def cast_to_int(value):
     if isinstance(value, int):
