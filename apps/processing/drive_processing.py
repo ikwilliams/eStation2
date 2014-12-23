@@ -12,7 +12,7 @@ start = time.clock()
 # Manual Switch for START/STOP
 do_start = False
 dry_run = True
-service  = False
+service = False
 
 if service:
     # Make sure the pid dir exists
