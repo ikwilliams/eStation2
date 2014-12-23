@@ -56,9 +56,13 @@ def loop_processing(dry_run=False):
 
         logger.debug("Entering infinite loop")
 
-        # First processing
+
+        # Processing Loop
+        product_code = "fewsnet_rfe"
+        sub_product_code = "fewsnet_rfe"
+
         # The following id comes either from the DB id, or a combination of fields
-        processing_unique_id='0000001'
+        processing_unique_id=functions.set_path_filename_no_date(product_code, sub_product_code, mapset_id, '.lock')
         processing_unique_lock=es_constants.processing_tasks_dir+processing_unique_id
 
         args = {'pipeline_run_level':1, \
