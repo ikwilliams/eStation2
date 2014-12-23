@@ -14,7 +14,6 @@ from database import querydb
 class TestQuerydb(TestCase):
 
     def Test_get_active_internet_sources(self):
-
         internet_sources = querydb.get_active_internet_sources()
         logger.info("Internet sources are: %s", internet_sources)
         for internet_source in internet_sources:
@@ -175,5 +174,15 @@ class TestQuerydb(TestCase):
         logger.info("Legend info: %s", legend_steps)
         for row in legend_steps:
             print row
+
+        self.assertEqual(1, 1)
+
+
+    def Test_get_processing_chains(self):
+
+        processing_chains = querydb.get_processing_chains()
+        logger.info("Processing chains: %s", processing_chains)
+        for row in processing_chains:
+            print row.activated
 
         self.assertEqual(1, 1)

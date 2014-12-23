@@ -788,7 +788,6 @@ def get_active_internet_sources(echo=False):
 
         es = session.query(db.internet_source).subquery()
         pads = aliased(db.product_acquisition_data_source)
-
         # The columns on the subquery "es" are accessible through an attribute called "c"
         # e.g. es.c.filter_expression_jrc
 
@@ -823,7 +822,7 @@ def get_active_internet_sources(echo=False):
 
 ######################################################################################
 #   get_processing_chains(allrecs=False, echo=False, productcode_in='', version_in='')
-#   Purpose: Query the database to get the COUNT of all processing definitions or one specific
+#   Purpose: Query the database to get all the processing chains definitions or one specific
 #            product definition at product level from the table processing (and related).
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/12/17
@@ -831,40 +830,48 @@ def get_active_internet_sources(echo=False):
 #          echo             - If True echo the query result in the console for debugging purposes. Default=False
 #          productcode      - The productcode of the specific product ingestion definition requested. Default=''
 #          version          - The version of the specific product ingestion definition requested. Default='undefined'
-#   ??? Output: Return the productcode, version and count() of subproducts of all [or a specific product ingestion definition] from the table
-#           ingestion.
-def get_processing_chains(allrecs=False, echo=False, productcode='', version='undefined'):
+#   Output: Return a list of productcode/subproductcode/version/mapset from the table Processing+Process_product
+#
+# SELECT p.*, pin.*
+# FROM products.processing p
+# INNER JOIN (SELECT * FROM products.process_product WHERE type = 'INPUT') pin
+# ON p.process_id = pin.process_id
+#
+def get_processing_chains(allrecs=False, echo=False):
 
     active_processing_chains = []
     try:
         session = db.session
-        # ingest = aliased(db.ingestion)
-        #
-        # # Get all defined ingestion definitions with the amount of subproducts per product/version (count).
-        # ingestion_product = session.query(ingest.productcode,
-        #                                   ingest.version,
-        #                                   func.count(ingest.subproductcode), ). \
-        #     group_by(ingest.productcode, ingest.version)
-        #
-        # active_ingestions = []
-        # if allrecs:
-        #     ingestion_product = ingestion_product.filter(ingest.activated == True)
-        #
-        #     if ingestion_product.count() >= 1:      # At least 1 product ingestion definition has to exist.
-        #         active_ingestions = ingestion_product.all()
-        #         if echo:
-        #             for row in active_ingestions:
-        #                 print row
-        #else:
-            # where = and_(ingest.productcode == productcode,
-            #              ingest.activated == True,
-            #              ingest.version == version)
-            # if ingestion_product.filter(where).count() == 1:    # Exactly 1 product ingestion definition has to exist.
-            #     active_ingestions = ingestion_product.filter(where).one()
-               #if echo:
-               # print active_processing_chains
-        print 1
+        process = aliased(db.processing)
+
+        processinput = session.query(db.process_product.process_id,
+                                     db.process_product.productcode,
+                                     db.process_product.subproductcode,
+                                     db.process_product.version,
+                                     db.process_product.mapsetcode,
+                                     db.process_product.type,
+                                     db.process_product.activated,
+                                     db.process_product.final,
+                                     db.process_product.date_format).subquery()
+        # The columns on the subquery "processinput" are accessible through an attribute called "c"
+        # e.g. es.c.productcode
+        active_processing_chains = session.query(process,
+                                                 processinput.c.process_id,
+                                                 processinput.c.productcode,
+                                                 processinput.c.productcode,
+                                                 processinput.c.subproductcode,
+                                                 processinput.c.version,
+                                                 processinput.c.mapsetcode,
+                                                 processinput.c.type,
+                                                 processinput.c.activated,
+                                                 processinput.c.final,
+                                                 processinput.c.date_format).\
+            outerjoin(processinput, process.process_id == processinput.c.process_id).\
+            filter(and_(processinput.c.type == 'INPUT')).all()
+#            filter(and_(processinput.c.type == 'INPUT', process.activated is True)).all()
         return active_processing_chains
+
+
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         if echo:
