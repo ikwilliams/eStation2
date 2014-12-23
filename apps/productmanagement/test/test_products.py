@@ -8,7 +8,6 @@
 
 from __future__ import absolute_import
 
-import tempfile
 import unittest
 import os
 import datetime
@@ -145,7 +144,7 @@ class TestProducts(unittest.TestCase):
         self.assertEqual(missing[0]['from_start'], True)
         self.assertEqual(missing[0]['to_end'], True)
 
-    def test_tgz_creation(self):
+    def test_missing_dates(self):
         today = datetime.date.today().strftime("%Y-%m-%d")
         missing = [{
             'info': {
@@ -182,9 +181,12 @@ class TestProducts(unittest.TestCase):
             'from_start': True,
             'mapset': 'WGS84_Africa_1km'}]
         product = self.get_product()
-        file = tempfile.NamedTemporaryFile()
-        filename = file.name
-        file.close()
-        dates = product.get_dates(missing[0])
-        print dates
-        #self.assertTrue(status)
+        dates = product.get_missing_filenames(missing[0])
+        self.assertIsInstance(dates, list)
+
+    def test_tar_creation(self):
+        product = self.get_product()
+        mapsets = product.mapsets
+        missing = product.get_missing_datasets(mapset=mapsets[0])
+        filetar = Product.create_tar(missing)
+        #TODO check for file size
