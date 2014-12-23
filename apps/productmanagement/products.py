@@ -8,6 +8,7 @@ from __future__ import absolute_import
 
 import os
 import glob
+import tarfile
 
 import locals
 from lib.python import es_logging as log
@@ -91,9 +92,10 @@ class Product(object):
                     missings.append(self.get_missing_dataset_subproduct(mapset, sub_product_code, from_date, to_date))
         return missings
 
-    def get_dates(self, missing):
+    def get_missing_filenames(self, missing):
         product = Product(missing['product'], version=missing['version'])
-        dataset = product.get_dataset(mapset=missing['mapset'], sub_product_code=missing['subproduct'])
+        mapset = missing['mapset']
+        dataset = product.get_dataset(mapset=mapset, sub_product_code=missing['subproduct'])
         dates = dataset.get_dates()
         missing_dates = []
         first_date = None
@@ -117,17 +119,25 @@ class Product(object):
                 if last_date < dataset.get_last_date():
                     missing_dates.extend(dataset.get_interval_dates(last_date,
                         dataset.get_last_date(), first_included=False))
-        return dates
+        return [dataset.format_filename(date) for date in sorted(set(dates).intersection(set(missing_dates)))]
 
     @staticmethod
-    def create_tar(missing_info, filename, tgz=False):
-        files = []
+    def create_tar(missing_info, filetar=None, tgz=False):
+        if filetar is None:
+            import tempfile
+            file_temp = tempfile.NamedTemporaryFile()
+            filetar = file_temp.name
+            file_temp.close()
+        filenames = []
         for missing in missing_info:
             try:
                 product = Product(missing['product'], version=missing['version'])
-                dates = product.get_dates(missing)
-                #TODO calcolare i filename dalle date e aggiungerlo a files
+                filenames.extend(product.get_missing_filenames(missing))
             except NoProductFound:
                 pass
-        #TODO creare il tar contenente files
-        return True
+        # creare il tar contenente files
+        tar = tarfile.open(filetar, "w|gz" if tgz else "w|")
+        for filename in filenames:
+            tar.add(filename)
+        tar.close()
+        return filetar
