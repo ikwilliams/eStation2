@@ -80,7 +80,7 @@ def signal_handler(signal, frame):
     sys.exit(0)
 
 
-def drive_eumetcast(dry_run=False):
+def loop_eumetcast(dry_run=False):
 
     global processed_list_filename, processed_list
     global processed_info_filename, processed_info

@@ -220,6 +220,9 @@ class Dataset(object):
         self.from_date = from_date or None
         self.to_date = to_date or self._frequency.today()
 
+    def next_date(self, date):
+        return self._frequency.next_date(date)
+
     def get_filenames(self):
         return glob.glob(os.path.join(self._fullpath, "*"))
 
@@ -229,6 +232,12 @@ class Dataset(object):
     def get_basenames(self):
         return list(os.path.basename(filename) for filename in self.get_filenames())
 
+    def get_first_date(self):
+        return self.intervals[0].from_date
+
+    def get_last_date(self):
+        return self.intervals[-1].to_date
+
     def find_intervals(self, from_date=None, to_date=None, only_intervals=True):
         return find_gaps(self.get_basenames(), self._frequency, only_intervals,
                 from_date=from_date or self.from_date, to_date=to_date or self.to_date)
@@ -236,6 +245,23 @@ class Dataset(object):
     def find_gaps(self, from_date=None, to_date=None):
         return find_gaps(self.get_basenames(), self._frequency, only_intervals=False,
                 from_date=from_date or self.from_date, to_date=to_date or self.to_date)
+
+    def get_interval_dates(self, from_date, to_date, last_included=True, first_included=True):
+        dates = []
+        first_cycle = True
+        while True:
+            if not last_included and from_date == to_date:
+                break
+            if first_included or not first_cycle:
+                dates.append(from_date)
+            first_cycle = False
+            from_date = self.next_date(from_date)
+            if from_date > to_date:
+                break
+        return dates
+
+    def get_dates(self):
+        return sorted(self._frequency.extract_date(filename) for filename in self.get_basenames())
 
     def _extract_kwargs(self, interval):
         return {

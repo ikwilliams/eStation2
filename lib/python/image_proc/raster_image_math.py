@@ -1363,7 +1363,10 @@ def assign_metadata_processing(input_file_list, output_file):
     sds_meta.assign_comput_time_now()
 
     [productcode, subproductcode, version, str_date, mapset] = functions.get_all_from_path_full(output_file)
-    sds_meta.assign_from_product(productcode,subproductcode,version)
+
+    #   TODO-M.C.: cannot read metadata from database for a newly created product ! Copy from input file ?
+    #
+    # sds_meta.assign_from_product(productcode,subproductcode,version)
 
     sds_meta.assign_date(str_date)
     sds_meta.assign_input_files(input_file_list)

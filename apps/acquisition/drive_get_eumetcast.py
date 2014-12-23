@@ -38,6 +38,6 @@ if service:
             logger.info('GetEumetcast process is running: Stop it.')
             daemon.stop()
 else:
-    get_eumetcast.drive_eumetcast(dry_run=dry_run)
+    get_eumetcast.loop_eumetcast(dry_run=dry_run)
 
 

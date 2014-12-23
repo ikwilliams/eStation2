@@ -55,13 +55,16 @@ activate_10d_comput=1
 activate_1month_comput=1
 
 #   specific switch for each subproduct
+# 1. 10d prod stats
 activate_10davg_comput=1
 activate_10dmin_comput=1
 activate_10dmax_comput=1
+# 2.a 10d prod anom
 activate_10ddiff_comput=1
 activate_10dperc_comput=1
 activate_10dnp_comput=1
 
+# 2.a 10d prod anom
 activate_1moncum_comput=1
 activate_1monavg_comput=1
 activate_1monmin_comput=1
@@ -445,12 +448,14 @@ def processing_fewsnet_rfe(pipeline_run_level=0,pipeline_run_touch_only=0, pipel
 
     create_pipeline(starting_sprod='rfe')
 
+    list = pipeline_get_task_names()
+    print list
     logger.info("Entering routine %s" % 'processing_fewsnet_rfe')
-    if pipeline_run_level > 0:
-        pipeline_run(verbose=pipeline_run_level, touch_files_only=pipeline_run_touch_only)
-
-    if pipeline_printout_level > 0:
-        pipeline_printout(verbose=pipeline_printout_level)
-
-    if pipeline_printout_graph_level > 0:
-        pipeline_printout_graph('flowchart.jpg')
+    # if pipeline_run_level > 0:
+    #     pipeline_run(verbose=pipeline_run_level, touch_files_only=pipeline_run_touch_only)
+    #
+    # if pipeline_printout_level > 0:
+    #     pipeline_printout(verbose=pipeline_printout_level)
+    #
+    # if pipeline_printout_graph_level > 0:
+    #     pipeline_printout_graph('flowchart.jpg')

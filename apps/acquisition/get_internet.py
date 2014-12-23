@@ -283,7 +283,7 @@ def get_dir_contents_from_url(remote_url_dir, target_file=None, target_dir=None,
 #   Inputs: none
 #   Arguments: dry_run -> if 1, read tables and report activity ONLY
 
-def drive_get_internet(dry_run=False):
+def loop_get_internet(dry_run=False):
 
     global processed_list_filename, processed_list
     global processed_info_filename, processed_info

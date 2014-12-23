@@ -65,6 +65,8 @@ pid_file_dir=base_tmp_dir+'services'+os.path.sep
 get_internet_pid_filename=pid_file_dir+'get-internet.pid'
 get_eumetcast_pid_filename=pid_file_dir+'get-eumetcast.pid'
 ingest_pid_filename=pid_file_dir+'ingest.pid'
+processing_pid_filename=pid_file_dir+'processing.pid'
+processing_tasks_dir=base_tmp_dir+'processing'+os.path.sep
 
 #umask 0002
 # Python libs paths
@@ -118,7 +120,10 @@ DB_TABLE_TS = prefix+'timeseries'
 DB_TABLE_TSUNIQDATE = prefix+'timeseries_dates'
 DB_TABLE_TSDECAD = prefix+'timeseries_decad'
 
+# ---------------------------------------------------------------
 # Various definitions
+# ---------------------------------------------------------------
 ES2_OUTFILE_FORMAT = 'GTiff'
+ES2_OUTFILE_EXTENSION = '.tif'
 ES2_OUTFILE_OPTIONS = 'COMPRESS=LZW'
 ES2_OUTFILE_INTERP_METHOD = gdalconst.GRA_NearestNeighbour

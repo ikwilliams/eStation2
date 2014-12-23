@@ -7,25 +7,25 @@ _author__ = "Marco Clerici"
 from apps.acquisition import get_eumetcast
 from apps.acquisition import get_internet
 from apps.acquisition import ingestion
-from lib.python.daemon import Daemon
+from lib.python.daemon import DaemonDryRunnable
 
 
-class DaemonDryRunnable(Daemon):
-    def __init__(self, *args, **kwargs):
-        self.dry_run = kwargs.pop('dry_run', True)
-        Daemon.__init__(self, *args, **kwargs)
-
+# class DaemonDryRunnable(Daemon):
+#     def __init__(self, *args, **kwargs):
+#         self.dry_run = kwargs.pop('dry_run', True)
+#         Daemon.__init__(self, *args, **kwargs)
+#
 
 class IngestDaemon(DaemonDryRunnable):
     def run(self):
-        ingestion.drive_ingestion(dry_run=self.dry_run)
+        ingestion.loop_ingestion(dry_run=self.dry_run)
 
 
 class GetEumetcastDaemon(DaemonDryRunnable):
     def run(self):
-        get_eumetcast.drive_eumetcast(dry_run=self.dry_run)
+        get_eumetcast.loop_eumetcast(dry_run=self.dry_run)
 
 
 class GetInternetDaemon(DaemonDryRunnable):
     def run(self):
-        get_internet.drive_get_internet(dry_run=self.dry_run)
+        get_internet.loop_get_internet(dry_run=self.dry_run)
