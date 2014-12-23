@@ -150,14 +150,13 @@ def get_ingestions(echo=False):
         i = db.ingestion._table
         m = db.mapset._table
         s = select([func.CONCAT(i.c.productcode, '_', i.c.version).label('productID'),
-                 i.c.productcode,
-                 i.c.subproductcode,
-                 i.c.version,
-                 i.c.mapsetcode,
-                 i.c.defined_by,
-                 #func.CONCAT('tristate', ' chart widget').label('completeness'),
-                 i.c.activated,
-                 m.c.descriptive_name.label('mapsetname')]).select_from(i.outerjoin(m, i.c.mapsetcode == m.c.mapsetcode))
+                    i.c.productcode,
+                    i.c.subproductcode,
+                    i.c.version,
+                    i.c.mapsetcode,
+                    i.c.defined_by,
+                    i.c.activated,
+                    m.c.descriptive_name.label('mapsetname')]).select_from(i.outerjoin(m, i.c.mapsetcode == m.c.mapsetcode))
 
         s = s.alias('ingest')
         i = db.map(s, primary_key=[s.c.productID, i.c.subproductcode, i.c.mapsetcode])
@@ -249,35 +248,6 @@ def get_dataacquisitions(echo=False):
 #
 def get_products(echo=False, activated=None):
     try:
-        #session = db.session
-
-        #pc = session.query(db.product_category.category_id,
-        #                   db.product_category.descriptive_name,
-        #                   db.product_category.order_index).subquery()
-        #pc = aliased(db.product_category)
-        #p = aliased(db.product)
-
-        #if activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
-        #    where = and_(p.product_type == 'Native', p.activated)
-        #else:
-        #    where = and_(p.product_type == 'Native', p.activated != 't')
-
-        # The columns on the subquery "pc" are accessible through an attribute called "c"
-        # e.g. product.c.descriptive_name
-        #productslist = session.query(func.CONCAT(p.productcode, '_', p.version).label('productID'),
-        #                             p.productcode,
-        #                             p.subproductcode,
-        #                             p.version,
-        #                             p.activated,
-        #                             p.descriptive_name.label('prod_descriptive_name'),
-        #                             p.description,
-        #                             pc.category_id,
-        #                             pc.descriptive_name.label('cat_descr_name'),
-        #                             pc.order_index).\
-        #    outerjoin(pc, p.category_id == pc.category_id).\
-        #    filter(where).\
-        #    order_by(asc(pc.order_index), asc(p.productcode)).all()
-
         pc = db.product_category._table
         p = db.product._table
 
@@ -844,31 +814,25 @@ def get_processing_chains(allrecs=False, echo=False):
         session = db.session
         process = aliased(db.processing)
 
-        processinput = session.query(db.process_product.process_id,
-                                     db.process_product.productcode,
-                                     db.process_product.subproductcode,
-                                     db.process_product.version,
-                                     db.process_product.mapsetcode,
-                                     db.process_product.type,
-                                     db.process_product.activated,
-                                     db.process_product.final,
-                                     db.process_product.date_format).subquery()
+        processinput = session.query(db.process_product).subquery()
+
         # The columns on the subquery "processinput" are accessible through an attribute called "c"
         # e.g. es.c.productcode
-        active_processing_chains = session.query(process,
-                                                 processinput.c.process_id,
-                                                 processinput.c.productcode,
+        active_processing_chains = session.query(process.process_id,
+                                                 process.defined_by,
+                                                 process.output_mapsetcode,
+                                                 process.derivation_method,
+                                                 process.algorithm,
+                                                 process.priority,
+
                                                  processinput.c.productcode,
                                                  processinput.c.subproductcode,
                                                  processinput.c.version,
                                                  processinput.c.mapsetcode,
-                                                 processinput.c.type,
-                                                 processinput.c.activated,
-                                                 processinput.c.final,
                                                  processinput.c.date_format).\
             outerjoin(processinput, process.process_id == processinput.c.process_id).\
-            filter(and_(processinput.c.type == 'INPUT')).all()
-#            filter(and_(processinput.c.type == 'INPUT', process.activated is True)).all()
+            filter(and_(processinput.c.type == 'INPUT', process.activated == True)).all()
+
         return active_processing_chains
 
 
