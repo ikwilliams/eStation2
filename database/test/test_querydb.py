@@ -184,5 +184,7 @@ class TestQuerydb(TestCase):
         logger.info("Processing chains: %s", processing_chains)
         for row in processing_chains:
             print row.activated
+            print row.process_id
+
 
         self.assertEqual(1, 1)
