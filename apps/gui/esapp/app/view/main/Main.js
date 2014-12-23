@@ -114,6 +114,11 @@ Ext.define('esapp.view.main.Main', {
                 id:'processingmaintab',
                 xtype:'container',
                 autoScroll: true,
+                layout: 'fit',
+	            items: [{
+                   xtype  : 'processing-main',
+                   id:'processingmain'
+                }],
                 listeners: {
                    activate: function (analisistab) {
                         var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];

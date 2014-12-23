@@ -30,6 +30,10 @@ Ext.define('esapp.Application', {
         'acquisition.product.editProduct',
         'acquisition.product.selectProduct',
 
+        'processing.Processing',
+        'processing.ProductMapSet',
+        'processing.MapSetFinalOutputSubProduct',
+
         'datamanagement.DataManagement',
         'datamanagement.ProductMapSet',
         'datamanagement.MapSetDataSet',
@@ -50,6 +54,7 @@ Ext.define('esapp.Application', {
         ,'DataAcquisitionsStore'
         ,'IngestionsStore'
         ,'DataSetsStore'
+        ,'ProcessingStore'
     ],
 
 //    onBeforeLaunch: function () {
