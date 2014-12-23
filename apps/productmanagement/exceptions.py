@@ -39,6 +39,11 @@ class WrongSequence(Exception):
                 % (filename, filename_expected))
 
 
+class BadDate(Exception):
+    def __init__(self, date):
+        super(BadDate, self).__init__(u"Bad date: %s" % unicode(date))
+
+
 class WrongDateType(Exception):
     def __init__(self, date, date_type_expected):
         super(WrongDateType, self).__init__(u"Wrong date type for %s: found=%s expected=%s"

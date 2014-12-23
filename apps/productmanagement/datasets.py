@@ -206,10 +206,10 @@ class Dataset(object):
             raise NoProductFound(kwargs)
         if isinstance(self._db_product, list):
             self._db_product = self._db_product[0]
+        self.mapset = mapset
         self._path = functions.set_path_sub_directory(product_code, sub_product_code,
                 self._db_product.product_type, version, mapset)
-        self._fullpath = os.path.join(locals.es2globals['data_dir'], self._path)
-        self._fullpath = os.path.join(locals.es2globals['data_dir'], self._path)
+        self.fullpath = os.path.join(locals.es2globals['data_dir'], self._path)
         self._db_frequency = querydb.db.frequency.get(self._db_product.frequency_id)
         if self._db_frequency is None:
             raise NoFrequencyFound(self._db_product)
@@ -220,14 +220,26 @@ class Dataset(object):
         self.from_date = from_date or None
         self.to_date = to_date or self._frequency.today()
 
+    def next_date(self, date):
+        return self._frequency.next_date(date)
+
     def get_filenames(self):
-        return glob.glob(os.path.join(self._fullpath, "*"))
+        return glob.glob(os.path.join(self.fullpath, "*"))
 
     def get_number_files(self):
         return len(self.get_filenames())
 
     def get_basenames(self):
         return list(os.path.basename(filename) for filename in self.get_filenames())
+
+    def format_filename(self, date):
+        return os.path.join(self.fullpath, self._frequency.format_filename(date, self.mapset))
+
+    def get_first_date(self):
+        return self.intervals[0].from_date
+
+    def get_last_date(self):
+        return self.intervals[-1].to_date
 
     def find_intervals(self, from_date=None, to_date=None, only_intervals=True):
         return find_gaps(self.get_basenames(), self._frequency, only_intervals,
@@ -236,6 +248,23 @@ class Dataset(object):
     def find_gaps(self, from_date=None, to_date=None):
         return find_gaps(self.get_basenames(), self._frequency, only_intervals=False,
                 from_date=from_date or self.from_date, to_date=to_date or self.to_date)
+
+    def get_interval_dates(self, from_date, to_date, last_included=True, first_included=True):
+        dates = []
+        first_cycle = True
+        while True:
+            if not last_included and from_date == to_date:
+                break
+            if first_included or not first_cycle:
+                dates.append(from_date)
+            first_cycle = False
+            from_date = self.next_date(from_date)
+            if from_date > to_date:
+                break
+        return dates
+
+    def get_dates(self):
+        return sorted(self._frequency.extract_date(filename) for filename in self.get_basenames())
 
     def _extract_kwargs(self, interval):
         return {

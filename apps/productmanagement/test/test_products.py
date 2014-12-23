@@ -136,3 +136,57 @@ class TestProducts(unittest.TestCase):
         to_date=datetime.date(2040, 1, 1)
         missing = product.get_missing_datasets(mapset=mapsets[0], from_date=from_date, to_date=to_date)
         self.assertEqual(missing[0]['info']['missingfiles'], 1441)
+
+    def test_get_missing_all(self):
+        product = self.get_product()
+        mapsets = product.mapsets
+        missing = product.get_missing_datasets(mapset=mapsets[0])
+        self.assertEqual(missing[0]['from_start'], True)
+        self.assertEqual(missing[0]['to_end'], True)
+
+    def test_missing_dates(self):
+        today = datetime.date.today().strftime("%Y-%m-%d")
+        missing = [{
+            'info': {
+                'missingfiles': 1,
+                'totfiles': 1,
+                'intervals': [{
+                    'todate': today,
+                    'totfiles': 1,
+                    'missing': True,
+                    'intervaltype': 'missing',
+                    'intervalpercentage': 100.0,
+                    'fromdate': today,
+                    }],
+                'lastdate': today,
+                'firstdate': today,
+                },
+            'product': 'vgt_ndvi',
+            'to_end': True,
+            'mapset_data': {
+                'rotation_factor_long': 0.0,
+                'description': u'Original Spot VGT 1km mapset',
+                'pixel_shift_lat': -0.008928571428571,
+                'defined_by': u'JRC',
+                'pixel_shift_long': 0.008928571428571,
+                'upper_left_lat': 38.004464285714285,
+                'upper_left_long': -26.004464285714285,
+                'mapsetcode': u'WGS84_Africa_1km',
+                'pixel_size_y': 8177,
+                'pixel_size_x': 9633,
+                'srs_wkt': u'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],TOWGS84[0,0,0,0,0,0,0],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9108"]],AUTHORITY["EPSG","4326"]]',
+                'rotation_factor_lat': 0.0},
+            'subproduct': 'sm',
+            'version': None,
+            'from_start': True,
+            'mapset': 'WGS84_Africa_1km'}]
+        product = self.get_product()
+        dates = product.get_missing_filenames(missing[0])
+        self.assertIsInstance(dates, list)
+
+    def test_tar_creation(self):
+        product = self.get_product()
+        mapsets = product.mapsets
+        missing = product.get_missing_datasets(mapset=mapsets[0])
+        filetar = Product.create_tar(missing)
+        #TODO check for file size

@@ -426,6 +426,7 @@ def get_product_native(productcode='', version='undefined', allrecs=False, echo=
                          db.product.product_type == 'Native',
                          db.product.version == version)
             product = db.product.filter(where).one()
+
             if echo:
                 print product
         return product
@@ -434,7 +435,7 @@ def get_product_native(productcode='', version='undefined', allrecs=False, echo=
         if echo:
             print traceback.format_exc()
         # Exit the script and print an error telling what happened.
-        logger.error("get_product_native: Database query error!\n -> {}".format(exceptionvalue))
+        logger.error("get_product_native : Database query error!\n -> {}".format(exceptionvalue))
         #raise Exception("get_product_native: Database query error!\n ->%s" % exceptionvalue)
 
 
@@ -455,6 +456,7 @@ def get_subproduct(productcode='', version='undefined', subproductcode='', echo=
                      db.product.subproductcode == subproductcode,
                      db.product.version == version)
         subproduct = db.product.filter(where).one()
+
         if echo:
             print subproduct
 
@@ -464,8 +466,8 @@ def get_subproduct(productcode='', version='undefined', subproductcode='', echo=
         if echo:
             print traceback.format_exc()
         # Exit the script and print an error telling what happened.
-        logger.error("get_product_native: Database query error!\n -> {}".format(exceptionvalue))
-        #raise Exception("get_product_native: Database query error!\n ->%s" % exceptionvalue)
+        logger.error("get_subproduct: Database query error!\n -> {}".format(exceptionvalue))
+        #raise Exception("get_subproduct: Database query error!\n ->%s" % exceptionvalue)
 
 
 ######################################################################################
@@ -770,7 +772,6 @@ def get_eumetcast_sources(echo=False):
             print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_eumetcast_sources: Database query error!\n -> {}".format(exceptionvalue))
-        #raise Exception("get_ingestion: Database query error!\n ->%s" % exceptionvalue)
 
 
 ######################################################################################
@@ -817,7 +818,6 @@ def get_active_internet_sources(echo=False):
             print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_internet_sources: Database query error!\n -> {}".format(exceptionvalue))
-        #raise Exception("get_ingestion: Database query error!\n ->%s" % exceptionvalue)
 
 
 ######################################################################################

@@ -155,6 +155,11 @@ class TestDatasets(unittest.TestCase):
         completeness = dataset.get_dataset_normalized_info()
         self.assertEquals(completeness['totfiles'], 11)
         self.assertEquals(completeness['missingfiles'], 2)
+        current_date = datetime.date(2014, 1, 1)
+        last_date = datetime.date(2015, 1, 1)
+        for i in range(12):
+            current_date = dataset.next_date(current_date)
+        self.assertEquals(last_date, current_date)
 
     def test_product_vgt_fapar(self):
         kwargs = self.kwargs.copy()
@@ -173,3 +178,15 @@ class TestDatasets(unittest.TestCase):
         completeness = dataset.get_dataset_normalized_info()
         self.assertEquals(completeness['totfiles'], 13)
         self.assertEquals(completeness['missingfiles'], 12)
+
+    def test_get_dates(self):
+        kwargs = self.kwargs.copy()
+        dataset = Dataset(**kwargs)
+        dates = dataset.get_dates()
+        last = None
+        for date in dates:
+            if last:
+                self.assertTrue(last < date)
+            last = date
+        self.assertEquals(len(dates), 160)
+
