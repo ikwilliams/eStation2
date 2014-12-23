@@ -96,7 +96,7 @@ def create_pipeline(prod, starting_sprod, mapset, version):
 
     #   ---------------------------------------------------------------------
     #   Average
-    output_sproduct_group=cr
+    output_sprod_group=create_subprod_group("10dstats")
     output_sprod=create_subprod("10davg", "10dstats", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
@@ -155,6 +155,7 @@ def create_pipeline(prod, starting_sprod, mapset, version):
 
     #   ---------------------------------------------------------------------
     #   10dDiff
+    output_sprod_group=create_subprod_group("10anomalies")
     output_sprod=create_subprod("10ddiff", "10anomalies", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
@@ -238,6 +239,7 @@ def create_pipeline(prod, starting_sprod, mapset, version):
 
     #   ---------------------------------------------------------------------
     #   1moncum
+    output_sprod_group=create_subprod_group("monthly")
     output_sprod=create_subprod("1moncum", "monthly", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
@@ -261,7 +263,7 @@ def create_pipeline(prod, starting_sprod, mapset, version):
     #   Monthly Average
     new_input_subprod='1moncum'
     in_prod_ident= functions.set_path_filename_no_date(prod, new_input_subprod, mapset, ext)
-
+    output_sprod_group=create_subprod_group("monstat")
     output_sprod=create_subprod("1monavg", "monstat", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
@@ -321,6 +323,7 @@ def create_pipeline(prod, starting_sprod, mapset, version):
 
     #   ---------------------------------------------------------------------
     #   1monDiff
+    output_sprod_group=create_subprod_group("monanomalies")
     output_sprod=create_subprod("1mondiff", "monanomalies", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
