@@ -44,89 +44,48 @@ def loop_processing(dry_run=False):
     functions.check_output_dir(es_constants.processing_tasks_dir)
     while True :
 
-        # Get all active processing chains from the database.
-        # active_processing_chains = querydb.get_processing_chains(allrecs=True, echo=echo_query)
-        #
-        # for active_chain in active_processing_chains:
-        #
-        #     logger.info("Processing active for product: [%s] subproduct N. %s" % (active_processing_chain[0],
-        #                                                                           active_processing_chain[2]))
-        #     productcode = active_product_ingest[0]
-        #     productversion = active_product_ingest[1]
-
         logger.debug("Entering infinite loop")
+        # Get all active processing chains from the database.
+        processing_chains = querydb.get_processing_chains(allrecs=True)
+        for chain in processing_chains:
+
+            product_code = chain.product_code
+            sub_product_code = chain.subproduct_code
+            mapset = chain.output_mapsetcode
+            algorithm
+
+            # The following id comes either from the DB id, or a combination of fields
+            processing_unique_id=functions.set_path_filename_no_date(product_code, sub_product_code, mapset, '.lock')
+            processing_unique_lock=es_constants.processing_tasks_dir+processing_unique_id
 
 
-        # Processing Loop
-        product_code = "fewsnet_rfe"
-        sub_product_code = "fewsnet_rfe"
+            args = {'pipeline_run_level':1, \
+                    'starting_sprod': product_code, \
+                    'prod':sub_product_code, \
+                    'mapset':mapset,\
+                    'version':'undefined'}
 
-        # The following id comes either from the DB id, or a combination of fields
-        processing_unique_id=functions.set_path_filename_no_date(product_code, sub_product_code, mapset_id, '.lock')
-        processing_unique_lock=es_constants.processing_tasks_dir+processing_unique_id
-
-        args = {'pipeline_run_level':1, \
-                'pipeline_run_touch_only':0, \
-                'pipeline_printout_level':0, \
-                'pipeline_printout_graph_level':0, \
-                'starting_sprod': 'rfe', \
-                'prod':"fewsnet_rfe", \
-                'mapset':'FEWSNET_Africa_8km',\
-                'version':'undefined'}
-
-        if not os.path.isfile(processing_unique_lock):
-            logger.debug("Launching processing for ID: %s" % processing_unique_id)
-            open(processing_unique_lock,'a').close()
-            # fork and call the std_precip 'generic' processing
-            pid = os.fork()
-            if pid == 0:
-                # Call to the processing pipeline
-                [l1,l2] = processing_std_precip.get_subprods_std_precip()
-                print l1
-                print l2
-                #processing_std_precip.processing_std_precip(**args)
-                # Simulate longer processing (TEMP)
-                time.sleep(1)
-                os.remove(processing_unique_lock)
-                sys.exit(0)
+            if not os.path.isfile(processing_unique_lock):
+                logger.debug("Launching processing for ID: %s" % processing_unique_id)
+                open(processing_unique_lock,'a').close()
+                # fork and call the std_precip 'generic' processing
+                pid = os.fork()
+                if pid == 0:
+                    # Call to the processing pipeline
+                    [l1,l2] = processing_std_precip.processing_std_precip()
+                    print l1
+                    print l2
+                    #processing_std_precip.processing_std_precip(**args)
+                    # Simulate longer processing (TEMP)
+                    time.sleep(1)
+                    os.remove(processing_unique_lock)
+                    sys.exit(0)
+                else:
+                    # Qui sono il padre
+                    pass
+                    #os.wait()
             else:
-                # Qui sono il padre
-                pass
-                #os.wait()
-        else:
-            logger.debug("Processing already running for ID: %s " % processing_unique_id)
-
-        # Second processing (to be removed - do a loop)
-        # processing_unique_id='0000002'
-        # processing_unique_lock=es_constants.processing_tasks_dir+processing_unique_id
-        #
-        # args = {'pipeline_run_level':0, \
-        #         'pipeline_run_touch_only':0, \
-        #         'pipeline_printout_level':1, \
-        #         'pipeline_printout_graph_level':0, \
-        #         'starting_sprod': 'rfe', \
-        #         'prod':"fewsnet_rfe", \
-        #         'mapset':'FEWSNET_AFRICA_8km',\
-        #         'version':'undefined'}
-        #
-        # if not os.path.isfile(processing_unique_lock):
-        #     logger.debug("Launching processing for ID: %s" % processing_unique_id)
-        #     open(processing_unique_lock,'a').close()
-        #     # fork and call the std_precip 'generic' processing
-        #     pid = os.fork()
-        #     if pid == 0:
-        #         # Call to the processing pipeline
-        #         processing_std_precip.processing_std_precip(**args)
-        #         # Simulate longer processing (TEMP)
-        #         time.sleep(7)
-        #         os.remove(processing_unique_lock)
-        #         sys.exit(0)
-        #     else:
-        #         # Qui sono il padre
-        #         pass
-        #         #os.wait()
-        # else:
-        #     logger.debug("Processing already running for ID: %s " % processing_unique_id)
+                logger.debug("Processing already running for ID: %s " % processing_unique_id)
 
         time.sleep(1)
 
