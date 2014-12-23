@@ -867,8 +867,8 @@ def get_processing_chains(allrecs=False, echo=False):
                                                  processinput.c.final,
                                                  processinput.c.date_format).\
             outerjoin(processinput, process.process_id == processinput.c.process_id).\
-            filter(and_(processinput.c.type == 'INPUT')).all()
-#            filter(and_(processinput.c.type == 'INPUT', process.activated is True)).all()
+            filter(and_(processinput.c.type == 'INPUT', process.activated == True)).all()
+
         return active_processing_chains
 
 
