@@ -28,6 +28,7 @@ data_dir= locals.es2globals['data_dir']
 from apps.processing import processing_std_precip
 from lib.python.daemon import DaemonDryRunnable
 
+
 def loop_processing(dry_run=False):
 
 #    Driver of the process service
@@ -47,9 +48,10 @@ def loop_processing(dry_run=False):
 
         logger.debug("Entering infinite loop")
         # Get all active processing chains from the database.
-        processing_chains = querydb.get_processing_chains(allrecs=True)
+        processing_chains = querydb.get_processing_chains()
 
         for chain in processing_chains:
+            logger.debug("Processing Product: %s" % chain.productcode)
 
             product_code = chain.productcode
             sub_product_code = chain.subproductcode
@@ -62,31 +64,32 @@ def loop_processing(dry_run=False):
 
             # Prepare arguments
             args = {'pipeline_run_level':1, \
-                    'starting_sprod': product_code, \
-                    'prod':sub_product_code, \
+                    'starting_sprod': sub_product_code, \
+                    'prod': product_code, \
                     'mapset':mapset,\
                     'version':'undefined'}
 
             if not os.path.isfile(processing_unique_lock):
                 logger.debug("Launching processing for ID: %s" % processing_unique_id)
-                #open(processing_unique_lock,'a').close()
+                open(processing_unique_lock,'a').close()
 
                 # Define the module name and function()
                 module_name = 'processing_'+algorithm
-
-                proc_pck = __import__("apps.processing")
+                # Enter the module and walk until to the name of the function() to be executed
+                proc_dir = __import__("apps.processing")
+                proc_pck = getattr(proc_dir, "processing")
                 proc_mod = getattr(proc_pck, module_name)
-                proc_func= getattr(proc_mod,module_name)
+                proc_func= getattr(proc_mod, module_name)
+
                 # fork and call the std_precip 'generic' processing
                 pid = os.fork()
                 if pid == 0:
                     # Call to the processing pipeline
-                    [l1,l2] = processing_std_precip.processing_std_precip()
-                    print l1
-                    print l2
-                    #processing_std_precip.processing_std_precip(**args)
+                    [list_subprods, list_subprod_groups] = proc_func(**args)
+                    print list_subprods
+                    print list_subprod_groups
                     # Simulate longer processing (TEMP)
-                    time.sleep(1)
+                    time.sleep(5)
                     os.remove(processing_unique_lock)
                     sys.exit(0)
                 else:
