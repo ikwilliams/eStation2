@@ -11,7 +11,7 @@ start = time.clock()
 
 # Manual Switch for START/STOP
 do_start = False
-dry_run = True
+dry_run = False
 service = False
 
 if service:
