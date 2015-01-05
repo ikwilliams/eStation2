@@ -381,23 +381,44 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                 width: 265,
                 cellWrap:true
 //                ,hideable: false
-            }, {
-                xtype: 'checkcolumn',
+            },{
+                xtype: 'actioncolumn',
                 header: 'Active',
-                width: 65,
-                dataIndex: 'activated',
-                stopSelection: false,
                 hideable: true,
                 hidden:true,
-                disabled: true,
+                width: 65,
+                align: 'center',
+                shrinkWrap: 0,
+                items: [{
+                    icon: 'resources/img/icons/check.png',
+                    tooltip: 'Activate/Deactivate Product',
+                    handler: 'ActivateDeactivateProduct'
+                }],
                 listeners: {
-                  checkchange: function(chkBox, rowIndex, checked, eOpts){
-//                      var myTitle = ""
-//                      if (checked)  myTitle = "Activate Product";
-//                      else myTitle = "De-activate Product";
-//                      Ext.toast({ html: 'Checkbox clicked!', title: myTitle, width: 200, align: 't' });
-                  }
+                    beforerender: function(x, y, z){
+                        console.info(x);
+                        console.info(y);
+                        console.info(z);
+                        Ext.toast({ html: 'Before render active column', title: 'Before render', width: 250, align: 't' });
+                    }
                 }
+//            }, {
+//                xtype: 'checkcolumn',
+//                header: 'Active',
+//                width: 65,
+//                dataIndex: 'activated',
+//                stopSelection: false,
+//                hideable: true,
+//                hidden:true,
+//                disabled: true,
+//                listeners: {
+//                  checkchange: function(chkBox, rowIndex, checked, eOpts){
+////                      var myTitle = ""
+////                      if (checked)  myTitle = "Activate Product";
+////                      else myTitle = "De-activate Product";
+////                      Ext.toast({ html: 'Checkbox clicked!', title: myTitle, width: 200, align: 't' });
+//                  }
+//                }
 
     //            xtype: 'booleancolumn',
     //            header: 'Active',

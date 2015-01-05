@@ -124,6 +124,23 @@ Ext.define("esapp.view.processing.Processing",{
                     ),
                 width: 450,
                 cellWrap:true
+            },{
+                xtype: 'checkcolumn',
+                header: 'Active',
+                width: 65,
+                dataIndex: 'activated',
+                stopSelection: false,
+                hideable: true,
+                hidden:false,
+                disabled: false,
+                listeners: {
+                  checkchange: function(chkBox, rowIndex, checked, eOpts){
+                      var myTitle = ""
+                      if (checked)  myTitle = "Activate Processing Chain";
+                      else myTitle = "De-activate Processing Chain";
+                      Ext.toast({ html: 'Checkbox clicked!', title: myTitle, width: 200, align: 't' });
+                  }
+                }
             }]
         }, {
             header:  '<div class="grid-header-style">Processing outputs</div>',
@@ -142,17 +159,17 @@ Ext.define("esapp.view.processing.Processing",{
                 width: 500,
                 bodyPadding:0,
 
-                header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 215px; left: 0px; tabindex="-1">' +
+                header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 210px; left: 0px; tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">Mapset</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 215px; right: auto; left: 215px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 190px; right: auto; left: 210px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">Sub Product</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 430px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 400px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">Active</span>' +
                 '           </div>' +

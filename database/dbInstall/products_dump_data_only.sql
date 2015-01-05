@@ -2347,12 +2347,26 @@ INSERT INTO internet_source (internet_id, defined_by, descriptive_name, descript
 -- Data for Name: processing; Type: TABLE DATA; Schema: products; Owner: estation
 --
 
+INSERT INTO processing (process_id, defined_by, output_mapsetcode, activated, derivation_method, algorithm, priority) VALUES (1, 'JRC', 'FEWSNET_Africa_8km', true, 'std_precip', 'std_precip', '1');
 
 
 --
 -- Data for Name: process_product; Type: TABLE DATA; Schema: products; Owner: estation
 --
 
+INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format) VALUES (1, 'fewsnet_rfe', 'rfe', 'undefined', 'FEWSNET_Africa_8km', 'INPUT', true, false, 'YYYYMMDD');
+INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format) VALUES (1, 'fewsnet_rfe', '10davg', 'undefined', 'FEWSNET_Africa_8km', 'OUTPUT', true, true, 'YYYYMMDD');
+INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format) VALUES (1, 'fewsnet_rfe', '10dmin', 'undefined', 'FEWSNET_Africa_8km', 'OUTPUT', true, true, 'YYYYMMDD');
+INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format) VALUES (1, 'fewsnet_rfe', '10dmax', 'undefined', 'FEWSNET_Africa_8km', 'OUTPUT', true, true, 'YYYYMMDD');
+INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format) VALUES (1, 'fewsnet_rfe', '10ddiff', 'undefined', 'FEWSNET_Africa_8km', 'OUTPUT', true, true, 'YYYYMMDD');
+INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format) VALUES (1, 'fewsnet_rfe', '10dperc', 'undefined', 'FEWSNET_Africa_8km', 'OUTPUT', true, true, 'YYYYMMDD');
+INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format) VALUES (1, 'fewsnet_rfe', '10dnp', 'undefined', 'FEWSNET_Africa_8km', 'OUTPUT', true, true, 'YYYYMMDD');
+INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format) VALUES (1, 'fewsnet_rfe', '1moncum', 'undefined', 'FEWSNET_Africa_8km', 'OUTPUT', true, true, 'YYYYMMDD');
+INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format) VALUES (1, 'fewsnet_rfe', '1mondiff', 'undefined', 'FEWSNET_Africa_8km', 'OUTPUT', true, true, 'YYYYMMDD');
+INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format) VALUES (1, 'fewsnet_rfe', '1monperc', 'undefined', 'FEWSNET_Africa_8km', 'OUTPUT', true, true, 'YYYYMMDD');
+INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format) VALUES (1, 'fewsnet_rfe', '1monnp', 'undefined', 'FEWSNET_Africa_8km', 'OUTPUT', true, true, 'YYYYMMDD');
+INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format) VALUES (1, 'fewsnet_rfe', '1monmin', 'undefined', 'FEWSNET_Africa_8km', 'OUTPUT', false, true, 'YYYYMMDD');
+INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format) VALUES (1, 'fewsnet_rfe', '1monmax', 'undefined', 'FEWSNET_Africa_8km', 'OUTPUT', false, true, 'YYYYMMDD');
 
 
 --

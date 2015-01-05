@@ -14,7 +14,7 @@ Ext.define('esapp.store.IngestionsStore', {
     ,autoSync: true
     ,remoteSort: false
 
-//    sorters: {property: 'productcode', direction: 'ASC'}
+    ,sorters: {property: 'mapsetname', direction: 'ASC'}
 
     ,proxy: {
         type: 'rest',
@@ -40,7 +40,7 @@ Ext.define('esapp.store.IngestionsStore', {
         listeners: {
             exception: function(proxy, response, operation){
                 Ext.MessageBox.show({
-                    title: 'REMOTE EXCEPTION',
+                    title: 'INGESTION - REMOTE EXCEPTION',
                     msg: operation.getError(),
                     icon: Ext.MessageBox.ERROR,
                     buttons: Ext.Msg.OK

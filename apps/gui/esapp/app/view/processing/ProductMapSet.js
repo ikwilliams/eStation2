@@ -44,18 +44,18 @@ Ext.define("esapp.view.processing.ProductMapSet",{
         me.columns = [{
             header: '', // 'Mapset',
             dataIndex: 'descriptive_name',
-            width: 205
+            width: 200
         }, {
             header: '',
             xtype: 'widgetcolumn',
-            width: 725,
+            width: 280,
             widget: {
                 xtype: 'mapset_finaloutput_subproduct_grid'
                 // ,height:80
             },
             onWidgetAttach: function(widget, record) {
                 Ext.suspendLayouts();
-                var mapset_finaloutput_subproduct = record.getData().mapset_finaloutput_subproduct;
+                var mapset_finaloutput_subproduct = record.getData().mapsetoutputproducts; //mapset_finaloutput_subproduct;
                 // console.info(mapset_finaloutput_subproduct);
                 var newstore = Ext.create('Ext.data.JsonStore', {
                     model: 'MapSetDataSet',

@@ -46,7 +46,24 @@ Ext.define("esapp.view.processing.MapSetFinalOutputSubProduct",{
         me.columns = [{
             header: '', // 'Sub Product Code',
             dataIndex: 'subproductcode',
-            width: 210
+            width: 180
+        },{
+            xtype: 'checkcolumn',
+            header: '', // Active
+            width: 65,
+            dataIndex: 'activated',
+            stopSelection: false,
+            hideable: true,
+            hidden: false,
+            disabled: false,
+            listeners: {
+              checkchange: function(chkBox, rowIndex, checked, eOpts){
+                  var myTitle = ""
+                  if (checked)  myTitle = "Activate Processing of Final SubProduct";
+                  else myTitle = "De-activate Processing of Final SubProduct";
+                  Ext.toast({ html: 'Checkbox clicked!', title: myTitle, width: 200, align: 't' });
+              }
+            }
         }];
 
         me.callParent();
