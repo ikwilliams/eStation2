@@ -967,12 +967,13 @@ class ProcLists:
 
 
 class ProcSubprod:
-    def __init__(self, sprod, group, final=False, active_default=True):
+    def __init__(self, sprod, group, final=False, active_default=True, active_depend=False):
         self.sprod = sprod
         self.group = group
         self.final = final
         self.active_default=active_default
         self.active_user = True
+        self.active_depend = active_depend
 
 class ProcSubprodGroup:
     def __init__(self, group, active_default=True):
