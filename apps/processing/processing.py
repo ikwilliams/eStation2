@@ -63,7 +63,7 @@ def loop_processing(dry_run=False):
             processing_unique_lock=es_constants.processing_tasks_dir+processing_unique_id
 
             # Prepare arguments
-            args = {'pipeline_run_level':1, \
+            args = {'pipeline_run_level':3, \
                     'starting_sprod': sub_product_code, \
                     'prod': product_code, \
                     'mapset':mapset,\
@@ -86,10 +86,8 @@ def loop_processing(dry_run=False):
                 if pid == 0:
                     # Call to the processing pipeline
                     [list_subprods, list_subprod_groups] = proc_func(**args)
-                    print list_subprods
-                    print list_subprod_groups
                     # Simulate longer processing (TEMP)
-                    time.sleep(5)
+                    time.sleep(10)
                     os.remove(processing_unique_lock)
                     sys.exit(0)
                 else:
@@ -99,7 +97,7 @@ def loop_processing(dry_run=False):
             else:
                 logger.debug("Processing already running for ID: %s " % processing_unique_id)
 
-        time.sleep(1)
+        time.sleep(5)
 
 class ProcessingDaemon(DaemonDryRunnable):
     def run(self):
