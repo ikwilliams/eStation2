@@ -238,12 +238,12 @@ class Processing:
     #@property
     def GET(self):
         # return web.ctx
-        db_processes = querydb.get_processes(echo=False)
+        db_proc_products = querydb.get_processingchain_products(echo=False)
 
-        if db_processes.__len__() > 0:
+        if db_proc_products.__len__() > 0:
             products_dict_all = []
             # loop the products list
-            for row in db_processes:
+            for row in db_proc_products:
                 prod_dict = functions.row2dict(row)
                 productcode = prod_dict['productcode']
                 version = prod_dict['version']
@@ -282,7 +282,7 @@ class Processing:
                                    separators=(', ', ': '))
 
             datamanagement_json = '{"success":true, "total":'\
-                                  + str(db_products.__len__())\
+                                  + str(db_proc_products.__len__())\
                                   + ',"products":'+prod_json+'}'
 
         else:

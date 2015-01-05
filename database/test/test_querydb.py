@@ -188,3 +188,15 @@ class TestQuerydb(TestCase):
 
 
         self.assertEqual(1, 1)
+
+    def Test_get_processingchain_products(self):
+
+        processingchain_products = querydb.get_processingchain_products()
+        logger.info("Processing chains: %s", processingchain_products)
+        for row in processingchain_products:
+            logger.info("row.output_mapsetcode: %s", row.output_mapsetcode)
+            logger.info("row.mapsetcode: %s", row.mapsetcode)
+            print row.output_mapsetcode
+            print row.mapsetcode
+
+        self.assertEqual(1, 1)

@@ -791,23 +791,20 @@ def get_active_internet_sources(echo=False):
 
 
 ######################################################################################
-#   get_processing_chains(allrecs=False, echo=False, productcode_in='', version_in='')
+#   get_processing_chains(echo=False)
 #   Purpose: Query the database to get all the processing chains definitions or one specific
 #            product definition at product level from the table processing (and related).
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/12/17
-#   Input: allrecs          - If True return all processing. Default=False
-#          echo             - If True echo the query result in the console for debugging purposes. Default=False
-#          productcode      - The productcode of the specific product ingestion definition requested. Default=''
-#          version          - The version of the specific product ingestion definition requested. Default='undefined'
-#   Output: Return a list of productcode/subproductcode/version/mapset from the table Processing+Process_product
+#   Input: echo   - If True echo the query result in the console for debugging purposes. Default=False
+#   Output: Return a list of all the processing chains definitions and it's input product
 #
-# SELECT p.*, pin.*
-# FROM products.processing p
-# INNER JOIN (SELECT * FROM products.process_product WHERE type = 'INPUT') pin
-# ON p.process_id = pin.process_id
+#   SELECT p.*, pin.*
+#   FROM products.processing p
+#   INNER JOIN (SELECT * FROM products.process_product WHERE type = 'INPUT') pin
+#   ON p.process_id = pin.process_id
 #
-def get_processing_chains(allrecs=False, echo=False):
+def get_processing_chains(echo=False):
 
     active_processing_chains = []
     try:
@@ -835,6 +832,79 @@ def get_processing_chains(allrecs=False, echo=False):
 
         return active_processing_chains
 
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_processing_chains: Database query error!\n -> {}".format(exceptionvalue))
+
+
+######################################################################################
+#   get_processingchain_products(echo=False)
+#   Purpose: Query the database to get all the processing chains definitions or one specific
+#            product definition at product level from the table processing (and related).
+#   Author: Jurriaan van 't Klooster
+#   Date: 2014/12/17
+#   Input: echo   - If True echo the query result in the console for debugging purposes. Default=False
+#   Output: Return a list of all the processing chains definitions and it's input product
+#
+#   SELECT p.*, pin.*
+#   FROM products.processing p
+#   INNER JOIN (SELECT * FROM products.process_product WHERE type = 'INPUT') pin
+#   ON p.process_id = pin.process_id
+#
+def get_processingchain_products(echo=False):
+
+    active_processing_chains = []
+    try:
+        session = db.session
+
+        process = aliased(db.processing)
+        #processinput = aliased(db.process_product)
+        #product = aliased(db.product)
+        #pc = aliased(db.product_category)
+
+        processinput = session.query(db.process_product).subquery()
+        product = session.query(db.product).subquery()
+        pc = session.query(db.product_category).subquery()
+
+        # The columns on the subquery "processinput" are accessible through an attribute called "c"
+        # e.g. es.c.productcode
+        active_processing_chains = session.query(process.process_id,
+                                                 process.defined_by,
+                                                 process.output_mapsetcode,
+                                                 process.derivation_method,
+                                                 process.algorithm,
+                                                 process.priority,
+
+                                                 processinput.c.productcode,
+                                                 processinput.c.subproductcode,
+                                                 processinput.c.version,
+                                                 processinput.c.mapsetcode,
+                                                 processinput.c.date_format,
+
+                                                 func.CONCAT(product.c.productcode, '_', product.c.version).label('productID'),
+                                                 product.c.productcode,
+                                                 product.c.subproductcode,
+                                                 product.c.version,
+                                                 product.c.defined_by,
+                                                 product.c.activated,
+                                                 product.c.product_type,
+                                                 product.c.descriptive_name.label('prod_descriptive_name'),
+                                                 product.c.description,
+                                                 pc.c.category_id,
+                                                 pc.c.descriptive_name.label('cat_descr_name'),
+                                                 pc.c.order_index).\
+            outerjoin(processinput, process.process_id == processinput.c.process_id).\
+            outerjoin(product, and_(processinput.c.productcode == product.c.productcode,
+                      processinput.c.subproductcode == product.c.subproductcode,
+                      processinput.c.version == product.c.version)).\
+            outerjoin(pc, product.c.category_id == pc.c.category_id).\
+            filter(and_(processinput.c.type == 'INPUT', process.activated == True)).all()
+
+        return active_processing_chains
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
