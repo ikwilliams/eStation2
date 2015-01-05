@@ -183,8 +183,8 @@ class TestQuerydb(TestCase):
         processing_chains = querydb.get_processing_chains()
         logger.info("Processing chains: %s", processing_chains)
         for row in processing_chains:
-            print row.activated
-            print row.process_id
+            print row.mapsetcode
+            print row.output_mapsetcode
 
 
         self.assertEqual(1, 1)
