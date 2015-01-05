@@ -806,6 +806,8 @@ def get_active_internet_sources(echo=False):
 #
 def get_processing_chains(echo=False):
 
+    # logger.debug("Entering get_processing_chains")
+
     active_processing_chains = []
     try:
         session = db.session

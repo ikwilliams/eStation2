@@ -36,68 +36,61 @@ logger = log.my_logger(__name__)
 #   General definitions for this processing chain
 ext=es_constants.ES2_OUTFILE_EXTENSION
 
-#   switch wrt groups
-activate_10dstats_comput=1
-activate_10danomalies_comput=1
-activate_monthly_comput=1
-activate_monstats_comput=1
-activate_monanomalies_comput=1
-
-#   specific switch for each subproduct
-activate_10davg_comput=1
-activate_10dmin_comput=1
-activate_10dmax_comput=1
-activate_10ddiff_comput=1
-activate_10dperc_comput=1
-activate_10dnp_comput=1
-
-activate_1moncum_comput=1
-activate_1monavg_comput=1
-activate_1monmin_comput=1
-activate_1monmax_comput=1
-activate_1mondiff_comput=1
-activate_1monperc_comput=1
-activate_1monnp_comput=1
-
-class Subprod:
-    def __init__(self, sprod, group, final=False, active_default=True):
-        self.sprod = sprod
-        self.group = group
-        self.final = final
-        self.active_default=active_default
-        self.active_user = True
-
-class SubprodGroup:
-    def __init__(self, group, active_default=True):
-        self.group = group
-        self.active_default=active_default
-        self.active_user = True
+def create_pipeline(prod, starting_sprod, mapset, version, list_subprods=None):
 
 
-def create_subprod(sprod, group, final=False, active_default=True):
-    list_subprods.append(Subprod(sprod, group, final, active_default=True))
-    return sprod
+    #   ---------------------------------------------------------------------
+    #   Create lists
 
+    proc_lists = functions.ProcLists()
 
-def create_subprod_group(sprod_group, active_default=True):
-    list_subprod_groups.append(SubprodGroup(sprod_group, active_default=True))
-    return sprod_group
+    if list_subprods is not None:
+        list_subprods = proc_lists.list_subprods
+        list_subprod_groups = proc_lists.list_subprod_groups
+    
+    #   ---------------------------------------------------------------------
+    #   TODO-M.C.: Manage here the switches, considering User Defined+Dependencies
+    #
+    #
 
-def create_pipeline(prod, starting_sprod, mapset, version):
+    #   switch wrt groups
+    activate_10dstats_comput=1          # 1.
+    activate_10danomalies_comput=1      # 2.
+    activate_monthly_comput=1           # 3.a
+    activate_monstats_comput=1          # 3.b
+    activate_monanomalies_comput=1      # 3.c
+
+    activate_10davg_comput=1
+    activate_10dmin_comput=1
+    activate_10dmax_comput=1
+    activate_10ddiff_comput=1
+    activate_10dperc_comput=1
+    activate_10dnp_comput=1
+
+    activate_1moncum_comput=1
+    activate_1monavg_comput=1
+    activate_1monmin_comput=1
+    activate_1monmax_comput=1
+    activate_1mondiff_comput=1
+    activate_1monperc_comput=1
+    activate_1monnp_comput=1
 
     #   ---------------------------------------------------------------------
     #   Define input files
     in_prod_ident = functions.set_path_filename_no_date(prod, starting_sprod, mapset, ext)
 
+    logger.debug('Base data directory is: %s' % locals.es2globals['data_dir'])
     input_dir = locals.es2globals['data_dir']+ \
                 functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
 
+    logger.debug('Input data directory is: %s' % input_dir)
     starting_files = input_dir+"*"+in_prod_ident
+    logger.debug('Starting files wild card is: %s' % starting_files)
 
     #   ---------------------------------------------------------------------
     #   Average
-    output_sprod_group=create_subprod_group("10dstats")
-    output_sprod=create_subprod("10davg", "10dstats", False, True)
+    output_sprod_group=proc_lists.proc_add_subprod_group("10dstats")
+    output_sprod=proc_lists.proc_add_subprod("10davg", "10dstats", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -112,12 +105,10 @@ def create_pipeline(prod, starting_sprod, mapset, version):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_avg_image(**args)
-        # upsert_processed_ruffus(output_file)
-
 
     #   ---------------------------------------------------------------------
     #   Minimum
-    output_sprod=create_subprod("10dmin", "10dstats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10dmin", "10dstats", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -132,11 +123,10 @@ def create_pipeline(prod, starting_sprod, mapset, version):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_min_image(**args)
-        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   Maximum
-    output_sprod=create_subprod("10dmax", "10dstats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10dmax", "10dstats", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -151,12 +141,11 @@ def create_pipeline(prod, starting_sprod, mapset, version):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_max_image(**args)
-        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   10dDiff
-    output_sprod_group=create_subprod_group("10anomalies")
-    output_sprod=create_subprod("10ddiff", "10anomalies", False, True)
+    output_sprod_group=proc_lists.proc_add_subprod_group("10anomalies")
+    output_sprod=proc_lists.proc_add_subprod("10ddiff", "10anomalies", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -178,11 +167,10 @@ def create_pipeline(prod, starting_sprod, mapset, version):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_oper_subtraction(**args)
-        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   10dperc
-    output_sprod=create_subprod("10dperc", "10anomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10dperc", "10anomalies", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -204,11 +192,10 @@ def create_pipeline(prod, starting_sprod, mapset, version):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file[0], "avg_file": input_file[1], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_compute_perc_diff_vs_avg(**args)
-        # _processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   10dnp
-    output_sprod=create_subprod("10dnp", "10anomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10dnp", "10anomalies", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -235,12 +222,11 @@ def create_pipeline(prod, starting_sprod, mapset, version):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_make_vci(**args)
-        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   1moncum
-    output_sprod_group=create_subprod_group("monthly")
-    output_sprod=create_subprod("1moncum", "monthly", False, True)
+    output_sprod_group=proc_lists.proc_add_subprod_group("monthly")
+    output_sprod=proc_lists.proc_add_subprod("1moncum", "monthly", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -257,20 +243,20 @@ def create_pipeline(prod, starting_sprod, mapset, version):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file,"output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_cumulate(**args)
-        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   Monthly Average
     new_input_subprod='1moncum'
     in_prod_ident= functions.set_path_filename_no_date(prod, new_input_subprod, mapset, ext)
-    output_sprod_group=create_subprod_group("monstat")
-    output_sprod=create_subprod("1monavg", "monstat", False, True)
+    output_sprod_group=proc_lists.proc_add_subprod_group("monstat")
+    output_sprod=proc_lists.proc_add_subprod("1monavg", "monstat", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
     formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
+    @follows(std_precip_1moncum)
     @active_if(activate_monstats_comput, activate_1monavg_comput)
     @collate(std_precip_1moncum, formatter(formatter_in),formatter_out)
     def std_precip_1monavg(input_file, output_file):
@@ -279,17 +265,17 @@ def create_pipeline(prod, starting_sprod, mapset, version):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_avg_image(**args)
-        #upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   Monthly Minimum
-    output_sprod=create_subprod("1monmin", "monstat", False, True)
+    output_sprod=proc_lists.proc_add_subprod("1monmin", "monstat", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
     formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
+    @follows(std_precip_1moncum)
     @active_if(activate_monstats_comput, activate_1monmin_comput)
     @collate(std_precip_1moncum, formatter(formatter_in),formatter_out)
     def std_precip_1monmin(input_file, output_file):
@@ -298,11 +284,10 @@ def create_pipeline(prod, starting_sprod, mapset, version):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_min_image(**args)
-        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   Monthly Maximum
-    output_sprod=create_subprod("1monmax", "monstat", False, True)
+    output_sprod=proc_lists.proc_add_subprod("1monmax", "monstat", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -311,6 +296,7 @@ def create_pipeline(prod, starting_sprod, mapset, version):
     formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
     formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
+    @follows(std_precip_1moncum)
     @active_if(activate_monstats_comput, activate_1monmax_comput)
     @collate(std_precip_1moncum, formatter(formatter_in),formatter_out)
     def std_precip_1monmax(input_file, output_file):
@@ -319,12 +305,11 @@ def create_pipeline(prod, starting_sprod, mapset, version):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_max_image(**args)
-        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   1monDiff
-    output_sprod_group=create_subprod_group("monanomalies")
-    output_sprod=create_subprod("1mondiff", "monanomalies", False, True)
+    output_sprod_group=proc_lists.proc_add_subprod_group("monanomalies")
+    output_sprod=proc_lists.proc_add_subprod("1mondiff", "monanomalies", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -347,11 +332,10 @@ def create_pipeline(prod, starting_sprod, mapset, version):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_oper_subtraction(**args)
-        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   1monperc
-    output_sprod=create_subprod("1monperc", "monanomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("1monperc", "monanomalies", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -374,11 +358,10 @@ def create_pipeline(prod, starting_sprod, mapset, version):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file[0], "avg_file": input_file[1], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_compute_perc_diff_vs_avg(**args)
-        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   1monnp
-    output_sprod=create_subprod("1monnp", "monanomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("1monnp", "monanomalies", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -405,55 +388,54 @@ def create_pipeline(prod, starting_sprod, mapset, version):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_make_vci(**args)
-        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
-    #   Upsert in the DB table a product generated by ruffus
+        #   Upsert in the DB table a product generated by ruffus
 
-    def upsert_processed_ruffus(file_fullpath):
-
-            # -------------------------------------------------------------------------
-            # Upsert into DB table 'products_data'
-            # -------------------------------------------------------------------------
-
-            filename = os.path.basename(file_fullpath)
-            dirname = os.path.dirname(file_fullpath)
-
-            # TODO-M.C.: add tests, try/except
-            [productcode, subproductcode, version, mapsetcode] = functions.get_from_path_dir(dirname)
-            str_date = functions.get_date_from_path_filename(filename)
-            [str_year, str_month, str_day, str_hour] = functions.extract_from_date(str_date)
-
-            if str_year == '':
-                str_year='0'
-            cruddb = crud.CrudDB()
-            recordkey = {'productcode': productcode.lower(),
-                         'subproductcode': subproductcode.lower(),
-                         'version': 'undefined',
-                         'mapsetcode': mapsetcode,
-                         'product_datetime': str_date}
-
-
-            record = {'productcode': productcode.lower(),
-                      'subproductcode': subproductcode.lower(),
-                      'version': 'undefined',
-                      'mapsetcode': mapsetcode,
-                      'product_datetime': str_date,
-                      'directory': dirname,
-                      'filename': filename,
-                      'year': int(str_year),
-                      'month': int(str_month),
-                      'day': int(str_day),
-                      'hour': int(str_hour),
-                      'file_role': 'active',
-                      'file_type': 'GTiff'}
-
-            if len(cruddb.read('products.products_data', **recordkey)) > 0:
-                logger.debug('Updating products_data record: ' + str(recordkey))
-                cruddb.update('products.products_data', record)
-            else:
-                logger.debug('Creating products_data record: ' + str(recordkey))
-                cruddb.create('products.products_data', record)
+    # def upsert_processed_ruffus(file_fullpath):
+    #
+    #         # -------------------------------------------------------------------------
+    #         # Upsert into DB table 'products_data'
+    #         # -------------------------------------------------------------------------
+    #
+    #         filename = os.path.basename(file_fullpath)
+    #         dirname = os.path.dirname(file_fullpath)
+    #
+    #         # TODO-M.C.: add tests, try/except
+    #         [productcode, subproductcode, version, mapsetcode] = functions.get_from_path_dir(dirname)
+    #         str_date = functions.get_date_from_path_filename(filename)
+    #         [str_year, str_month, str_day, str_hour] = functions.extract_from_date(str_date)
+    #
+    #         if str_year == '':
+    #             str_year='0'
+    #         cruddb = crud.CrudDB()
+    #         recordkey = {'productcode': productcode.lower(),
+    #                      'subproductcode': subproductcode.lower(),
+    #                      'version': 'undefined',
+    #                      'mapsetcode': mapsetcode,
+    #                      'product_datetime': str_date}
+    #
+    #
+    #         record = {'productcode': productcode.lower(),
+    #                   'subproductcode': subproductcode.lower(),
+    #                   'version': 'undefined',
+    #                   'mapsetcode': mapsetcode,
+    #                   'product_datetime': str_date,
+    #                   'directory': dirname,
+    #                   'filename': filename,
+    #                   'year': int(str_year),
+    #                   'month': int(str_month),
+    #                   'day': int(str_day),
+    #                   'hour': int(str_hour),
+    #                   'file_role': 'active',
+    #                   'file_type': 'GTiff'}
+    #
+    #         if len(cruddb.read('products.products_data', **recordkey)) > 0:
+    #             logger.debug('Updating products_data record: ' + str(recordkey))
+    #             cruddb.update('products.products_data', record)
+    #         else:
+    #             logger.debug('Creating products_data record: ' + str(recordkey))
+    #             cruddb.create('products.products_data', record)
 
 #   ---------------------------------------------------------------------
 #   Run the pipeline
@@ -469,6 +451,7 @@ def processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0, pipeli
     create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version)
 
     logger.info("Entering routine %s" % 'processing_std_precip')
+    logger.info("pipeline_run_level %i" % pipeline_run_level)
     if pipeline_run_level > 0:
         pipeline_run(verbose=pipeline_run_level, touch_files_only=pipeline_run_touch_only)
 

@@ -173,7 +173,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, echo
 
     logger.info("Entering routine %s for prod: %s and date: %s" % ('ingestion', product['productcode'], in_date))
 
-    preproc_type =  datasource_descr.compose_area_type
+    preproc_type =  datasource_descr.preproc_type
     native_mapset_code = datasource_descr.native_mapset
 
     do_preprocess = 0

@@ -154,8 +154,7 @@ class TestQuerydb(TestCase):
         ingestions = querydb.get_ingestions()
         logger.info("All Ingestions: %s", ingestions)
         for row in ingestions:
-            #print row
-            print row.c.mapsetname
+            print row
 
         self.assertEqual(1, 1)
 
@@ -178,15 +177,15 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
+
     def Test_get_processing_chains(self):
 
         processing_chains = querydb.get_processing_chains()
         logger.info("Processing chains: %s", processing_chains)
         for row in processing_chains:
-            logger.info("row.output_mapsetcode: %s", row.output_mapsetcode)
-            logger.info("row.mapsetcode: %s", row.mapsetcode)
-            print row.output_mapsetcode
             print row.mapsetcode
+            print row.output_mapsetcode
+
 
         self.assertEqual(1, 1)
 
