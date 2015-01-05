@@ -59,45 +59,31 @@ activate_1mondiff_comput=1
 activate_1monperc_comput=1
 activate_1monnp_comput=1
 
-class Subprod:
-    def __init__(self, sprod, group, final=False, active_default=True):
-        self.sprod = sprod
-        self.group = group
-        self.final = final
-        self.active_default=active_default
-        self.active_user = True
-
-class SubprodGroup:
-    def __init__(self, group, active_default=True):
-        self.group = group
-        self.active_default=active_default
-        self.active_user = True
-
-
-def create_subprod(sprod, group, final=False, active_default=True):
-    list_subprods.append(Subprod(sprod, group, final, active_default=True))
-    return sprod
-
-
-def create_subprod_group(sprod_group, active_default=True):
-    list_subprod_groups.append(SubprodGroup(sprod_group, active_default=True))
-    return sprod_group
-
 def create_pipeline(prod, starting_sprod, mapset, version):
 
+    #   ---------------------------------------------------------------------
+    #   Create lists
+
+    proc_lists = functions.ProcLists()
+    list_subprods = proc_lists.list_subprods
+    list_subprod_groups = proc_lists.list_subprod_groups
+    
     #   ---------------------------------------------------------------------
     #   Define input files
     in_prod_ident = functions.set_path_filename_no_date(prod, starting_sprod, mapset, ext)
 
+    logger.debug('Base data directory is: %s' % locals.es2globals['data_dir'])
     input_dir = locals.es2globals['data_dir']+ \
                 functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
 
+    logger.debug('Input data directory is: %s' % input_dir)
     starting_files = input_dir+"*"+in_prod_ident
+    logger.debug('Starting files wild card is: %s' % starting_files)
 
     #   ---------------------------------------------------------------------
     #   Average
-    output_sprod_group=create_subprod_group("10dstats")
-    output_sprod=create_subprod("10davg", "10dstats", False, True)
+    output_sprod_group=proc_lists.proc_add_subprod_group("10dstats")
+    output_sprod=proc_lists.proc_add_subprod("10davg", "10dstats", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -117,7 +103,7 @@ def create_pipeline(prod, starting_sprod, mapset, version):
 
     #   ---------------------------------------------------------------------
     #   Minimum
-    output_sprod=create_subprod("10dmin", "10dstats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10dmin", "10dstats", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -136,7 +122,7 @@ def create_pipeline(prod, starting_sprod, mapset, version):
 
     #   ---------------------------------------------------------------------
     #   Maximum
-    output_sprod=create_subprod("10dmax", "10dstats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10dmax", "10dstats", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -155,8 +141,8 @@ def create_pipeline(prod, starting_sprod, mapset, version):
 
     #   ---------------------------------------------------------------------
     #   10dDiff
-    output_sprod_group=create_subprod_group("10anomalies")
-    output_sprod=create_subprod("10ddiff", "10anomalies", False, True)
+    output_sprod_group=proc_lists.proc_add_subprod_group("10anomalies")
+    output_sprod=proc_lists.proc_add_subprod("10ddiff", "10anomalies", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -182,7 +168,7 @@ def create_pipeline(prod, starting_sprod, mapset, version):
 
     #   ---------------------------------------------------------------------
     #   10dperc
-    output_sprod=create_subprod("10dperc", "10anomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10dperc", "10anomalies", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -208,7 +194,7 @@ def create_pipeline(prod, starting_sprod, mapset, version):
 
     #   ---------------------------------------------------------------------
     #   10dnp
-    output_sprod=create_subprod("10dnp", "10anomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10dnp", "10anomalies", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -239,8 +225,8 @@ def create_pipeline(prod, starting_sprod, mapset, version):
 
     #   ---------------------------------------------------------------------
     #   1moncum
-    output_sprod_group=create_subprod_group("monthly")
-    output_sprod=create_subprod("1moncum", "monthly", False, True)
+    output_sprod_group=proc_lists.proc_add_subprod_group("monthly")
+    output_sprod=proc_lists.proc_add_subprod("1moncum", "monthly", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -263,8 +249,8 @@ def create_pipeline(prod, starting_sprod, mapset, version):
     #   Monthly Average
     new_input_subprod='1moncum'
     in_prod_ident= functions.set_path_filename_no_date(prod, new_input_subprod, mapset, ext)
-    output_sprod_group=create_subprod_group("monstat")
-    output_sprod=create_subprod("1monavg", "monstat", False, True)
+    output_sprod_group=proc_lists.proc_add_subprod_group("monstat")
+    output_sprod=proc_lists.proc_add_subprod("1monavg", "monstat", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -283,7 +269,7 @@ def create_pipeline(prod, starting_sprod, mapset, version):
 
     #   ---------------------------------------------------------------------
     #   Monthly Minimum
-    output_sprod=create_subprod("1monmin", "monstat", False, True)
+    output_sprod=proc_lists.proc_add_subprod("1monmin", "monstat", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -302,7 +288,7 @@ def create_pipeline(prod, starting_sprod, mapset, version):
 
     #   ---------------------------------------------------------------------
     #   Monthly Maximum
-    output_sprod=create_subprod("1monmax", "monstat", False, True)
+    output_sprod=proc_lists.proc_add_subprod("1monmax", "monstat", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -323,8 +309,8 @@ def create_pipeline(prod, starting_sprod, mapset, version):
 
     #   ---------------------------------------------------------------------
     #   1monDiff
-    output_sprod_group=create_subprod_group("monanomalies")
-    output_sprod=create_subprod("1mondiff", "monanomalies", False, True)
+    output_sprod_group=proc_lists.proc_add_subprod_group("monanomalies")
+    output_sprod=proc_lists.proc_add_subprod("1mondiff", "monanomalies", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -351,7 +337,7 @@ def create_pipeline(prod, starting_sprod, mapset, version):
 
     #   ---------------------------------------------------------------------
     #   1monperc
-    output_sprod=create_subprod("1monperc", "monanomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("1monperc", "monanomalies", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -378,7 +364,7 @@ def create_pipeline(prod, starting_sprod, mapset, version):
 
     #   ---------------------------------------------------------------------
     #   1monnp
-    output_sprod=create_subprod("1monnp", "monanomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("1monnp", "monanomalies", False, True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -407,8 +393,12 @@ def create_pipeline(prod, starting_sprod, mapset, version):
         raster_image_math.do_make_vci(**args)
         # upsert_processed_ruffus(output_file)
 
+
+
+    print list_subprods
+    print list_subprod_groups
     #   ---------------------------------------------------------------------
-    #   Upsert in the DB table a product generated by ruffus
+        #   Upsert in the DB table a product generated by ruffus
 
     def upsert_processed_ruffus(file_fullpath):
 
@@ -469,6 +459,7 @@ def processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0, pipeli
     create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version)
 
     logger.info("Entering routine %s" % 'processing_std_precip')
+    logger.info("pipeline_run_level %i" % pipeline_run_level)
     if pipeline_run_level > 0:
         pipeline_run(verbose=pipeline_run_level, touch_files_only=pipeline_run_touch_only)
 
