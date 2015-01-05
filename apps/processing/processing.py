@@ -38,7 +38,8 @@ def loop_processing(dry_run=False):
 #                       -> if < 0, it triggers pipeline_printout_graph() rather than pipeline_run()
 
     # Clean dir with locks
-    shutil.rmtree(es_constants.processing_tasks_dir)
+    if os.path.isdir(es_constants.processing_tasks_dir):
+        shutil.rmtree(es_constants.processing_tasks_dir)
     logger.info("Entering routine %s" % 'loop_processing')
     echo_query = False
     functions.check_output_dir(es_constants.processing_tasks_dir)
@@ -47,18 +48,19 @@ def loop_processing(dry_run=False):
         logger.debug("Entering infinite loop")
         # Get all active processing chains from the database.
         processing_chains = querydb.get_processing_chains(allrecs=True)
+
         for chain in processing_chains:
 
-            product_code = chain.product_code
-            sub_product_code = chain.subproduct_code
+            product_code = chain.productcode
+            sub_product_code = chain.subproductcode
             mapset = chain.output_mapsetcode
-            algorithm
+            algorithm = chain.algorithm
 
-            # The following id comes either from the DB id, or a combination of fields
+            # Define an id from a combination of fields
             processing_unique_id=functions.set_path_filename_no_date(product_code, sub_product_code, mapset, '.lock')
             processing_unique_lock=es_constants.processing_tasks_dir+processing_unique_id
 
-
+            # Prepare arguments
             args = {'pipeline_run_level':1, \
                     'starting_sprod': product_code, \
                     'prod':sub_product_code, \
@@ -67,7 +69,14 @@ def loop_processing(dry_run=False):
 
             if not os.path.isfile(processing_unique_lock):
                 logger.debug("Launching processing for ID: %s" % processing_unique_id)
-                open(processing_unique_lock,'a').close()
+                #open(processing_unique_lock,'a').close()
+
+                # Define the module name and function()
+                module_name = 'processing_'+algorithm
+
+                proc_pck = __import__("apps.processing")
+                proc_mod = getattr(proc_pck, module_name)
+                proc_func= getattr(proc_mod,module_name)
                 # fork and call the std_precip 'generic' processing
                 pid = os.fork()
                 if pid == 0:
