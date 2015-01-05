@@ -942,3 +942,41 @@ def get_eumetcast_info(eumetcast_id):
     filename = get_eumetcast_processed_list_prefix+str(eumetcast_id)+'.info'
     info = load_obj_from_pickle(filename)
     return info
+
+######################################################################################
+#                            PROCESSING CHAINS
+######################################################################################
+
+class ProcLists:
+
+    def __init__(self):
+        self.list_subprods = []
+        self.list_subprod_groups = []
+
+    def proc_add_subprod(self, sprod, group, final=False, active_default=True):
+        self.list_subprods.append(ProcSubprod(sprod, group, final, active_default=True))
+        return sprod
+
+    def proc_add_subprod(self, sprod, group, final=False, active_default=True):
+        self.list_subprods.append(ProcSubprod(sprod, group, final, active_default=True))
+        return sprod
+
+    def proc_add_subprod_group(self, sprod_group, active_default=True):
+        self.list_subprod_groups.append(ProcSubprodGroup(sprod_group, active_default=True))
+        return sprod_group
+
+
+class ProcSubprod:
+    def __init__(self, sprod, group, final=False, active_default=True):
+        self.sprod = sprod
+        self.group = group
+        self.final = final
+        self.active_default=active_default
+        self.active_user = True
+
+class ProcSubprodGroup:
+    def __init__(self, group, active_default=True):
+        self.group = group
+        self.active_default=active_default
+        self.active_user = True
+
