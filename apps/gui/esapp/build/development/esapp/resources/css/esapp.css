@@ -1,6 +1,13 @@
-
+.6f230e6da2ec3c5669e254fb28cf798ced5a468a{display:block;}
 p {
     margin:5px;
+}
+
+.activated {
+    background-image:url(../img/icons/check.png);
+}
+.deactivated {
+    background-image:url(../img/icons/times.png);
 }
 .settings {
     background-image:url(../img/icons/folder_wrench.png);
@@ -17,7 +24,6 @@ p {
 .edit {
     background-image: url(../img/icons/edit.png ) !important;
 }
-
 .dashboard-panel-body {
     background-image: url(../img/square.gif);
 }

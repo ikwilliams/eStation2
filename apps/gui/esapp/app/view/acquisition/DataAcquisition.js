@@ -14,8 +14,7 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
         'esapp.view.acquisition.DataAcquisitionModel',
         'esapp.view.acquisition.DataAcquisitionController',
         'Ext.grid.plugin.CellEditing',
-//        'Ext.grid.column.Action',
-//        'Ext.grid.column.Widget',
+        'Ext.grid.column.Action',
         'Ext.grid.column.Check'
     ],
 
@@ -24,7 +23,7 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
 //    bind: '{products.dataacquisitions}',
 //    bind: '{dataacquisitions}',
 
-    // get the chained store vrom view model
+    // get the chained store from view model
     bind:{
         store:'{productdatasources}'
     },
@@ -44,8 +43,6 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
     hideHeaders: true,
     columnLines: false,
     rowLines: false,
-//    frame: false,
-//    border: false,
 
     listeners: {
         mouseenter: {
@@ -68,51 +65,59 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
         };
 
         me.columns = [{
-//            xtype: 'actioncolumn',
-//            width: 30,
-//            sortable: false,
-//            menuDisabled: true,
-//            items: [{
-//                icon: 'resources/img/icons/delete.png',
-//                tooltip: 'Delete Product',
-//                scope: me,
-////                handler: me.onRemoveClick
-//                handler: function(grid, rowIndex){
-//                    Ext.toast({
-//                        html: 'Removed row!',
-//                        title: 'onRemoveClick',
-//                        width: 200,
-//                        align: 't'
-//                    });
-//                }
-//            }]
-//        }, {
-//            text: '', // 'Type',
+            // text: '', // 'Type',
             width: 105,
             dataIndex: 'type'
 //            bind: '{products.dataacquisitions.type}'
 //            bind: '{dataacquisitions.type}'
         }, {
-//            text: '', // 'Latest Acquired',
+            // text: '', // 'Latest Acquired',
             width: 110,
-            dataIndex: 'time_latest_copy'
+            dataIndex: 'time_latest_copy',
+            hidden: true
 //            bind: '{products.dataacquisitions.latest}'
 //            bind: '{dataacquisitions.latest}'
         }, {
-//            text: '', // 'Latest Acquired',
+            // text: '', // 'Latest Acquired',
             width: 110,
-            dataIndex: 'time_latest_exec'
+            dataIndex: 'time_latest_exec',
+            hidden: true
 //            bind: '{products.dataacquisitions.latest}'
 //            bind: '{dataacquisitions.latest}'
         }, {
-            xtype: 'checkcolumn',
-//            text: '', // 'Active',
+            xtype: 'actioncolumn',
+            // header: 'Active',
+            hideable: false,
+            hidden:false,
+            // disabled: true,
+            // stopSelection: false,
             width: 65,
-            disabled: true,
-            stopSelection: true,
-            dataIndex: 'activated'
-//            bind: '{products.dataacquisitions.activated}'
-//            bind: '{dataacquisitions.activated}'
+            align: 'center',
+            items: [{
+                // scope: me,
+                // handler: me.onToggleActivation
+                disabled: false,
+                getClass: function(v, meta, rec) {
+                    if (rec.get('activated')) {
+                        return 'activated';
+                    } else {
+                        return 'deactivated';
+                    }
+                },
+                getTip: function(v, meta, rec) {
+                    if (rec.get('activated')) {
+                        return 'Deactivate Aqcuisition';
+                    } else {
+                        return 'Activate Aqcuisition';
+                    }
+                },
+                handler: function(grid, rowIndex, colIndex) {
+                    var rec = grid.getStore().getAt(rowIndex),
+                        action = (rec.get('activated') ? 'deactivated' : 'activated');
+                    Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
+                    rec.get('activated') ? rec.set('activated', false) : rec.set('activated', true);
+                }
+            }]
         }];
 
         me.callParent();
