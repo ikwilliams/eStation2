@@ -3,18 +3,29 @@ Ext.define('esapp.model.Processing', {
 
 //    idProperty : 'productID',
     fields: [
-       {name: 'productID', type: 'string', mapping: 'productID'},
-       {name: 'productcode', mapping: 'productcode'},
-       {name: 'subproductcode', mapping: 'subproductcode'}, // Native
-       {name: 'version', mapping: 'version'},
-       {name: 'defined_by', mapping: 'defined_by'},
-       {name: 'product_type', mapping: 'product_type'},
-       {name: 'activated', type: 'boolean', mapping: 'activated'},
-       {name: 'prod_descriptive_name', mapping: 'prod_descriptive_name'},
-       {name: 'description', mapping: 'description'},
-       {name: 'category_id', mapping: 'category_id'},
-       {name: 'cat_descr_name', mapping: 'cat_descr_name'},
-       {name: 'order_index', mapping: 'order_index'}
+        {name: 'process_id', mapping: 'process_id'},
+        {name: 'process_defined_by', mapping: 'process_defined_by'},
+        {name: 'activated', mapping: 'activated'},
+        {name: 'output_mapsetcode', mapping: 'output_mapsetcode'},
+        {name: 'derivation_method', mapping: 'derivation_method'},
+        {name: 'algorithm', mapping: 'algorithm'},
+        {name: 'priority', mapping: 'priority'},
+
+        {name: 'productcode', mapping: 'productcode'},
+        {name: 'subproductcode', mapping: 'subproductcode'},
+        {name: 'version', mapping: 'version'},
+        {name: 'mapsetcode', mapping: 'mapsetcode'},
+        {name: 'date_format', mapping: 'date_format'},
+
+        {name: 'productID', type: 'string', mapping: 'productID'},
+        {name: 'defined_by', mapping: 'defined_by'},
+        // {name: 'activated', type: 'boolean', mapping: 'activated'},
+        {name: 'product_type', mapping: 'product_type'},
+        {name: 'prod_descriptive_name', mapping: 'prod_descriptive_name'},
+        {name: 'description', mapping: 'description'},
+        {name: 'category_id', mapping: 'category_id'},
+        {name: 'cat_descr_name', mapping: 'cat_descr_name'},
+        {name: 'order_index', mapping: 'order_index'}
     ]
 });
 
@@ -47,7 +58,7 @@ Ext.define('esapp.model.MapSetFinalOutputSubProducts', {
 //    extend: 'Ext.data.Model',
 
     fields: [
-       {name: 'mapsetcode', reference:'ProcessingProductMapSet'},
+       {name: 'mapsetcode', reference:'ProcessingProductMapSet', type: 'string'},
        {name: 'datasetID'},
        {name: 'productcode'},
        {name: 'subproductcode'},

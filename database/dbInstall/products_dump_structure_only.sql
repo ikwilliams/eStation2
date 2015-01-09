@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.3.2
 -- Dumped by pg_dump version 9.3.2
--- Started on 2014-12-18 17:13:10 CET
+-- Started on 2015-01-08 16:07:10 CET
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -27,7 +27,7 @@ ALTER SCHEMA analysis OWNER TO estation;
 -- TOC entry 9 (class 2615 OID 17843)
 -- Name: products; Type: SCHEMA; Schema: -; Owner: estation
 --
-DROP SCHEMA products CASCADE;
+
 CREATE SCHEMA products;
 
 
@@ -1365,7 +1365,7 @@ ALTER TABLE ONLY product_acquisition_data_source
     ADD CONSTRAINT products_description_product_acquisition_data_sources_fk FOREIGN KEY (subproductcode, productcode, version) REFERENCES product(subproductcode, productcode, version) ON UPDATE CASCADE;
 
 
--- Completed on 2014-12-18 17:13:11 CET
+-- Completed on 2015-01-08 16:07:11 CET
 
 --
 -- PostgreSQL database dump complete

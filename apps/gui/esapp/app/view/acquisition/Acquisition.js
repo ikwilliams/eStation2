@@ -95,30 +95,91 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                     Ext.suspendLayouts();
 
                     var acq_main = Ext.ComponentQuery.query('panel[name=acquisitionmain]');
+                    var dataacquisitiongrids = Ext.ComponentQuery.query('dataacquisitiongrid');
                     var addproductbtn = Ext.ComponentQuery.query('panel[name=acquisitionmain] > toolbar > button[name=addproduct]');
                     var checkColumns = Ext.ComponentQuery.query('panel[name=acquisitionmain] checkcolumn, dataacquisitiongrid checkcolumn, ingestiongrid checkcolumn');
+                    var actionColumns = Ext.ComponentQuery.query('panel[name=acquisitionmain] actioncolumn, dataacquisitiongrid actioncolumn, ingestiongrid actioncolumn');
 
                     if (btn.pressed){
                         // ToDo: check if logged in!
+
+                        acq_main[0].columns[3].setWidth(420);
+                        acq_main[0].columns[3].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 111px; left: 0px; tabindex="-1">' +
+                        '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                        '               <span data-ref="textEl" class="x-column-header-text">Type</span>' +
+                        '           </div>' +
+                        '       </div>' +
+                        '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 110px; right: auto; left: 111px; margin: 0px; top: 0px;" tabindex="-1">' +
+                        '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                        '               <span data-ref="textEl" class="x-column-header-text">Last copied</span>' +
+                        '           </div>' +
+                        '       </div>' +
+                        '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 110px; right: auto; left: 221px; margin: 0px; top: 0px;" tabindex="-1">' +
+                        '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                        '               <span data-ref="textEl" class="x-column-header-text">Last executed</span>' +
+                        '           </div>' +
+                        '       </div>' +
+                        '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 60px; left: 332px; margin: 0px; top: 0px;" tabindex="-1">' +
+                        '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                        '               <span data-ref="textEl" class="x-column-header-text">Active</span>' +
+                        '           </div>' +
+                        '       </div>');
+
                         addproductbtn[0].show();
-                        acq_main[0].columns[0].show();
-                        acq_main[0].columns[2].show();
-                        Ext.Object.each(checkColumns, function(id, chkCol, myself) {
-                            chkCol.enable();
+                        acq_main[0].columns[0].show();  // Last copied
+                        acq_main[0].columns[2].show();  // Last executed
+                        Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
+                            dataacquisitiongrid.columns[1].show();
+                            dataacquisitiongrid.columns[2].show();
                         });
+//                        Ext.Object.each(checkColumns, function(id, chkCol, myself) {
+//                            chkCol.enable();
+//                        });
+                        // TODO: Enable action columns
+//                        Ext.Object.each(actionColumns, function(id, actionCol, myself) {
+//                            actionCol.enable();
+//                            actionCol.items[0].disabled = false;
+//                            actionCol.enableAction(0);
+//                            actionCol.updateLayout();
+//                        })
                         btn.setIconCls('fa fa-unlock fa-2x');
+
                     }
                     else {
+                        acq_main[0].columns[3].setWidth(190);
+                        acq_main[0].columns[3].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 111px; left: 0px; tabindex="-1">' +
+                                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                                '               <span data-ref="textEl" class="x-column-header-text">Type</span>' +
+                                '           </div>' +
+                                '       </div>' +
+                                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 60px; left: 111px; margin: 0px; top: 0px;" tabindex="-1">' +
+                                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                                '               <span data-ref="textEl" class="x-column-header-text">Active</span>' +
+                                '           </div>' +
+                                '       </div>');
+
                         addproductbtn[0].hide();
                         acq_main[0].columns[0].hide();
                         acq_main[0].columns[2].hide();
-                        Ext.Object.each(checkColumns, function(id, chkCol, myself) {
-                            chkCol.disable();
+                        Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
+                            dataacquisitiongrid.columns[1].hide();
+                            dataacquisitiongrid.columns[2].hide();
                         });
+//                        Ext.Object.each(checkColumns, function(id, chkCol, myself) {
+//                            chkCol.disable();
+//                        });
+                        // TODO: Disable action columns - problem icon not visible!
+//                        Ext.Object.each(actionColumns, function(id, actionCol, myself) {
+//                            actionCol.disable();
+//                            actionCol.items[0].disabled = true;
+//                            actionCol.disableAction(0);
+//                            actionCol.updateLayout();
+//                        })
                         btn.setIconCls('fa fa-lock fa-2x');
                     }
 
                     Ext.resumeLayouts(true);
+                    // acq_main.updateLayout();
 
         //                var toggleFn = newValue ? 'disable' : 'enable';
         //                Ext.each(this.query('button'), function(item) {
@@ -381,24 +442,55 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                 width: 265,
                 cellWrap:true
 //                ,hideable: false
-            }, {
-                xtype: 'checkcolumn',
+            },{
+                xtype: 'actioncolumn',
                 header: 'Active',
-                width: 65,
-                dataIndex: 'activated',
-                stopSelection: false,
                 hideable: true,
                 hidden:true,
-                disabled: true,
-                listeners: {
-                  checkchange: function(chkBox, rowIndex, checked, eOpts){
-//                      var myTitle = ""
-//                      if (checked)  myTitle = "Activate Product";
-//                      else myTitle = "De-activate Product";
-//                      Ext.toast({ html: 'Checkbox clicked!', title: myTitle, width: 200, align: 't' });
-                  }
-                }
-
+                width: 65,
+                align: 'center',
+                shrinkWrap: 0,
+                items: [{
+                    // scope: me,
+                    // handler: me.onToggleActivation
+                    getClass: function(v, meta, rec) {
+                        if (rec.get('activated')) {
+                            return 'activated';
+                        } else {
+                            return 'deactivated';
+                        }
+                    },
+                    getTip: function(v, meta, rec) {
+                        if (rec.get('activated')) {
+                            return 'Deactivate Product';
+                        } else {
+                            return 'Activate Product';
+                        }
+                    },
+                    handler: function(grid, rowIndex, colIndex) {
+                        var rec = grid.getStore().getAt(rowIndex),
+                            action = (rec.get('activated') ? 'deactivated' : 'activated');
+                        Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
+                        rec.get('activated') ? rec.set('activated', false) : rec.set('activated', true);
+                    }
+                }]
+//            }, {
+//                xtype: 'checkcolumn',
+//                header: 'Active',
+//                width: 65,
+//                dataIndex: 'activated',
+//                stopSelection: false,
+//                hideable: true,
+//                hidden:true,
+//                disabled: true,
+//                listeners: {
+//                  checkchange: function(chkBox, rowIndex, checked, eOpts){
+////                      var myTitle = ""
+////                      if (checked)  myTitle = "Activate Product";
+////                      else myTitle = "De-activate Product";
+////                      Ext.toast({ html: 'Checkbox clicked!', title: myTitle, width: 200, align: 't' });
+//                  }
+//                }
     //            xtype: 'booleancolumn',
     //            header: 'Active',
     //            width: 80,
@@ -424,29 +516,39 @@ Ext.define("esapp.view.acquisition.Acquisition",{
             },
             columns: [{
                 xtype: 'widgetcolumn',
-                width: 410,
-//                bodyPadding: {top: 0, left: 10, right: 10, bottom: 0},
+                width: 190,
 
                 header: ' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 111px; left: 0px; tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">Type</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 110px; right: auto; left: 111px; margin: 0px; top: 0px;" tabindex="-1">' +
-                '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Last copied</span>' +
-                '           </div>' +
-                '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 110px; right: auto; left: 221px; margin: 0px; top: 0px;" tabindex="-1">' +
-                '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Last executed</span>' +
-                '           </div>' +
-                '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 60px; left: 332px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 60px; left: 111px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">Active</span>' +
                 '           </div>' +
                 '       </div>',
+
+//                header: ' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 111px; left: 0px; tabindex="-1">' +
+//                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+//                '               <span data-ref="textEl" class="x-column-header-text">Type</span>' +
+//                '           </div>' +
+//                '       </div>' +
+//                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 110px; right: auto; left: 111px; margin: 0px; top: 0px;" tabindex="-1">' +
+//                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+//                '               <span data-ref="textEl" class="x-column-header-text">Last copied</span>' +
+//                '           </div>' +
+//                '       </div>' +
+//                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 110px; right: auto; left: 221px; margin: 0px; top: 0px;" tabindex="-1">' +
+//                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+//                '               <span data-ref="textEl" class="x-column-header-text">Last executed</span>' +
+//                '           </div>' +
+//                '       </div>' +
+//                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 60px; left: 332px; margin: 0px; top: 0px;" tabindex="-1">' +
+//                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+//                '               <span data-ref="textEl" class="x-column-header-text">Active</span>' +
+//                '           </div>' +
+//                '       </div>',
 
                 listeners: {
                     render: function(column){

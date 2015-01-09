@@ -235,44 +235,31 @@ class Processing:
     def __init__(self):
         self.lang = "en"
 
-    #@property
     def GET(self):
-        # return web.ctx
-        db_proc_products = querydb.get_processingchain_products(echo=False)
+        db_proc_products = querydb.get_processingchains_input_products()
 
         if db_proc_products.__len__() > 0:
             products_dict_all = []
+
             # loop the products list
-            for row in db_proc_products:
-                prod_dict = functions.row2dict(row)
-                productcode = prod_dict['productcode']
-                version = prod_dict['version']
+            for input_product in db_proc_products:
+                process_id = input_product.process_id
+                output_mapsetcode = input_product.output_mapsetcode
+                prod_dict = input_product.__dict__
+                del prod_dict['_labels']
 
-                p = Product(product_code=productcode, version=version)
+                prod_dict['productmapsets'] = []
+                mapset_info = querydb.get_mapset(mapsetcode=output_mapsetcode)
 
-                # does the product have mapsets AND subproducts?
-                all_prod_mapsets = p.mapsets
-                all_prod_subproducts = p.subproducts
-                if all_prod_mapsets.__len__() > 0 and all_prod_subproducts.__len__() > 0:
-                    prod_dict['productmapsets'] = []
-                    for mapset in all_prod_mapsets:
-                        mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
-                        mapset_dict = functions.row2dict(mapset_info)
-                        mapset_dict['mapsetdatasets'] = []
-                        all_mapset_datasets = p.get_subproducts(mapset=mapset)
-                        for subproductcode in all_mapset_datasets:
-                            dataset_info = querydb.get_subproduct(productcode=productcode,
-                                                                  version=version,
-                                                                  subproductcode=subproductcode,
-                                                                  echo=False)
-
-                            dataset_dict = functions.row2dict(dataset_info)
-                            dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
-                            completeness = dataset.get_dataset_normalized_info()
-                            dataset_dict['datasetcompleteness'] = completeness
-
-                            mapset_dict['mapsetdatasets'].append(dataset_dict)
-                        prod_dict['productmapsets'].append(mapset_dict)
+                mapset_dict = functions.row2dict(mapset_info)
+                mapset_dict['mapsetoutputproducts'] = []
+                output_products = querydb.get_processingchain_output_products(process_id)
+                for outputproduct in output_products:
+                    #outputproduct_dict = functions.row2dict(outputproduct)
+                    outputproduct_dict = outputproduct.__dict__
+                    del outputproduct_dict['_labels']
+                    mapset_dict['mapsetoutputproducts'].append(outputproduct_dict)
+                prod_dict['productmapsets'].append(mapset_dict)
                 products_dict_all.append(prod_dict)
 
             prod_json = json.dumps(products_dict_all,
@@ -295,7 +282,6 @@ class DataSets:
     def __init__(self):
         self.lang = "en"
 
-    #@property
     def GET(self):
         # return web.ctx
         db_products = querydb.get_products(echo=False)

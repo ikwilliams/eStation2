@@ -156,35 +156,56 @@ Ext.define("esapp.view.acquisition.Ingestion",{
             }
 
         },{
-            header: '', // 'Active',
-            xtype: 'checkcolumn',
-            dataIndex: 'activated',
-//            bind: '{ingestions.activated}',
+            xtype: 'actioncolumn',
+            // header: 'Active',
+            hideable: false,
+            hidden:false,
+            // disabled: true,
+            // stopSelection: false,
             width: 65,
-            disabled: true,
-            stopSelection: false
+            align: 'center',
+            items: [{
+                // scope: me,
+                // handler: me.onToggleActivation
+                disabled: false,
+                getClass: function(v, meta, rec) {
+                    if (rec.get('activated')) {
+                        return 'activated';
+                    } else {
+                        return 'deactivated';
+                    }
+                },
+                getTip: function(v, meta, rec) {
+                    if (rec.get('activated')) {
+                        return 'Deactivate Ingestion';
+                    } else {
+                        return 'Activate Ingestion';
+                    }
+                },
+                handler: function(grid, rowIndex, colIndex) {
+                    var rec = grid.getStore().getAt(rowIndex),
+                        action = (rec.get('activated') ? 'deactivated' : 'activated');
+                    Ext.toast({ html: action + ' ' + rec.get('productcode') + ' ' + rec.get('mapsetcode') + ' ' + rec.get('subproductcode'), title: 'Action', width: 300, align: 't' });
+                    rec.get('activated') ? rec.set('activated', false) : rec.set('activated', true);
+                }
+            }]
+
+//            header: '', // 'Active',
+//            xtype: 'checkcolumn',
+//            dataIndex: 'activated',
+////            bind: '{ingestions.activated}',
+//            width: 65,
+//            disabled: true,
+//            stopSelection: false
         },{
             xtype: 'actioncolumn',
             width: 65,
             align:'center',
             items: [{
-//                icon: 'resources/img/icons/add.png',
-//                tooltip: 'Add Ingestion',
-//                scope: me,
-////                handler: me.onRemoveClick
-//                handler: function (grid, rowIndex) {
-//                    Ext.toast({
-//                        html: 'Add ingestion window!',
-//                        title: 'Add ingestion',
-//                        width: 200,
-//                        align: 't'
-//                    });
-//                }
-//            },{
                 icon: 'resources/img/icons/file-extension-log-icon-32x32.png',
                 tooltip: 'Show log of this Ingestion',
                 scope: me,
-//                handler: me.onRemoveClick
+                // handler: me.onRemoveClick
                 handler: function (grid, rowIndex) {
                     Ext.toast({
                         html: 'Show log of ingestion!',

@@ -171,7 +171,7 @@ Ext.define('esapp.view.main.Main', {
                 title: 'Help',
                 xtype:'container',
                 autoScroll: true,
-                html: '<a id="hideit" href="#">Toggle the west region</a>',
+                html: '', // '<a id="hideit" href="#">Toggle the west region</a>',
                 listeners: {
                    activate: function (analisistab) {
                         var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];

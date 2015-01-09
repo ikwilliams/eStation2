@@ -2,6 +2,13 @@
 p {
     margin:5px;
 }
+
+.activated {
+    background-image:url(../img/icons/check.png);
+}
+.deactivated {
+    background-image:url(../img/icons/times.png);
+}
 .settings {
     background-image:url(../img/icons/folder_wrench.png);
 }
@@ -17,7 +24,6 @@ p {
 .edit {
     background-image: url(../img/icons/edit.png ) !important;
 }
-
 .dashboard-panel-body {
     background-image: url(../img/square.gif);
 }

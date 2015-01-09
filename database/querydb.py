@@ -552,8 +552,8 @@ def get_mapset(mapsetcode='', allrecs=False, echo=False):
 #          echo             - If True echo the query result in the console for debugging purposes. Default=False
 #          productcode      - The productcode of the specific product ingestion definition requested. Default=''
 #          version          - The version of the specific product ingestion definition requested. Default='undefined'
-#   Output: Return the productcode, version and count() of subproducts of all [or a specific product ingestion definition] from the table
-#           ingestion.
+#   Output: Return the productcode, version and count() of subproducts of all
+#           [or a specific product ingestion definition] from the table ingestion.
 def get_ingestion_product(allrecs=False, echo=False, productcode='', version='undefined'):
     try:
         session = db.session
@@ -844,7 +844,7 @@ def get_processing_chains(echo=False):
 
 
 ######################################################################################
-#   get_processingchain_products(echo=False)
+#   get_processingchains_input_products()
 #   Purpose: Query the database to get all the processing chains definitions or one specific
 #            product definition at product level from the table processing (and related).
 #   Author: Jurriaan van 't Klooster
@@ -857,9 +857,8 @@ def get_processing_chains(echo=False):
 #   INNER JOIN (SELECT * FROM products.process_product WHERE type = 'INPUT') pin
 #   ON p.process_id = pin.process_id
 #
-def get_processingchain_products(echo=False):
-
-    active_processing_chains = []
+def get_processingchains_input_products():
+    processing_chains = []
     try:
         session = db.session
 
@@ -873,44 +872,107 @@ def get_processingchain_products(echo=False):
         pc = session.query(db.product_category).subquery()
 
         # The columns on the subquery "processinput" are accessible through an attribute called "c"
-        # e.g. es.c.productcode
-        active_processing_chains = session.query(process.process_id,
-                                                 process.defined_by,
-                                                 process.output_mapsetcode,
-                                                 process.derivation_method,
-                                                 process.algorithm,
-                                                 process.priority,
+        # e.g. processinput.c.productcode
+        processing_chains = session.query(process.process_id,
+                                          process.defined_by.label('process_defined_by'),
+                                          process.activated,
+                                          process.output_mapsetcode,
+                                          process.derivation_method,
+                                          process.algorithm,
+                                          process.priority,
 
-                                                 processinput.c.productcode,
-                                                 processinput.c.subproductcode,
-                                                 processinput.c.version,
-                                                 processinput.c.mapsetcode,
-                                                 processinput.c.date_format,
+                                          processinput.c.productcode,
+                                          processinput.c.subproductcode,
+                                          processinput.c.version,
+                                          processinput.c.mapsetcode,
+                                          processinput.c.date_format,
 
-                                                 func.CONCAT(product.c.productcode, '_', product.c.version).label('productID'),
-                                                 product.c.productcode,
-                                                 product.c.subproductcode,
-                                                 product.c.version,
-                                                 product.c.defined_by,
-                                                 product.c.activated,
-                                                 product.c.product_type,
-                                                 product.c.descriptive_name.label('prod_descriptive_name'),
-                                                 product.c.description,
-                                                 pc.c.category_id,
-                                                 pc.c.descriptive_name.label('cat_descr_name'),
-                                                 pc.c.order_index).\
+                                          func.CONCAT(product.c.productcode, '_', product.c.version).label('productID'),
+                                          #product.c.productcode,
+                                          #product.c.subproductcode,
+                                          #product.c.version,
+                                          product.c.defined_by,
+                                          #product.c.activated,
+                                          product.c.product_type,
+                                          product.c.descriptive_name.label('prod_descriptive_name'),
+                                          product.c.description,
+                                          pc.c.category_id,
+                                          pc.c.descriptive_name.label('cat_descr_name'),
+                                          pc.c.order_index).\
             outerjoin(processinput, process.process_id == processinput.c.process_id).\
             outerjoin(product, and_(processinput.c.productcode == product.c.productcode,
                       processinput.c.subproductcode == product.c.subproductcode,
                       processinput.c.version == product.c.version)).\
             outerjoin(pc, product.c.category_id == pc.c.category_id).\
-            filter(and_(processinput.c.type == 'INPUT', process.activated == True)).all()
+            filter(and_(processinput.c.type == 'INPUT')).all()
 
-        return active_processing_chains
+        return processing_chains
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
+        #if echo:
+        #    print traceback.format_exc()
         # Exit the script and print an error telling what happened.
-        logger.error("get_processing_chains: Database query error!\n -> {}".format(exceptionvalue))
+        logger.error("get_processingchains_input_products: Database query error!\n -> {}".format(exceptionvalue))
+
+
+######################################################################################
+#   get_processingchain_output_products(process_id=None, echo=False)
+#   Purpose: Query the database to get the final output (sub) products of a given processing chain (process_id)
+#            from the table process_product (and product table).
+#   Author: Jurriaan van 't Klooster
+#   Date: 2015/01/02
+#   Input: echo   - If True echo the query result in the console for debugging purposes. Default=False
+#   Output: Return a list of the final output (sub) products of a given processing chain (process_id)
+#
+def get_processingchain_output_products(process_id=None):
+
+    processing_chain_output_products = []
+    try:
+        if process_id is not None:
+            session = db.session
+
+            processfinaloutput = aliased(db.process_product)
+
+            product = session.query(db.product).subquery()
+            pc = session.query(db.product_category).subquery()
+
+            # The columns on the subquery "processinput" are accessible through an attribute called "c"
+            # e.g. processinput.c.productcode
+            processing_chain_output_products = session.query(processfinaloutput.process_id,
+                                                             processfinaloutput.productcode,
+                                                             processfinaloutput.subproductcode,
+                                                             processfinaloutput.version,
+                                                             processfinaloutput.mapsetcode,
+                                                             processfinaloutput.type,
+                                                             processfinaloutput.activated,
+                                                             processfinaloutput.final,
+                                                             processfinaloutput.date_format,
+
+                                                             func.CONCAT(product.c.productcode, '_',
+                                                                         product.c.subproductcode, '_',
+                                                                         product.c.version).label('productID'),
+                                                             product.c.defined_by,
+                                                             #product.c.activated,
+                                                             product.c.product_type,
+                                                             product.c.descriptive_name.label('prod_descriptive_name'),
+                                                             product.c.description,
+                                                             pc.c.category_id,
+                                                             pc.c.descriptive_name.label('cat_descr_name'),
+                                                             pc.c.order_index).\
+                outerjoin(product, and_(processfinaloutput.productcode == product.c.productcode,
+                          processfinaloutput.subproductcode == product.c.subproductcode,
+                          processfinaloutput.version == product.c.version)).\
+                outerjoin(pc, product.c.category_id == pc.c.category_id).\
+                filter(and_(processfinaloutput.process_id == process_id,
+                            processfinaloutput.type == 'OUTPUT',
+                            processfinaloutput.final == True)).all()
+
+        return processing_chain_output_products
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        #if echo:
+        #    print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_processingchain_output_products: Database query error!\n -> {}".format(exceptionvalue))
