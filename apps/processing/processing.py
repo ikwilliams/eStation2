@@ -87,6 +87,7 @@ def loop_processing(dry_run=False):
                     # Call to the processing pipeline
                     [list_subprods, list_subprod_groups] = proc_func(**args)
                     # Simulate longer processing (TEMP)
+                    logger.info("Going to sleep for a while")
                     time.sleep(10)
                     os.remove(processing_unique_lock)
                     sys.exit(0)
