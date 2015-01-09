@@ -1,13 +1,21 @@
 #
-#	purpose: Define all variables for es2 (previously iniEnv + iniEnv_db)
+#	purpose: Define all variables for es2
 #	author:  M.Clerici
 #	date:	 13.03.2014
-#   descr:	 Define all variables for es2 (previously iniEnv + iniEnv_db)
+#   descr:	 Define all variables for es2
 #	history: 1.0
 #
-
+#   NOTE: all the definitions are going to be in es_constants.ini, that will contain two sections
+#         Factory Settings : some of them are going to be written at the .deb package generation from iniEnv
+#         User Settings: User can overwrite a sub-set of the Factory settings (not the 'internal' ones)
+#         This module will:     1. Read both Factory/User Settings from .ini
+#                               2. Manage priorities (User -> Factory)
+#                               3. Make available the settings, part in es2globals, part
+#
+#   This module will be be imported by any other (instead of locals.py -> to be discontinued)
+#
 import os
-import locals
+#import locals
 from osgeo import gdalconst
 
 # Get base dir
@@ -31,22 +39,23 @@ ES2_SW_VERSION = '2.0.0'
 # ---------------------------------------------------------------
 # Application paths (depends on locals.py)
 # ---------------------------------------------------------------
-install_path = base_dir
-apps_dir = install_path+'/apps/'
-config_dir = install_path+'/config/'
+#install_path = base_dir
+base_dir = '/srv/www/eStation2/'                                ## User Defined !
+apps_dir = base_dir+'/apps/'
+config_dir = base_dir+'/config/'
 processing_dir = apps_dir+'/processing'
 
-log_dir = install_path+'/log/'
-wrk_dir = install_path+'/wrk_dir/'
-base_tmp_dir = os.path.sep+'tmp'+os.path.sep+'eStation2'+os.path.sep
+log_dir = base_dir+'/log/'
+wrk_dir = base_dir+'/wrk_dir/'
+base_tmp_dir = os.path.sep+'tmp'+os.path.sep+'eStation2'+os.path.sep    ## User Defined !
 
 # Data paths (temp)
-eumetcast_files_dir = data_dir+'my_eumetcast_dir/'
-ingest_server_in_dir = data_dir+'my_data_ingest_dir/'
+data_dir =  '/data/'                                            ## User Defined !
 
+eumetcast_files_dir = data_dir+'my_eumetcast_dir/'              ## User Defined !
+ingest_server_in_dir = data_dir+'my_data_ingest_dir/'           ## User Defined !
 
 template_mapfile = apps_dir+'analysis/MAP_main.map'
-
 
 # ---------------------------------------------------------------
 # Services: GET/INGEST
@@ -99,27 +108,6 @@ dbglobals = {
     'schema_data': DB_SCHEMA_DATA
 }
 
-prefix = DB_SCHEMA_PRODUCTS+'.'
-
-DB_TABLE_PRODUCTS = prefix+'products_data'
-DB_TABLE_PGROUP = prefix+'product_groups'
-DB_TABLE_DESCRIPTION = prefix+'products_description'
-DB_TABLE_LEGEND = prefix+'legend'
-DB_TABLE_LEGENDSTEP = prefix+'legend_step'
-DB_TABLE_I18N = prefix+'i18n'
-DB_TABLE_PRODUCTLEGEND = prefix+'product_legend'
-DB_TABLE_USERS = prefix+'users'
-DB_TABLE_MAPLEGEND = prefix+'maplegend'
-DB_TABLE_MAPLEGENDSTEP = prefix+'maplegendstep'
-DB_TABLE_PORTFOLIO = prefix+'portfolio'
-DB_TABLE_TSDATA = prefix+'timeseries_data'
-DB_TABLE_TSDRAWPROP = prefix+'timeseries_user_drawproperties'
-DB_TABLE_TSPROP = prefix+'timeseriesgroup_user_graphproperties'
-DB_TABLE_TSGROUP = prefix+'timeseries_groups'
-DB_TABLE_TS = prefix+'timeseries'
-DB_TABLE_TSUNIQDATE = prefix+'timeseries_dates'
-DB_TABLE_TSDECAD = prefix+'timeseries_decad'
-
 # ---------------------------------------------------------------
 # Various definitions
 # ---------------------------------------------------------------
@@ -127,3 +115,21 @@ ES2_OUTFILE_FORMAT = 'GTiff'
 ES2_OUTFILE_EXTENSION = '.tif'
 ES2_OUTFILE_OPTIONS = 'COMPRESS=LZW'
 ES2_OUTFILE_INTERP_METHOD = gdalconst.GRA_NearestNeighbour
+
+# ---------------------------------------------------------------
+# Copy some of the definitions to es2globals (previously in locals.py)
+# ---------------------------------------------------------------
+es2globals = {
+    'host': 'localhost',
+    'port': '5432',
+    'dbUser': 'estation',
+    'dbPass': 'mesadmin',
+    'dbName': 'estationdb',
+    'schema': 'products',
+    'base_dir': '/srv/www/eStation2/',              # eStation2 installation dir
+    'data_dir': '',                                 # root dir for all eStation2 operational data
+    'ingest_dir': '',                               # 'pool' dir for all retrieved files (GET service)
+    'static_data_path': '',
+    'temp_dir': '/tmp/eStation2/'
+}
+
