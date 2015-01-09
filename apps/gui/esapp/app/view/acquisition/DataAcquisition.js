@@ -106,9 +106,9 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
                 },
                 getTip: function(v, meta, rec) {
                     if (rec.get('activated')) {
-                        return 'Deactivate Aqcuisition';
+                        return 'Deactivate Acquisition';
                     } else {
-                        return 'Activate Aqcuisition';
+                        return 'Activate Acquisition';
                     }
                 },
                 handler: function(grid, rowIndex, colIndex) {
