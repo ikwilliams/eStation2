@@ -14,7 +14,7 @@ import locals
 # Import standard modules
 import signal
 import commands
-from time import *
+import time
 import datetime
 import os
 import re
@@ -96,9 +96,9 @@ def loop_eumetcast(dry_run=False):
         if not os.path.exists(input_dir):
             logger.error("The EUMETCast input directory : %s is not yet mounted.", input_dir)
 
-        logger.debug("Check if the Ingest Server output directory : %s exists.", output_dir)
+        logger.debug("Check if the Ingest Server input directory : %s exists.", output_dir)
         if not os.path.exists(output_dir):
-            logger.fatal("The Ingest Server output directory : %s doesn't exists.", output_dir)
+            logger.fatal("The Ingest Server input directory : %s doesn't exists.", output_dir)
             # TODO Jurvtk: Create the Ingest Server output directory if it doesn't exist!
             exit(1)
 
@@ -187,7 +187,7 @@ def loop_eumetcast(dry_run=False):
                     functions.dump_obj_to_pickle(processed_list, processed_list_filename)
                     functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
-            sleep(float(user_def_sleep))
+            time.sleep(float(10))
 
         # except Exception, e:
         #     logger.fatal(str(e))

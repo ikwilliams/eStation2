@@ -10,9 +10,9 @@ es2globals = {
     'dbPass': 'mesadmin',
     'dbName': 'estationdb',
     'schema': 'products',
-    'base_dir': '/srv/www/eStation2/',              # eStation2 installation dir
-    'data_dir': '',                                 # root dir for all eStation2 operational data
-    'ingest_dir': '',                               # 'pool' dir for all retrieved files (GET service)
+    'base_dir': '/srv/www/eStation2/',                      # eStation2 installation dir
+    'data_dir': '/data/processing/',                        # root dir for all eStation2 operational data
+    'ingest_dir': '/data/ingest/',                          # 'pool' dir for all retrieved files (GET service)
     'static_data_path': '',
     'temp_dir': '/tmp/eStation2/'
 }

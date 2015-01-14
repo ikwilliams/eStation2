@@ -9,9 +9,9 @@ from lib.python import es_logging as log
 logger = log.my_logger(__name__)
 
 # Manual Switch for START/STOP
-do_start = False
-dry_run  = True
-service  = False
+do_start = True
+dry_run  = False
+service  = True
 
 if service:
     # Make sure the pid dir exists
@@ -38,5 +38,5 @@ if service:
             logger.info('GetInternet process is running: Stop it.')
             daemon.stop()
 else:
-    get_internet.drive_get_internet(dry_run=dry_run)
+    get_internet.loop_get_internet(dry_run=dry_run)
 

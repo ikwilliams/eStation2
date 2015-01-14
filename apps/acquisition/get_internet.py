@@ -337,11 +337,18 @@ def loop_get_internet(dry_run=False):
                 processed_info['time_latest_exec']=datetime.datetime.now()
 
                 logger.debug("Create current list of file to process for source %s.", internet_source.internet_id)
-                #if isinstance(internet_source.user_name,str) and isinstance(internet_source.password,str):
-                usr_pwd = str(internet_source.user_name)+':'+internet_source.password
-                #else:
-                #    usr_pwd =''
-
+                if internet_source.user_name is None:
+                    user_name = "anonymous"
+                else:
+                    user_name = internet_source.user_name
+                
+                if internet_source.password is None:
+                    password = "anonymous"
+                else:
+                    password = internet_source.password
+                    
+                usr_pwd = str(user_name)+':'+str(password)
+                
                 logger.debug("              Url is %s.", internet_source.url)
                 logger.debug("              usr/pwd is %s.", usr_pwd)
                 logger.debug("              regex   is %s.", internet_source.include_files_expression)

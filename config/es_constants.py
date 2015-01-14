@@ -15,7 +15,7 @@
 #   This module will be be imported by any other (instead of locals.py -> to be discontinued)
 #
 import os
-#import locals
+import locals
 from osgeo import gdalconst
 
 # Get base dir
@@ -52,8 +52,8 @@ base_tmp_dir = os.path.sep+'tmp'+os.path.sep+'eStation2'+os.path.sep    ## User 
 # Data paths (temp)
 data_dir =  '/data/'                                            ## User Defined !
 
-eumetcast_files_dir = data_dir+'my_eumetcast_dir/'              ## User Defined !
-ingest_server_in_dir = data_dir+'my_data_ingest_dir/'           ## User Defined !
+eumetcast_files_dir = '/eumetcast/'              ## User Defined !
+ingest_server_in_dir = '/data/ingest/'           ## User Defined !
 
 template_mapfile = apps_dir+'analysis/MAP_main.map'
 
