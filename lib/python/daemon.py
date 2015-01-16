@@ -3,7 +3,8 @@
 import sys, os, time, atexit
 import psutil
 from signal import SIGTERM
-
+from lib.python import es_logging as log
+logger = log.my_logger(__name__)
 
 class Daemon:
     """
@@ -48,7 +49,7 @@ class Daemon:
             sys.exit(1)
 
         # Now I am a daemon!
-
+        logger.debug("Daemon created")
         # redirect standard file descriptors
         sys.stdout.flush()
         sys.stderr.flush()
@@ -58,6 +59,7 @@ class Daemon:
         os.dup2(si.fileno(), sys.stdin.fileno())
         os.dup2(so.fileno(), sys.stdout.fileno())
         os.dup2(se.fileno(), sys.stderr.fileno())
+        logger.debug("Outputs redirected")
 
         # write pidfile
         atexit.register(self.delpid)
