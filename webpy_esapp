@@ -52,6 +52,7 @@ urls = (
     "/systemsettings/reset", "ResetSystemSettings",
 
     "/processing", "Processing",
+    "/processing/update", "UpdateProcessing",
 
     "/datasets", "DataSets",
 
@@ -382,6 +383,25 @@ class Processing:
         return datamanagement_json
 
 
+class UpdateProcessing:
+    def __init__(self):
+        self.lang = "en"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def PUT(self):
+        getparams = json.loads(web.data())
+        processinfo = {'process_id': getparams['products']['process_id'],
+                       'process_defined_by': getparams['products']['process_defined_by'],
+                       'activated': getparams['products']['activated']}
+
+        if self.crud_db.update('processing', processinfo):
+            updatestatus = '{"success":true, "message":"Process updated!"}'
+        else:
+            updatestatus = '{"success":false, "message":"An error occured while updating the process!"}'
+
+        return updatestatus
+
+
 class DataSets:
     def __init__(self):
         self.lang = "en"
@@ -501,7 +521,7 @@ class ExecuteServiceTask:
 class UpdateProduct:
     def __init__(self):
         self.lang = "en"
-        self.crud_db = crud.CrudDB(schema=es_constants.dbglobals['schema_products'])
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
 
     def PUT(self):
         getparams = json.loads(web.data())
@@ -523,7 +543,7 @@ class UpdateProduct:
 class UpdateDataAcquisition:
     def __init__(self):
         self.lang = "en"
-        self.crud_db = crud.CrudDB(schema=es_constants.dbglobals['schema_products'])
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
 
     def PUT(self):
         getparams = json.loads(web.data())
@@ -545,10 +565,10 @@ class UpdateDataAcquisition:
 class UpdateIngestion:
     def __init__(self):
         self.lang = "en"
-        self.crud_db = crud.CrudDB(schema=es_constants.dbglobals['schema_products'])
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
 
     def PUT(self):
-        #return web.ctx
+        # return web.ctx
         getparams = json.loads(web.data())
         ingestioninfo = {'productcode': getparams['ingestions']['productcode'],
                          'subproductcode': getparams['ingestions']['subproductcode'],

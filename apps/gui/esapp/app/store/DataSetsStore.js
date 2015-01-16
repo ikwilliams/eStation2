@@ -42,7 +42,7 @@ Ext.define('esapp.store.DataSetsStore', {
         listeners: {
             exception: function(proxy, response, operation){
                 Ext.MessageBox.show({
-                    title: 'REMOTE EXCEPTION',
+                    title: 'DATASETS STORE - REMOTE EXCEPTION',
                     msg: operation.getError(),
                     icon: Ext.MessageBox.ERROR,
                     buttons: Ext.Msg.OK

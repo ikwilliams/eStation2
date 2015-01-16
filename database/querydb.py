@@ -161,9 +161,9 @@ def get_ingestions(echo=False):
         s = s.alias('ingest')
         i = db.map(s, primary_key=[s.c.productID, i.c.subproductcode, i.c.mapsetcode])
 
-        #where = and_(i.c.activated)
-        #ingestions = i.filter(where).order_by(desc(i.productcode)).all()
-        ingestions = i.order_by(desc(i.productcode)).all()
+        where = and_(i.c.defined_by != 'Test_JRC')
+        ingestions = i.filter(where).order_by(desc(i.productcode)).all()
+        #ingestions = i.order_by(desc(i.productcode)).all()
 
         if echo:
             for row in ingestions:

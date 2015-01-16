@@ -40,7 +40,7 @@ Ext.define('esapp.store.IngestionsStore', {
         listeners: {
             exception: function(proxy, response, operation){
                 Ext.MessageBox.show({
-                    title: 'INGESTION - REMOTE EXCEPTION',
+                    title: 'INGESTION STORE - REMOTE EXCEPTION',
                     msg: operation.getError(),
                     icon: Ext.MessageBox.ERROR,
                     buttons: Ext.Msg.OK
