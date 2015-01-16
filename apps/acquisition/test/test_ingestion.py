@@ -7,8 +7,9 @@ from apps.acquisition import ingestion
 import unittest
 
 # Overwrite Dirs
-locals.es2globals['ingest_dir']=locals.es2globals['test_data_in_dir']
-locals.es2globals['data_dir']=locals.es2globals['test_data_out']
+locals.es2globals['ingest_dir'] = locals.es2globals['test_data_in_dir']
+locals.es2globals['data_dir'] = locals.es2globals['test_data_out']
+
 
 class TestIngestion(unittest.TestCase):
 

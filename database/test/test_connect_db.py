@@ -7,6 +7,7 @@ __author__ = "Jurriaan van 't Klooster"
 
 from database import connectdb
 
+
 class TestConnectDB(unittest.TestCase):
     def test_connection_sqlite(self):
 
@@ -16,7 +17,7 @@ class TestConnectDB(unittest.TestCase):
         connect_db = connectdb.ConnectDB()
         schema = ("%s." % connect_db.schema) if connect_db.schema else ""
 
-        self.assertEquals(schema,'')
+        self.assertEquals(schema, '')
 
     def test_connection_postgresql(self):
 
@@ -26,4 +27,4 @@ class TestConnectDB(unittest.TestCase):
         connect_db = connectdb.ConnectDB()
         schema = ("%s." % connect_db.schema) if connect_db.schema else ""
 
-        self.assertEquals(schema,'products.')
+        self.assertEquals(schema, 'products.')

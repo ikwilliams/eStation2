@@ -11,12 +11,12 @@ if not cur_dir in sys.path:
     sys.path.append(cur_dir)
 
 import web
-import locals
 import datetime
 import json
 import re
 
 from config import es_constants
+#import locals
 from database import querydb
 from database import crud
 
@@ -47,6 +47,10 @@ urls = (
     "/dataacquisition", "DataAcquisition",
     "/dataacquisition/update", "UpdateDataAcquisition",
 
+    "/systemsettings", "SystemSettings",
+    "/systemsettings/update", "UpdateSystemSettings",
+    "/systemsettings/reset", "ResetSystemSettings",
+
     "/processing", "Processing",
 
     "/datasets", "DataSets",
@@ -70,10 +74,103 @@ class EsApp:
     def GET(self):
         #return sys.path
         #return web.ctx
-        render = web.template.render(locals.es2globals['base_dir']+'/apps/gui/esapp')
+        render = web.template.render(es_constants.es2globals['base_dir']+'/apps/gui/esapp')
         return render.index()
         #getparam = web.input(lang=self.lang)
         #return render.index(getparam.lang)
+
+
+class ResetSystemSettings:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self):
+        import ConfigParser
+        configfilepath = es_constants.es2globals['config_dir']+'/es_constants.ini'
+        config = ConfigParser.ConfigParser()
+        config.read(['es_constants.ini', configfilepath])
+
+        for option in config.options('USER_SETTINGS'):
+            config.set('USER_SETTINGS', option, '')
+
+        # Writing our configuration file to 'example.cfg' - COMMENTS ARE NOT PRESERVED!
+        with open(configfilepath, 'wb') as configfile:
+            config.write(configfile)
+
+        updatestatus = '{"success":true, "message":"System settings reset to factory settings!"}'
+
+        return updatestatus
+
+
+class UpdateSystemSettings:
+    def __init__(self):
+        self.lang = "en"
+
+    def PUT(self):
+        import ConfigParser
+        configfilepath = es_constants.es2globals['config_dir']+'/es_constants.ini'
+        config = ConfigParser.ConfigParser()
+        config.read(['es_constants.ini', configfilepath])
+
+        getparams = json.loads(web.data())
+        for setting in getparams['systemsettings']:
+            if config.has_option('FACTORY_SETTINGS', setting) \
+               and config.get('FACTORY_SETTINGS', setting, 0) == getparams['systemsettings'][setting]:
+                config.set('USER_SETTINGS', setting, '')
+            elif config.has_option('USER_SETTINGS', setting):
+                config.set('USER_SETTINGS', setting, getparams['systemsettings'][setting])
+
+        # Writing our configuration file to 'example.cfg' - COMMENTS ARE NOT PRESERVED!
+        with open(configfilepath, 'wb') as configfile:
+            config.write(configfile)
+
+        updatestatus = '{"success":true, "message":"System settings updated!"}'
+
+        return updatestatus
+
+
+class SystemSettings:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self):
+        import ConfigParser
+        config = ConfigParser.ConfigParser()
+        config.read(['es_constants.ini', es_constants.es2globals['config_dir']+'/es_constants.ini'])
+
+        systemsettings = {}
+        usersettings = config.items('USER_SETTINGS')
+        for setting, value in usersettings:
+            if not value is None and value != "":
+                systemsettings[setting] = value
+            else:
+                systemsettings[setting] = config.get('FACTORY_SETTINGS', setting, 0)
+
+        #systemsettings = {'base_dir': '',
+        #                  'base_tmp_dir': '',
+        #                  'data_dir': '',
+        #                  'static_data_dir': '',
+        #                  'archive_dir': '',
+        #                  'ingest_dir': '',
+        #                  'eumetcast_files_dir': '',
+        #                  'ingest_server_in_dir': '',
+        #                  'host': '',
+        #                  'port': '',
+        #                  'dbuser': '',
+        #                  'dbpass': '',
+        #                  'dbname': ''}
+        systemsettings['id'] = 0
+        systemsettings_json = json.dumps(systemsettings,
+                                         ensure_ascii=False,
+                                         sort_keys=True,
+                                         indent=4,
+                                         separators=(', ', ': '))
+
+        systemsettings_json = '{"success":true, "systemsettings":'+systemsettings_json+'}'
+
+        #systemsettings_json = '{"success":false, "error":"No ingestions defined!"}'
+
+        return systemsettings_json
 
 
 class GetLayer:
@@ -98,8 +195,8 @@ class GetLayer:
         mapscript.msIO_installStdoutToBuffer()
 
         projlib = "/usr/share/proj/"
-        errorfile = es_constants.apps_dir+"analysis/ms_tmp/ms_errors.log"
-        imagepath = es_constants.apps_dir+"analysis/ms_tmp/"
+        errorfile = es_constants.apps_dir+"/analysis/ms_tmp/ms_errors.log"
+        imagepath = es_constants.apps_dir+"/analysis/ms_tmp/"
         productfile = '/data/processing/vgt_ndvi/WGS84_Africa_1km/tif/ndv/20130701_vgt_ndvi_ndv_WGS84_Africa_1km.tif'
 
         owsrequest = mapscript.OWSRequest()
@@ -214,12 +311,12 @@ class GetLayer:
                     style.color.setRGB(colors[0], colors[1], colors[2])
                     stepcount += 1
 
-        result_map_file = es_constants.apps_dir+'analysis/MAP_result.map'
+        result_map_file = es_constants.apps_dir+'/analysis/MAP_result.map'
         if os.path.isfile(result_map_file):
             os.remove(result_map_file)
         productmap.save(result_map_file)
         image = productmap.draw()
-        image.save(es_constants.apps_dir+'analysis/20130701_vgt_ndvi_ndv_WGS84_Africa_1km.png')
+        image.save(es_constants.apps_dir+'/analysis/20130701_vgt_ndvi_ndv_WGS84_Africa_1km.png')
 
 
         contents = productmap.OWSDispatch(owsrequest)
@@ -237,6 +334,13 @@ class Processing:
 
     def GET(self):
         db_proc_products = querydb.get_processingchains_input_products()
+
+        #   Todo JURVTK: on each call of a processing chain for a product, get the list of output (sub)products from the
+        #   Todo JURVTK: processing chain algorithm using processing_std_precip . get_subprods_std_precip () and loop
+        #   Todo JURVTK: this list to check the existance of the output product in the table product.process_product
+        #   Todo JURVTK: Insert the output product in the table product.process_product if no record exists.
+        #   Todo JURVTK:  Use: from apps . processing import processing_std_precip
+        #   Todo JURVTK:       brachet l1, l2 brachet = processing_std_precip . get_subprods_std_precip ()
 
         if db_proc_products.__len__() > 0:
             products_dict_all = []
@@ -400,7 +504,6 @@ class UpdateProduct:
         self.crud_db = crud.CrudDB(schema=es_constants.dbglobals['schema_products'])
 
     def PUT(self):
-        #return web.ctx
         getparams = json.loads(web.data())
         productinfo = {'productcode': getparams['products']['productcode'],
                        'subproductcode': getparams['products']['subproductcode'],
@@ -408,7 +511,7 @@ class UpdateProduct:
                        'product_type': getparams['products']['product_type'],
                        'defined_by': getparams['products']['defined_by'],
                        'activated': getparams['products']['activated']}
-        #print productinfo
+
         if self.crud_db.update('product', productinfo):
             updatestatus = '{"success":true, "message":"Product updated!"}'
         else:
@@ -423,7 +526,6 @@ class UpdateDataAcquisition:
         self.crud_db = crud.CrudDB(schema=es_constants.dbglobals['schema_products'])
 
     def PUT(self):
-        #return web.ctx
         getparams = json.loads(web.data())
         dataacquisitioninfo = {'productcode': getparams['dataacquisitions']['productcode'],
                                'subproductcode': getparams['dataacquisitions']['subproductcode'],
@@ -431,7 +533,7 @@ class UpdateDataAcquisition:
                                'data_source_id': getparams['dataacquisitions']['data_source_id'],
                                'defined_by': getparams['dataacquisitions']['defined_by'],
                                'activated': getparams['dataacquisitions']['activated']}
-        #print dataacquisitioninfo
+
         if self.crud_db.update('product_acquisition_data_source', dataacquisitioninfo):
             updatestatus = '{"success":true, "message":"Data source updated!"}'
         else:
@@ -559,7 +661,7 @@ class ProductAcquisition:
 
 class TemplatePage:
     def __init__(self):
-        self.render = web.template.render(locals.es2globals['base_dir']+'/templates/')
+        self.render = web.template.render(es_constants.es2globals['base_dir']+'/templates/')
 
     def GET(self):
         getInput=web.input(name="World")

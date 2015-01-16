@@ -9,7 +9,7 @@
 #   Arguments: dry_run -> if 1, read tables and report activity ONLY
 
 # Import local definitions
-import locals
+#import locals
 
 # Import standard modules
 import signal
@@ -38,6 +38,7 @@ output_dir = es_constants.ingest_server_in_dir
 user_def_sleep = es_constants.poll_frequency
 
 echo_query = False
+
 
 def find_files(directory, pattern):
     lst = []

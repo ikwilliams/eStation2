@@ -1,12 +1,12 @@
 # Import local definitions
-import locals
+#import locals
 
-outputfile='test.tif'
-dir='/tmp/eStation2/test_files/'
+outputfile = 'test.tif'
+testdir = '/tmp/eStation2/test_files/'
 # Tif Georeff
-file='chlor_a_merged.tif'
+testfile = 'chlor_a_merged.tif'
 # HDF4 non-georef
-file='0001_NDV.HDF'
+testfile = '0001_NDV.HDF'
 
 # Import third-party modules
 from osgeo.gdalconst import *
@@ -15,8 +15,8 @@ from osgeo import osr
 from lib.python import mapset
 from config import es_constants
 
-# Open the file
-orig_ds=gdal.Open(dir+file)
+# Open the testfile
+orig_ds = gdal.Open(testdir+testfile)
 
 # Get the Native mapset
 native_mapset = mapset.MapSet()
@@ -41,12 +41,12 @@ out_size_y = trg_mapset.size_y
 mem_driver = gdal.GetDriverByName('MEM')
 
 # Assign mapset to dataset in memory
-out_data_type_gdal=2
+out_data_type_gdal = 2
 mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
 mem_ds.SetGeoTransform(trg_mapset.geo_transform)
 mem_ds.SetProjection(out_cs.ExportToWkt())
 
 # Do the Re-projection
-orig_wkt =  orig_cs.ExportToWkt()
+orig_wkt = orig_cs.ExportToWkt()
 res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
                                       es_constants.ES2_OUTFILE_INTERP_METHOD)

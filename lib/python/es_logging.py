@@ -7,7 +7,8 @@
 #			 Maximum length of the file/backup files are also managed. 
 #	history: 1.0 
 #
-import locals
+#import locals
+from config import es_constants
 
 try:
     import os, stat, glob, logging, logging.handlers
@@ -15,14 +16,14 @@ except ImportError:
     print 'Error in importing module ! Exit'
     exit(1)
 
-# Get base dir
+# Get log_dir
 try:
-    base_dir = locals.es2globals['base_dir']
+    log_dir = es_constants.es2globals['log_dir']
 except EnvironmentError:
-    print 'Error - basedir not defined in locals.  Exit'
+    print 'Error - log_dir not defined in es_constants.  Exit'
     exit(1)
 
-log_dir = base_dir+'log/'
+#log_dir = base_dir+'/log/'
 
 
 #class GroupWriteRotatingFileHandler(logging.handlers.RotatingFileHandler):

@@ -161,6 +161,11 @@ Ext.define('esapp.view.main.Main', {
                 title: 'System',
                 xtype:'container',
                 autoScroll: true,
+                layout : 'center',
+	            items: [{
+                   xtype  : 'systemsettings',
+                   id:'systemsettings'
+                }],
                 listeners: {
                    activate: function (analisistab) {
                         var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];

@@ -38,6 +38,8 @@ Ext.define('esapp.Application', {
         'datamanagement.ProductMapSet',
         'datamanagement.MapSetDataSet',
 
+        'system.systemsettings',
+
         'widgets.datasetCompletenessChart',
 
         'analysis.analysisMain'
@@ -55,6 +57,7 @@ Ext.define('esapp.Application', {
         ,'IngestionsStore'
         ,'DataSetsStore'
         ,'ProcessingStore'
+        ,'SystemSettingsStore'
     ],
 
 //    onBeforeLaunch: function () {

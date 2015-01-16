@@ -1,6 +1,6 @@
 _author__ = "Jurriaan van 't Klooster"
 
-import locals
+#import locals
 import os, time
 from config import es_constants
 from apps.acquisition import ingestion
@@ -10,8 +10,8 @@ logger = log.my_logger(__name__)
 
 # Manual Switch for START/STOP
 do_start = True
-dry_run  = False
-service  = False
+dry_run = False
+service = False
 
 if service:
     # Make sure the pid dir exists

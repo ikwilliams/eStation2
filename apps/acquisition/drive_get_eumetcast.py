@@ -1,6 +1,6 @@
 _author__ = "Marco Clerici"
 
-import locals
+#import locals
 import os, time
 from config import es_constants
 from apps.acquisition import get_eumetcast
@@ -11,7 +11,7 @@ logger = log.my_logger(__name__)
 # Manual Switch for START/STOP
 do_start = False
 dry_run = True
-service  = False
+service = False
 
 if service:
     # Make sure the pid dir exists

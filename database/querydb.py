@@ -728,7 +728,7 @@ def get_eumetcast_sources(echo=False):
         # e.g. es.c.filter_expression_jrc
         eumetcast_sources = session.query(pads, es.c.eumetcast_id, es.c.filter_expression_jrc).\
             outerjoin(es, pads.data_source_id == es.c.eumetcast_id).\
-            filter(and_(pads.type == 'EUMETCAST', pads.activated is True)).all()
+            filter(and_(pads.type == 'EUMETCAST', pads.activated)).all()
 
         if echo:
             for row in eumetcast_sources:

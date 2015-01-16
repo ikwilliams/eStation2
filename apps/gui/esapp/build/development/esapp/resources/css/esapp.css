@@ -1,4 +1,4 @@
-.6f230e6da2ec3c5669e254fb28cf798ced5a468a{display:block;}
+.a5a12d1f8adf85dbbaf9a0473119a8b5d8549fcb{display:block;}
 p {
     margin:5px;
 }
@@ -33,6 +33,13 @@ p {
     background-color: #FFF;
 }
 
+.icon-disk {
+	background-image:url(../img/icons/disk.png) ! important;
+}
+
+.apply_globals-icon {
+    background-image:url(../img/icons/world_go.png) !important;
+}
 
 
 @font-face {

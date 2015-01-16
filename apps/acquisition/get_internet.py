@@ -15,6 +15,7 @@ import StringIO
 import cStringIO
 import tempfile
 import sys
+import os
 import re
 import datetime
 
@@ -22,7 +23,7 @@ from time import sleep
 
 # Import eStation2 modules
 from lib.python import es_logging as log
-from config.es_constants import *
+from config import es_constants
 from database import querydb
 from lib.python import functions
 
@@ -33,11 +34,11 @@ logger = log.my_logger(__name__)
 #   General definitions
 c = pycurl.Curl()
 buffer = StringIO.StringIO()
-if not os.path.isdir(locals.es2globals['temp_dir']):
-    os.makedirs(locals.es2globals['temp_dir'])
-tmpdir = tempfile.mkdtemp(prefix=__name__, dir=locals.es2globals['temp_dir'])
+if not os.path.isdir(locals.es2globals['base_tmp_dir']):
+    os.makedirs(locals.es2globals['base_tmp_dir'])
+tmpdir = tempfile.mkdtemp(prefix=__name__, dir=locals.es2globals['base_tmp_dir'])
 echo_query = False
-user_def_sleep = poll_frequency
+user_def_sleep = es_constants.es2globals['poll_frequency']
 
 #   ---------------------------------------------------------------------------
 #   Functions
@@ -215,6 +216,7 @@ def get_list_matching_files_subdir_local(list, local_dir, regex, level, max_leve
 
     return 0
 
+
 ######################################################################################
 #   get_file_from_url
 #   Purpose: download and save locally a file
@@ -227,7 +229,7 @@ def get_list_matching_files_subdir_local(list, local_dir, regex, level, max_leve
 def get_file_from_url(remote_url_file, target_file=None, target_dir=None, userpwd=''):
 
     if target_dir is None:
-        tmpdir = tempfile.mkdtemp(prefix=__name__, dir=locals.es2globals['temp_dir'])
+        tmpdir = tempfile.mkdtemp(prefix=__name__, dir=locals.es2globals['base_tmp_dir'])
     else:
         tmpdir = target_dir
 
@@ -248,32 +250,33 @@ def get_file_from_url(remote_url_file, target_file=None, target_dir=None, userpw
 
     return target_fullpath
 
+
 #   Target dir is created as 'tmpdir' if not passed
 #   Full pathname is returned (or positive number for error)
-
 def get_dir_contents_from_url(remote_url_dir, target_file=None, target_dir=None, userpwd=''):
 
     if target_dir is None:
-        tmpdir = tempfile.mkdtemp(prefix=__name__, dir=locals.es2globals['temp_dir'])
+        tmpdir = tempfile.mkdtemp(prefix=__name__, dir=locals.es2globals['base_tmp_dir'])
     else:
         tmpdir = target_dir
 
     if target_file is None:
-        target_file='test_output_file'
+        target_file = 'test_output_file'
 
     target_fullpath=tmpdir+os.sep+target_file
 
-    outputfile=open(target_fullpath, 'wb')
+    outputfile = open(target_fullpath, 'wb')
     logger.debug('Output File: '+target_fullpath)
 
-    c.setopt(c.URL,remote_url_dir)
-    c.setopt(c.WRITEFUNCTION,outputfile.write)
+    c.setopt(c.URL, remote_url_dir)
+    c.setopt(c.WRITEFUNCTION, outputfile.write)
     if userpwd is not '':
-        c.setopt(c.USERPWD,userpwd)
+        c.setopt(c.USERPWD, userpwd)
     c.perform()
     outputfile.close()
 
     return target_fullpath
+
 
 ######################################################################################
 #   drive_get_internet
@@ -282,7 +285,6 @@ def get_dir_contents_from_url(remote_url_dir, target_file=None, target_dir=None,
 #   Date: 2014/09/01
 #   Inputs: none
 #   Arguments: dry_run -> if 1, read tables and report activity ONLY
-
 def loop_get_internet(dry_run=False):
 
     global processed_list_filename, processed_list

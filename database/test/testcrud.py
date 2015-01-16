@@ -6,7 +6,7 @@ import unittest
 from config import es_constants
 from database import crud
 
-crud_db = crud.CrudDB(schema=es_constants.dbglobals['schema_products'])
+crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
 
 
 class TestCrud(unittest.TestCase):

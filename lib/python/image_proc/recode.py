@@ -7,7 +7,7 @@
 #   TODO-M.C.: optimize (replace loops)
 
 # source eStation2 base definitions
-import locals
+#import locals
 
 # Import standard modules
 import sys
