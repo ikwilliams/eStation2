@@ -36,7 +36,8 @@ from osgeo import osr
 logger = log.my_logger(__name__)
 
 ingest_dir_in = locals.es2globals['ingest_dir']
-data_dir_out= locals.es2globals['data_dir']
+data_dir_out = locals.es2globals['data_dir']
+
 
 def loop_ingestion(dry_run=False):
 
@@ -153,8 +154,9 @@ def loop_ingestion(dry_run=False):
                         time.sleep(10)
 
         # Wait at the end of the loop
-        logger.info("Entering sleep time of  %s seconds" % str(10) )
+        logger.info("Entering sleep time of  %s seconds" % str(10))
         time.sleep(10)
+
 
 def ingestion(input_files, in_date, product, subproducts, datasource_descr, echo_query=False):
 #   Manages ingestion of 1/more file/files for a given date
@@ -173,7 +175,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, echo
 
     logger.info("Entering routine %s for prod: %s and date: %s" % ('ingestion', product['productcode'], in_date))
 
-    preproc_type =  datasource_descr.preproc_type
+    preproc_type = datasource_descr.preproc_type
     native_mapset_code = datasource_descr.native_mapset
 
     do_preprocess = 0
@@ -189,6 +191,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, echo
 
     ingest_file(composed_file_list, in_date, product, subproducts, datasource_descr, in_files=input_files,
                 echo_query=echo_query)
+
 
 def pre_process_msg_mpe (subproducts, tmpdir , input_files):
 # -------------------------------------------------------------------------------------------------------
@@ -232,6 +235,7 @@ def pre_process_msg_mpe (subproducts, tmpdir , input_files):
         pre_processed_list.append(out_tmp_tiff_file)
 
     return pre_processed_list
+
 
 def pre_process_modis_hdf4_tile (subproducts, tmpdir , input_files):
 # -------------------------------------------------------------------------------------------------------
@@ -290,7 +294,8 @@ def pre_process_modis_hdf4_tile (subproducts, tmpdir , input_files):
 
     return pre_processed_list
 
-def pre_process_lsasaf_hdf5 (subproducts, tmpdir , input_files):
+
+def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process LSASAF HDF5 files
 #
@@ -368,7 +373,8 @@ def pre_process_lsasaf_hdf5 (subproducts, tmpdir , input_files):
 
     return pre_processed_files
 
-def pre_process_pml_netcdf (subproducts, tmpdir , input_files):
+
+def pre_process_pml_netcdf(subproducts, tmpdir , input_files):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process PML NETCDF files
 #
@@ -431,8 +437,7 @@ def pre_process_pml_netcdf (subproducts, tmpdir , input_files):
                 sds_tmp = None
                 geotiff_files.append(myfile_path)
 
-
-#        # Merge temporary geotiff to a single one
+        # Merge temporary geotiff to a single one
 
     # Loop over the subproducts extracted and do the merging.
     for sprod in subproducts:
@@ -453,7 +458,8 @@ def pre_process_pml_netcdf (subproducts, tmpdir , input_files):
 
     return pre_processed_list
 
-def pre_process_unzip (subproducts, tmpdir , input_files):
+
+def pre_process_unzip(subproducts, tmpdir , input_files):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process ZIPPED files
 #
@@ -503,6 +509,7 @@ def pre_process_unzip (subproducts, tmpdir , input_files):
 
     return out_tmp_gtiff_file
 
+
 def pre_process_bzip2 (subproducts, tmpdir, input_files):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process bzip2 files
@@ -510,7 +517,7 @@ def pre_process_bzip2 (subproducts, tmpdir, input_files):
     interm_files_list = []
 
     # Make sure it is a list (if only a string is returned, it loops over chars)
-    if isinstance(input_files,list):
+    if isinstance(input_files, list):
         list_input_files = input_files
     else:
         list_input_files = []
@@ -534,7 +541,8 @@ def pre_process_bzip2 (subproducts, tmpdir, input_files):
 
     return interm_files_list
 
-def pre_process_bz2_hdf4 (subproducts, tmpdir, input_files):
+
+def pre_process_bz2_hdf4(subproducts, tmpdir, input_files):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process HDF4 files bz2 zipped
 #   First unzips, then extract relevant subdatasets
@@ -549,7 +557,7 @@ def pre_process_bz2_hdf4 (subproducts, tmpdir, input_files):
             list_to_extr.append(sprod['re_extract'])
 
     # Make sure input is a list (if only a string is received, it loops over chars)
-    if isinstance(input_files,list):
+    if isinstance(input_files, list):
         list_input_files = input_files
     else:
         list_input_files = []
@@ -586,7 +594,8 @@ def pre_process_bz2_hdf4 (subproducts, tmpdir, input_files):
 
     return interm_files_list
 
-def pre_process_georef_netcdf (subproducts, native_mapset_code, tmpdir, input_files):
+
+def pre_process_georef_netcdf(subproducts, native_mapset_code, tmpdir, input_files):
 # -------------------------------------------------------------------------------------------------------
 #   Convert netcdf to GTIFF (and assign geo-referencing)
 #   This is treated as a special case, being not possible to 'update' geo-ref info in the netcdf
@@ -595,7 +604,7 @@ def pre_process_georef_netcdf (subproducts, native_mapset_code, tmpdir, input_fi
     interm_files_list = []
 
     # Make sure input is a list (if only a string is received, it loops over chars)
-    if isinstance(input_files,list):
+    if isinstance(input_files, list):
         list_input_files = input_files
     else:
         list_input_files = []
@@ -608,14 +617,15 @@ def pre_process_georef_netcdf (subproducts, native_mapset_code, tmpdir, input_fi
     # Convert netcdf to GTIFF
     for subproduct in subproducts:
         for input_file in list_input_files:
-            outputfile = tmpdir + os.path.sep +  os.path.basename(input_file) + '_' + '.tif'
+            outputfile = tmpdir + os.path.sep + os.path.basename(input_file) + '_' + '.tif'
             dataset = gdal.Open(input_file)
             write_ds_and_mapset_to_geotiff(dataset, native_mapset, outputfile)
             interm_files_list.append(outputfile)
 
     return interm_files_list
 
-def pre_process_hdf5_zip (subproducts, tmpdir, input_files):
+
+def pre_process_hdf5_zip(subproducts, tmpdir, input_files):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process HDF5 zipped files (e.g. g2_biopar products)
 #   Only one zipped file is expected, containing more files (.h5, .xls, .txt, .xml, ..)
@@ -632,7 +642,7 @@ def pre_process_hdf5_zip (subproducts, tmpdir, input_files):
             sds_to_process.append(sprod['re_process'])
 
     # Make sure input is a list (if only a string is received, it loops over chars)
-    if isinstance(input_files,list):
+    if isinstance(input_files, list):
         list_input_files = input_files
     else:
         list_input_files = []
@@ -678,8 +688,8 @@ def pre_process_hdf5_zip (subproducts, tmpdir, input_files):
         for output_sds in sds_to_process:
             for subdataset in sdslist:
                 id_subdataset = subdataset.split(':')[-1]
-                id_subdataset=id_subdataset.replace('/','')
-                if id_subdataset==output_sds:
+                id_subdataset = id_subdataset.replace('/', '')
+                if id_subdataset == output_sds:
                     outputfile = tmpdir + os.path.sep + filename + "_" + id_subdataset + '.tif'
                     sds_tmp = gdal.Open(subdataset)
                     write_ds_to_geotiff(sds_tmp, outputfile)
@@ -768,7 +778,7 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 
 
     # Make sure it is a list (if only a string is returned, it loops over chars)
-    if isinstance(interm_files,list):
+    if isinstance(interm_files, list):
         list_interm_files = interm_files
     else:
         list_interm_files = []
@@ -809,6 +819,7 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 
     return list_interm_files
 
+
 def ingest_file(interm_files_list, in_date, product, subproducts, datasource_descr, in_files='', echo_query=False):
 # -------------------------------------------------------------------------------------------------------
 #   Ingest one or more files (a file for each subproduct)
@@ -832,9 +843,8 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 #         'target_mapset": comes from table 'ingestion' ('mapsetcode')
 #                          MUST be specified.
 
-
     # TODO-M.C.: manage version
-    version_undef='undefined'
+    version_undef = 'undefined'
     logger.info("Entering routine %s for product %s - date %s" % ('ingest_file', product['productcode'], in_date))
 
     # Test the file/files exists
@@ -944,8 +954,11 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         mapset_id = subproducts[ii]['mapsetcode']
 
         # Define output directory and make sure it exists
-        output_directory = data_dir_out+ functions.set_path_sub_directory(product['productcode'],subproducts[ii]['subproduct'],
-                                                                'Ingest', version_undef, mapset_id)
+        output_directory = data_dir_out + functions.set_path_sub_directory(product['productcode'],
+                                                                           subproducts[ii]['subproduct'],
+                                                                           'Ingest',
+                                                                           version_undef,
+                                                                           mapset_id)
         logger.debug('Output Directory is: %s' % output_directory)
         try:
             if not os.path.exists(output_directory):
@@ -956,10 +969,10 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         # Define output filename
         output_filename = output_directory + functions.set_path_filename(output_date_str,
-                                                               product['productcode'],
-                                                               subproducts[ii]['subproduct'],
-                                                               mapset_id,
-                                                               '.tif')
+                                                                         product['productcode'],
+                                                                         subproducts[ii]['subproduct'],
+                                                                         mapset_id,
+                                                                         '.tif')
 
         # -------------------------------------------------------------------------
         # Manage the geo-referencing associated to input file
@@ -993,7 +1006,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
 
         # TODO-M.C.: add a test on the mapset id in DB table !
-        trg_mapset=mapset.MapSet()
+        trg_mapset = mapset.MapSet()
         trg_mapset.assigndb(mapset_id)
         logger.debug('Target Mapset is: %s' % mapset_id)
         native_mapset_code = datasource_descr.native_mapset
@@ -1026,7 +1039,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             mem_ds.SetProjection(out_cs.ExportToWkt())
 
             # Apply Reproject-Image to the memory-driver
-            orig_wkt =  orig_cs.ExportToWkt()
+            orig_wkt = orig_cs.ExportToWkt()
             res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
                                       es_constants.ES2_OUTFILE_INTERP_METHOD)
 
@@ -1122,6 +1135,7 @@ def write_ds_to_geotiff(dataset, output_file):
     output_ds = None
     dataset = None
 
+
 def write_ds_and_mapset_to_geotiff(dataset, mapset, output_file):
 #
 #   Writes to geotiff file an osgeo.gdal.Dataset object
@@ -1154,6 +1168,7 @@ def write_ds_and_mapset_to_geotiff(dataset, mapset, output_file):
 
     output_ds = None
     dataset = None
+
 
 def mosaic_lsasaf_msg(in_files, output_file, format):
 #
@@ -1316,6 +1331,7 @@ def rescale_data(in_data,
 
     return trg_data
 
+
 #
 #   Converts the string data type to numpy types
 #   type: data type in wkt-estation format (inherited from 1.X)
@@ -1340,6 +1356,7 @@ def conv_data_type_to_numpy(type):
         return 'complex64'
     else:
         return 'int16'
+
 
 #
 #   Converts the string data type to GDAL types

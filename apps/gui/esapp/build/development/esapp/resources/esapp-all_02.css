@@ -1,0 +1,69 @@
+.x-legend.x-docked-left .x-legend-item:first-child, .x-legend.x-docked-right .x-legend-item:first-child, .x-legend-panel.x-docked-left .x-legend-item:first-child, .x-legend-panel.x-docked-right .x-legend-item:first-child {
+  border-top: none;
+}
+/* line 127, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
+.x-legend.x-docked-left .x-legend-inner, .x-legend.x-docked-right .x-legend-inner, .x-legend-panel.x-docked-left .x-legend-inner, .x-legend-panel.x-docked-right .x-legend-inner {
+  display: -webkit-box;
+  -webkit-box-align: center;
+  -webkit-box-pack: center;
+}
+
+/* line 135, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
+.x-legend.x-horizontal {
+  white-space: nowrap;
+}
+/* line 137, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
+.x-legend.x-horizontal .x-legend-item {
+  display: inline-block;
+}
+
+/* line 142, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
+.x-chart-toolbar {
+  position: absolute;
+  z-index: 9;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-box;
+  display: box;
+  padding: .6em;
+}
+/* line 148, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
+.x-chart-toolbar .x-button {
+  margin: .2em;
+}
+/* line 152, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
+.x-chart-toolbar[data-side=left], .x-chart-toolbar[data-side=right] {
+  top: 0;
+  -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  -ms-box-orient: vertical;
+  box-orient: vertical;
+}
+/* line 157, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
+.x-chart-toolbar[data-side=left] {
+  left: 0;
+}
+/* line 161, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
+.x-chart-toolbar[data-side=right] {
+  right: 0;
+}
+/* line 165, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
+.x-chart-toolbar[data-side=top], .x-chart-toolbar[data-side=bottom] {
+  -webkit-box-orient: horizontal;
+  -moz-box-orient: horizontal;
+  -ms-box-orient: horizontal;
+  box-orient: horizontal;
+  right: 0;
+}
+/* line 170, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
+.x-chart-toolbar[data-side=top] {
+  top: 0;
+}
+/* line 174, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
+.x-chart-toolbar[data-side=bottom] {
+  bottom: 0;
+  -webkit-box-orient: horizontal;
+  -moz-box-orient: horizontal;
+  -ms-box-orient: horizontal;
+  box-orient: horizontal;
+}

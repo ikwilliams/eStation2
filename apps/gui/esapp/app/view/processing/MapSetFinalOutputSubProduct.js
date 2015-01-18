@@ -47,23 +47,55 @@ Ext.define("esapp.view.processing.MapSetFinalOutputSubProduct",{
             header: '', // 'Sub Product Code',
             dataIndex: 'subproductcode',
             width: 180
-        },{
-            xtype: 'checkcolumn',
-            header: '', // Active
-            width: 65,
-            dataIndex: 'activated',
-            stopSelection: false,
-            hideable: true,
-            hidden: false,
-            disabled: false,
-            listeners: {
-              checkchange: function(chkBox, rowIndex, checked, eOpts){
-                  var myTitle = ""
-                  if (checked)  myTitle = "Activate Processing of Final SubProduct";
-                  else myTitle = "De-activate Processing of Final SubProduct";
-                  Ext.toast({ html: 'Checkbox clicked!', title: myTitle, width: 200, align: 't' });
-              }
-            }
+            },{
+                xtype: 'actioncolumn',
+                header: 'Active',
+                hideable: false,
+                hidden: false,
+                width: 65,
+                align: 'center',
+                shrinkWrap: 0,
+                items: [{
+                    // scope: me,
+                    // handler: me.onToggleActivation
+                    getClass: function(v, meta, rec) {
+                        if (rec.get('activated')) {
+                            return 'activated';
+                        } else {
+                            return 'deactivated';
+                        }
+                    },
+                    getTip: function(v, meta, rec) {
+                        if (rec.get('activated')) {
+                            return 'Deactivate Product';
+                        } else {
+                            return 'Activate Product';
+                        }
+                    },
+                    handler: function(grid, rowIndex, colIndex) {
+                        var rec = grid.getStore().getAt(rowIndex),
+                            action = (rec.get('activated') ? 'deactivated' : 'activated');
+                        Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
+                        rec.get('activated') ? rec.set('activated', false) : rec.set('activated', true);
+                    }
+                }]
+//        },{
+//            xtype: 'checkcolumn',
+//            header: '', // Active
+//            width: 65,
+//            dataIndex: 'activated',
+//            stopSelection: false,
+//            hideable: true,
+//            hidden: false,
+//            disabled: false,
+//            listeners: {
+//              checkchange: function(chkBox, rowIndex, checked, eOpts){
+//                  var myTitle = ""
+//                  if (checked)  myTitle = "Activate Processing of Final SubProduct";
+//                  else myTitle = "De-activate Processing of Final SubProduct";
+//                  Ext.toast({ html: 'Checkbox clicked!', title: myTitle, width: 200, align: 't' });
+//              }
+//            }
         }];
 
         me.callParent();

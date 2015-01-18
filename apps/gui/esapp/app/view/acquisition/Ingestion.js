@@ -159,7 +159,7 @@ Ext.define("esapp.view.acquisition.Ingestion",{
             xtype: 'actioncolumn',
             // header: 'Active',
             hideable: false,
-            hidden:false,
+            hidden: false,
             // disabled: true,
             // stopSelection: false,
             width: 65,

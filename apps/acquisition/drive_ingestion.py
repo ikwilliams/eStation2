@@ -1,6 +1,6 @@
 _author__ = "Jurriaan van 't Klooster"
 
-import locals
+#import locals
 import os, time
 from config import es_constants
 from apps.acquisition import ingestion

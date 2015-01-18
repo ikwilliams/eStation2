@@ -30,7 +30,7 @@ class ConnectDB(object):
         #                else -> connect to postgresql
 
         if getattr(ConnectDB, "_testing", None) is None:
-            setattr(ConnectDB, "_testing",locals.es2globals.get('db_test_mode' == 1)
+            setattr(ConnectDB, "_testing", locals.es2globals.get('db_test_mode' == 1)
                     or "nosetests" in sys.argv[0].lower())
         # Force through a global variable
         #if locals.es2globals.get('db_test_mode'):
@@ -55,13 +55,15 @@ class ConnectDB(object):
                 con.executescript(file(os.path.join(os.path.dirname(__file__), "fixtures", "sqlite.sql")).read())
                 con.close()
                 # Used in querydb
-                es_constants.dbglobals['schema_products'] = None
+                es_constants.es2globals['schema_products'] = None
             db_url = ConnectDB._db_url
         else:
-            db_url = "postgresql://%s:%s@%s/%s" % (es_constants.dbglobals['dbUser'],
-                                                   es_constants.dbglobals['dbPass'],
-                                                   es_constants.dbglobals['host'],
-                                                   es_constants.dbglobals['dbName'])
+            db_url = "postgresql://%s:%s@%s/%s" % (es_constants.es2globals['dbuser'],
+                                                   es_constants.es2globals['dbpass'],
+                                                   es_constants.es2globals['host'],
+                                                   es_constants.es2globals['dbname'])
+            logger.debug("Connect string: %s " % db_url)
+
         return db_url
 
     @staticmethod
@@ -72,7 +74,7 @@ class ConnectDB(object):
     def __init__(self, schema='products', usesqlsoup=True):
 
         try:
-            self.schema = schema or es_constants.dbglobals['schema_products']
+            self.schema = schema or es_constants.es2globals['schema_products']
             logger.debug("Usesqlsoup is: %s " % usesqlsoup)
             if usesqlsoup:
                 dburl = ConnectDB.get_db_url()

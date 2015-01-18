@@ -31,7 +31,7 @@ __author__ = 'clerima'
 #
 
 # source eStation2 base definitions
-import locals
+#import locals
 
 # import standard modules
 

@@ -121,8 +121,20 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
                     dismissDelay:2000,
                     style: 'background: #fff',
                     renderer: function (storeItem, item) {
-                        var period = item.series.getTitle()[Ext.Array.indexOf(item.series.getYField(), item.field)];
-                        this.setHtml(period);
+                        // console.info(item.series.getTitle());
+                        var allperiods = '';
+                        var arrayLength = item.series.getTitle().length;
+                        var thisperiodindex = Ext.Array.indexOf(item.series.getYField(), item.field);
+                        for (var i = 0; i < arrayLength; i++) {
+                            if (i == thisperiodindex) {
+                                allperiods = allperiods + '<b>'+item.series.getTitle()[thisperiodindex] + '</b></br>';
+                            }
+                            else {
+                                allperiods = allperiods + item.series.getTitle()[i] + '</br>';
+                            }
+                        }
+
+                        this.setHtml(allperiods);
                     }
                 }
             }]

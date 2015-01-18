@@ -1,6 +1,6 @@
 _author__ = "Marco Clerici"
 
-import locals
+#import locals
 import os, time
 from config import es_constants
 from apps.acquisition import get_internet

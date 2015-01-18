@@ -58,7 +58,7 @@ Ext.define("esapp.view.processing.ProductMapSet",{
                 var mapset_finaloutput_subproduct = record.getData().mapsetoutputproducts; //mapset_finaloutput_subproduct;
                 // console.info(mapset_finaloutput_subproduct);
                 var newstore = Ext.create('Ext.data.JsonStore', {
-                    model: 'MapSetDataSet',
+                    model: 'MapSetFinalOutputSubProducts',
                     data: mapset_finaloutput_subproduct
                 });
                 widget.setStore(newstore);

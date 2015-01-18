@@ -8,7 +8,7 @@
 #
 
 # source eStation2 base definitions
-import locals
+#import locals
 
 # Import eStation lib modules
 from database import querydb

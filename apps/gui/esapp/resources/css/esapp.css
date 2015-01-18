@@ -33,6 +33,13 @@ p {
     background-color: #FFF;
 }
 
+.icon-disk {
+	background-image:url(../img/icons/disk.png) ! important;
+}
+
+.apply_globals-icon {
+    background-image:url(../img/icons/world_go.png) !important;
+}
 
 
 @font-face {

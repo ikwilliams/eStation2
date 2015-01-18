@@ -1,6 +1,6 @@
 __author__ = "Jurriaan van 't Klooster"
 
-import locals
+#import locals
 import sys
 
 # Import eStation lib modules
@@ -18,7 +18,7 @@ class CrudDB(object):
 
     # Initialize the DB
     def __init__(self, schema='products', echo=False):
-        self.schema = schema or es_constants.dbglobals['schema_products']
+        self.schema = schema or es_constants.es2globals['schema_products']
         self.connect_db = connectdb.ConnectDB(schema=self.schema, usesqlsoup=False)
         db = self.connect_db.db
         db.echo = echo
