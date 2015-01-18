@@ -9,7 +9,7 @@ from lib.python import es_logging as log
 logger = log.my_logger(__name__)
 
 # Manual Switch for START/STOP
-do_start = False
+do_start = True
 dry_run = True
 service  = True
 
