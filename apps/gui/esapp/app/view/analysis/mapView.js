@@ -19,7 +19,7 @@ Ext.define("esapp.view.analysis.mapView",{
         type: 'fit'
     },
     width:500,
-    height:600,
+    height:500,
     minWidth:400,
     minHeight:400,
     // glyph : 'xf080@FontAwesome',

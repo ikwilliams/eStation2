@@ -15,7 +15,7 @@ from lib.python.daemon import DaemonDryRunnable
 #         Daemon.__init__(self, *args, **kwargs)
 #
 
-class IngestDaemon(DaemonDryRunnable):
+class IngestionDaemon(DaemonDryRunnable):
     def run(self):
         ingestion.loop_ingestion(dry_run=self.dry_run)
 

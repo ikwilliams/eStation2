@@ -470,8 +470,8 @@ class CheckStatusAllServices:
         dry_run = True
 
         ingest = "false"
-        pid_file = es_constants.ingest_pid_filename
-        ingest_daemon = acquisition.IngestDaemon(pid_file, dry_run=dry_run)
+        pid_file = es_constants.ingestion_pid_filename
+        ingest_daemon = acquisition.IngestionDaemon(pid_file, dry_run=dry_run)
         if ingest_daemon.status():
             ingest = "true"
 

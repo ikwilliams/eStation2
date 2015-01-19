@@ -297,14 +297,14 @@ def loop_get_internet(dry_run=False):
     logger.info("Starting retrieving data from INTERNET.")
 
     while True:
-        output_dir = ingest_server_in_dir
-        logger.debug("Check if the Ingest Server output directory : %s exists.", output_dir)
+        output_dir = es_constants.ingest_server_in_dir
+        logger.debug("Check if the Ingest Server input directory : %s exists.", output_dir)
         if not os.path.exists(output_dir):
-            logger.fatal("The Ingest Server output directory : %s doesn't exists.", output_dir)
+            logger.fatal("The Ingest Server input directory : %s doesn't exists.", output_dir)
             exit(1)
 
-        if not os.path.exists(processed_list_int_dir):
-            os.mkdir(processed_list_int_dir)
+        if not os.path.exists(es_constants.processed_list_int_dir):
+            os.mkdir(es_constants.processed_list_int_dir)
 
         while 1:
 
@@ -323,8 +323,8 @@ def loop_get_internet(dry_run=False):
             for internet_source in internet_sources_list:
                 logger.debug("Processing internet source  %s.", internet_source.descriptive_name)
 
-                processed_list_filename = get_internet_processed_list_prefix+str(internet_source.internet_id)+'.list'
-                processed_info_filename = get_internet_processed_list_prefix+str(internet_source.internet_id)+'.info'
+                processed_list_filename = es_constants.get_internet_processed_list_prefix+str(internet_source.internet_id)+'.list'
+                processed_info_filename = es_constants.get_internet_processed_list_prefix+str(internet_source.internet_id)+'.info'
 
                 # Create objects for list and info
                 processed_list = []

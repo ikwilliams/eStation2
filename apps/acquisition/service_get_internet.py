@@ -4,15 +4,15 @@ import locals
 import sys
 import os, time
 from config import es_constants
-from apps.acquisition import ingestion
+from apps.acquisition import get_internet
 from apps.acquisition import acquisition
 from lib.python import es_logging as log
 logger = log.my_logger(__name__)
 
 command=str(sys.argv[1])
 # Define pid file and create daemon
-pid_file = es_constants.ingestion_pid_filename
-daemon = acquisition.IngestionDaemon(pid_file, dry_run=1)
+pid_file = es_constants.get_internet_pid_filename
+daemon = acquisition.GetInternetDaemon(pid_file, dry_run=1)
 
 if command=="status":
         status=daemon.status()
@@ -23,3 +23,5 @@ if command=="start":
         
 if command=="stop":
         daemon.stop()
+
+

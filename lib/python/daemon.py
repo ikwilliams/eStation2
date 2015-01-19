@@ -5,6 +5,16 @@ import psutil
 from signal import SIGTERM
 from lib.python import es_logging as log
 logger = log.my_logger(__name__)
+from config import es_constants
+
+if not os.path.isdir(es_constants.pid_file_dir):
+        os.makedirs(es_constants.pid_file_dir)
+if not os.path.isdir(es_constants.processed_list_base_dir):
+        os.makedirs(es_constants.processed_list_base_dir)
+if not os.path.isdir(es_constants.processed_list_eum_dir):
+        os.makedirs(es_constants.processed_list_eum_dir)
+if not os.path.isdir(es_constants.processed_list_int_dir):
+        os.makedirs(es_constants.processed_list_int_dir)
 
 class Daemon:
     """
@@ -65,6 +75,7 @@ class Daemon:
         atexit.register(self.delpid)
         pid = str(os.getpid())
         file(self.pidfile, 'w+').write("%s\n" % pid)
+        logger.debug("Pid written")
 
     def delpid(self):
         os.remove(self.pidfile)
