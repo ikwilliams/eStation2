@@ -36,8 +36,8 @@ class TestGetInternet(unittest.TestCase):
         # Retrieve a list of MODIS burndate file .. check only one present
         remote_url='ftp://nrt1.modaps.eosdis.nasa.gov/FIRMS/Global'
         usr_pwd='jrcMondeFires:FIRE@data1'
-        full_regex   ='Global_MCD14DL_20142...txt'
-        file_to_check='Global_MCD14DL_2014260.txt'
+        full_regex   ='Global_MCD14DL_20143...txt'
+        file_to_check='Global_MCD14DL_2014350.txt'
 
         list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
 
@@ -62,7 +62,6 @@ class TestGetInternet(unittest.TestCase):
     #   Test iteration on remote ftp (e.g. VITO GL-GIO products)
     #   ---------------------------------------------------------------------------
     def TestRemoteFtp_CHIRP(self):
-
         # Retrieve a list of CHIRP
         remote_url='ftp://chg-ftpout.geog.ucsb.edu/pub/org/chg/products/CHIRP/pentads/'
         usr_pwd='anonymous:anonymous'
@@ -70,7 +69,6 @@ class TestGetInternet(unittest.TestCase):
         file_to_check='CHIRP.2014.09.3.tif'
 
         list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
-
         self.assertTrue(file_to_check in list)
 
     #   ---------------------------------------------------------------------------
@@ -82,7 +80,6 @@ class TestGetInternet(unittest.TestCase):
         remote_url='http://oceandata.sci.gsfc.nasa.gov/'
         UserPwd='anonymous:anonymous'
         filepath = get_dir_contents_from_url(remote_url, target_file=filename, userpwd=UserPwd)
-
         logger.info('File downloaded to: '+filepath)
         self.assertEqual(1,1)
 
@@ -90,14 +87,13 @@ class TestGetInternet(unittest.TestCase):
     #   Get contents of a directory (HTTP)  -> MODIS_SST_8D
     #   An html document is returned
     #   ---------------------------------------------------------------------------
-    def TestHttpDir(self):
-        filename=''
-        remote_url='http://oceandata.sci.gsfc.nasa.gov/'
-        UserPwd='anonymous:anonymous'
-        filepath = get_dir_contents_from_url(remote_url, target_file=filename, userpwd=UserPwd)
-
-        logger.info('File downloaded to: '+filepath)
-        self.assertEqual(1,1)
+    #def TestHttpDir(self):
+        #filename=''
+        #remote_url='http://oceandata.sci.gsfc.nasa.gov/'
+        #UserPwd='anonymous:anonymous'
+        #filepath = get_dir_contents_from_url(remote_url, target_file=filename, userpwd=UserPwd)
+        #logger.info('File downloaded to: '+filepath)
+        #self.assertEqual(1,1)
 
     #   ---------------------------------------------------------------------------
     #   Get contents of a directory (FTP)  -> MCD45A1_TIF_C51
@@ -108,25 +104,25 @@ class TestGetInternet(unittest.TestCase):
         remote_url='ftp://ba1.geog.umd.edu/'
         UserPwd='user:burnt_data'
         filepath = get_dir_contents_from_url(remote_url, target_file=filename, userpwd=UserPwd)
-
         logger.info('File downloaded to: '+filepath)
         self.assertEqual(1,1)
 
     #   ---------------------------------------------------------------------------
     #   Get a file from HTTP (list_from_template=TRUE, No User/psw) -> FEWSNET
     #   ---------------------------------------------------------------------------
-    def TestFewsnetFile(self):
+    def TestRemoteFtp_FEWSNET(self):
         filename='a14081rb.zip'
         remote_url='http://earlywarning.usgs.gov/ftp2/raster/rf/a/2014/'
         # filepath = get_file_from_url(remote_url+filename, target_file=filename)
         filepath = get_dir_contents_from_url(remote_url, target_file=filename)
+        print(filepath)
         logger.info('File downloaded to: '+filepath)
         self.assertEqual(1,1)
 
     #   ---------------------------------------------------------------------------
     #   Get a file from FTP (list_from_template=FALSE, User/psw) -> FIRMS_NASA
     #   ---------------------------------------------------------------------------
-    def TestFirmsFile(test):
+    def TestRemoteFtp_FIRMS(test):
         filename='Global_MCD14DL_2014237.txt'
         remote_url='ftp://nrt1.modaps.eosdis.nasa.gov/FIRMS/Global/'
         Username='jrcMondeFires'
