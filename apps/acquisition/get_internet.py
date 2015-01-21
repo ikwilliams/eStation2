@@ -29,8 +29,6 @@ from lib.python import functions
 
 logger = log.my_logger(__name__)
 
-#output_dir = ingest_server_in_dir
-
 #   General definitions
 c = pycurl.Curl()
 buffer = StringIO.StringIO()
@@ -149,6 +147,7 @@ def get_list_matching_files_subdir_ftp(list, remote_url, usr_pwd, full_regex, le
     max_level= len(re.findall("/",full_regex))
 
     my_list = get_list_current_subdirs_ftp(remote_url, usr_pwd)
+    logger.debug("Working on %s" % regex_my_level)
     for element in my_list:
         if re.match(regex_my_level,element) is not None:
             # Is it already the file ?
@@ -297,7 +296,7 @@ def loop_get_internet(dry_run=False):
     logger.info("Starting retrieving data from INTERNET.")
 
     while True:
-        output_dir = es_constants.ingest_server_in_dir
+        output_dir = es_constants.ingest_dir
         logger.debug("Check if the Ingest Server input directory : %s exists.", output_dir)
         if not os.path.exists(output_dir):
             logger.fatal("The Ingest Server input directory : %s doesn't exists.", output_dir)
@@ -376,7 +375,7 @@ def loop_get_internet(dry_run=False):
                                  logger.debug("Processing file: "+os.path.basename(filename))
                                  #try:
                                  target_file=filename
-                                 get_file_from_url(str(internet_source.url)+'/'+target_file, target_file=os.path.basename(target_file), target_dir=ingest_server_in_dir, userpwd=str(usr_pwd))
+                                 get_file_from_url(str(internet_source.url)+'/'+target_file, target_file=os.path.basename(target_file), target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
                                  logger.info("File %s copied.", filename)
                                  processed_list.append(os.path.basename(filename))
                                 #except:

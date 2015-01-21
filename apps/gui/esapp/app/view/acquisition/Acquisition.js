@@ -502,7 +502,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
     //            align: 'center'
             }]
         }, {
-            header:  '<div class="grid-header-style">Acquisition</div>',
+            header:  '<div class="grid-header-style">Get</div>',
             id:'acquisitioncolumn',
             menuDisabled: true,
             variableRowHeight : true,
