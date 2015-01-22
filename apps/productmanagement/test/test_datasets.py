@@ -194,10 +194,11 @@ class TestDatasets(unittest.TestCase):
 
     def test_with_xml(self):
         kwargs = self.kwargs.copy()
-        kwargs.update({'to_date': datetime.date(2014, 12, 31)})
+        kwargs.update({'from_date': datetime.date(2014, 1, 1),
+                       'to_date': datetime.date(2014, 12, 31)})
         dataset = Dataset(**kwargs)
         files_dekad = sorted(self.files_dekad[:])
         files_dekad = [files_dekad[0][:-3] + 'xml'] + files_dekad + [files_dekad[-1][:-3] + 'xml']
         dataset.get_filenames = lambda: files_dekad
-        number = dataset.get_number_files()
-        self.assertEquals(number, number)
+        completeness = dataset.get_dataset_normalized_info()
+        self.assertEquals(completeness['missingfiles'], 3)
