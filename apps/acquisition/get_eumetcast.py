@@ -34,7 +34,7 @@ logger = log.my_logger(__name__)
 
 # Defined in lib.python.es_constants.py
 input_dir = es_constants.eumetcast_files_dir
-output_dir = es_constants.ingest_server_in_dir
+output_dir = es_constants.ingest_dir
 user_def_sleep = es_constants.poll_frequency
 
 echo_query = False
