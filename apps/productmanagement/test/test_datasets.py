@@ -196,7 +196,8 @@ class TestDatasets(unittest.TestCase):
         kwargs = self.kwargs.copy()
         kwargs.update({'to_date': datetime.date(2014, 12, 31)})
         dataset = Dataset(**kwargs)
-        files_dekad = self.files_dekad[:] + [self.files_dekad[0][:-3] + 'xml']
+        files_dekad = sorted(self.files_dekad[:])
+        files_dekad = [files_dekad[0][:-3] + 'xml'] + files_dekad + [files_dekad[-1][:-3] + 'xml']
         dataset.get_filenames = lambda: files_dekad
         number = dataset.get_number_files()
         self.assertEquals(number, number)
