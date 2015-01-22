@@ -69,8 +69,8 @@ def get_legend_steps(legendid=None, echo=False):
         # Exit the script and log the error telling what happened.
         logger.error("get_legend_steps: Database query error!\n -> {}".format(exceptionvalue))
     finally:
-        if db.session:
-            db.session.close()
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
 
 
 ######################################################################################
@@ -128,8 +128,8 @@ def get_legend_info(legendid=None, echo=False):
         # Exit the script and log the error telling what happened.
         logger.error("get_legend_info: Database query error!\n -> {}".format(exceptionvalue))
     finally:
-        if db.session:
-            db.session.close()
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
 
 
 ######################################################################################
@@ -294,6 +294,36 @@ def get_products(echo=False, activated=None):
 
 
 ######################################################################################
+#   get_frequency(frequency_id='', echo=False)
+#   Purpose: Query the database to get the record of a specific frequency
+#            given its frequency_id, from the table frequency.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2015/01/22
+#   Input: frequency_id     - The frequency_id of the specific frequency info requested. Default=''
+#          echo             - If True echo the query result in the console for debugging purposes. Default=False
+#   Output: Return the fields of all or a specific product record with product_type='Native' from the table product.
+def get_frequency(frequency_id='', echo=False):
+    try:
+        #where = and_(db.frequency.frequency_id == frequency_id)
+        #frequency = db.frequency.filter(where).one()
+        frequency = db.frequency.get(frequency_id)
+
+        if echo:
+            print frequency
+
+        return frequency
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_frequency : Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
+######################################################################################
 #   get_product_out_info(allrecs=False, echo=False, productcode='', subproductcode='', version='undefined')
 #   Purpose: Query the database to get the records of all or a specific product from the table product
 #   Author: Jurriaan van 't Klooster
@@ -327,6 +357,9 @@ def get_product_out_info(allrecs=False, echo=False, productcode='', subproductco
         # Exit the script and print an error telling what happened.
         logger.error("get_product_out_info: Database query error!\n -> {}".format(exceptionvalue))
         #raise Exception("get_product_out_info: Database query error!\n ->%s" % exceptionvalue)
+    finally:
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################
@@ -370,6 +403,9 @@ def get_product_in_info(allrecs=False, echo=False,
         # Exit the script and print an error telling what happened.
         logger.error("get_product_out_info: Database query error!\n -> {}".format(exceptionvalue))
         #raise Exception("get_product_in_info: Database query error!\n ->%s" % exceptionvalue)
+    finally:
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################
@@ -407,6 +443,9 @@ def get_product_native(productcode='', version='undefined', allrecs=False, echo=
         # Exit the script and print an error telling what happened.
         logger.error("get_product_native : Database query error!\n -> {}".format(exceptionvalue))
         #raise Exception("get_product_native: Database query error!\n ->%s" % exceptionvalue)
+    finally:
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################
@@ -438,6 +477,9 @@ def get_subproduct(productcode='', version='undefined', subproductcode='', echo=
         # Exit the script and print an error telling what happened.
         logger.error("get_subproduct: Database query error!\n -> {}".format(exceptionvalue))
         #raise Exception("get_subproduct: Database query error!\n ->%s" % exceptionvalue)
+    finally:
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################
@@ -470,9 +512,9 @@ def get_eumetcast(source_id='', allrecs=False, echo=False):
         # Exit the script and print an error telling what happened.
         raise logger.error("get_eumetcast: Database query error!\n -> {}".format(exceptionvalue))
         #raise Exception("get_eumetcast: Database query error!\n ->%s" % exceptionvalue)
-    #finally:
-        #if session:
-        #    session.close()
+    finally:
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################
@@ -505,6 +547,9 @@ def get_internet(internet_id='', allrecs=False, echo=False):
         # Exit the script and print an error telling what happened.
         logger.error("get_internet: Database query error!\n -> {}".format(exceptionvalue))
         #raise Exception("get_internet: Database query error!\n ->%s" % exceptionvalue)
+    finally:
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################
@@ -540,6 +585,9 @@ def get_mapset(mapsetcode='', allrecs=False, echo=False):
         # Exit the script and print an error telling what happened.
         raise logger.error("get_mapset: Database query error!\n -> {}".format(exceptionvalue))
         #raise Exception("get_mapset: Database query error!\n ->%s" % exceptionvalue)
+    finally:
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################
@@ -590,6 +638,9 @@ def get_ingestion_product(allrecs=False, echo=False, productcode='', version='un
         # Exit the script and print an error telling what happened.
         logger.error("get_ingestion_product: Database query error!\n -> {}".format(exceptionvalue))
         #raise Exception("get_ingestion_product: Database query error!\n ->%s" % exceptionvalue)
+    finally:
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################
@@ -630,6 +681,9 @@ def get_ingestion_subproduct(allrecs=False, echo=False, productcode='', version=
         # Exit the script and print an error telling what happened.
         logger.error("get_ingestion_subproduct: Database query error!\n -> {}".format(exceptionvalue))
         #raise Exception("get_ingestion_subproduct: Database query error!\n ->%s" % exceptionvalue)
+    finally:
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################
@@ -667,6 +721,9 @@ def get_product_sources(echo=False, productcode='', subproductcode='', version='
         # Exit the script and print an error telling what happened.
         logger.error("get_product_sources: Database query error!\n -> {}".format(exceptionvalue))
         #raise Exception("get_product_sources: Database query error!\n ->%s" % exceptionvalue)
+    finally:
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################
@@ -706,6 +763,9 @@ def get_datasource_descr(echo=False, source_type='', source_id=''):
         # Exit the script and print an error telling what happened.
         logger.error("get_datasource_descr: Database query error!\n -> {}".format(exceptionvalue))
         #raise Exception("get_ingestion: Database query error!\n ->%s" % exceptionvalue)
+    finally:
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################
@@ -742,6 +802,9 @@ def get_eumetcast_sources(echo=False):
             print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_eumetcast_sources: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################
@@ -788,6 +851,9 @@ def get_active_internet_sources(echo=False):
             print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_internet_sources: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################
@@ -805,8 +871,6 @@ def get_active_internet_sources(echo=False):
 #   ON p.process_id = pin.process_id
 #
 def get_processing_chains(echo=False):
-
-    # logger.debug("Entering get_processing_chains")
 
     active_processing_chains = []
     try:
@@ -834,13 +898,15 @@ def get_processing_chains(echo=False):
 
         return active_processing_chains
 
-
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         if echo:
             print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_processing_chains: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################
@@ -914,6 +980,9 @@ def get_processingchains_input_products():
         #    print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_processingchains_input_products: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################
@@ -976,3 +1045,6 @@ def get_processingchain_output_products(process_id=None):
         #    print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_processingchain_output_products: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
