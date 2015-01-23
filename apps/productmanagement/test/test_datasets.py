@@ -134,6 +134,7 @@ class TestDatasets(unittest.TestCase):
     def test_product_only_month_year(self):
         kwargs = self.kwargs.copy()
         kwargs.update({
+            'from_date': datetime.date(2014, 1, 1),
             'to_date': datetime.date(2014, 11, 1),
             'product_code': "fewsnet_rfe",
             'sub_product_code': "1monmax",
@@ -182,11 +183,22 @@ class TestDatasets(unittest.TestCase):
     def test_get_dates(self):
         kwargs = self.kwargs.copy()
         dataset = Dataset(**kwargs)
+        dataset.get_filenames = lambda: self.files_dekad
         dates = dataset.get_dates()
         last = None
         for date in dates:
             if last:
                 self.assertTrue(last < date)
             last = date
-        self.assertEquals(len(dates), 160)
+        self.assertEquals(len(dates), 33)
 
+    def test_with_xml(self):
+        kwargs = self.kwargs.copy()
+        kwargs.update({'from_date': datetime.date(2014, 1, 1),
+                       'to_date': datetime.date(2014, 12, 31)})
+        dataset = Dataset(**kwargs)
+        files_dekad = sorted(self.files_dekad[:])
+        files_dekad = [files_dekad[0][:-3] + 'xml'] + files_dekad + [files_dekad[-1][:-3] + 'xml']
+        dataset.get_filenames = lambda: files_dekad
+        completeness = dataset.get_dataset_normalized_info()
+        self.assertEquals(completeness['missingfiles'], 3)
