@@ -16,7 +16,7 @@
 #
 
 # Source my definitions
-import locals
+from config import es_constants
 #
 import os
 
@@ -75,11 +75,13 @@ def create_pipeline(starting_sprod):
     #   Define input files
     in_prod_ident = functions.set_path_filename_no_date(prod, starting_sprod, mapset, ext)
 
-    input_dir = locals.es2globals['data_dir']+ \
+    input_dir = es_constants.processing_dir+ \
                 functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
 
     starting_files = input_dir+"*"+in_prod_ident
+    print input_dir
 
+    print starting_files
     #   ---------------------------------------------------------------------
     #   Average
     output_sprod="10davg"
@@ -446,11 +448,14 @@ def processing_fewsnet_rfe(pipeline_run_level=0,pipeline_run_touch_only=0, pipel
     create_pipeline(starting_sprod='rfe')
 
     list = pipeline_get_task_names()
+    print list
     logger.info("Entering routine %s" % 'processing_fewsnet_rfe')
     if pipeline_run_level > 0:
-         pipeline_run(verbose=pipeline_run_level, touch_files_only=pipeline_run_touch_only)
+        logger.info("Now calling pipeline_run")
+        pipeline_run(verbose=pipeline_run_level, touch_files_only=pipeline_run_touch_only)
     
     if pipeline_printout_level > 0:
+        
         pipeline_printout(verbose=pipeline_printout_level)
     
     if pipeline_printout_graph_level > 0:

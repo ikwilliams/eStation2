@@ -10,9 +10,9 @@ mapset='FEWSNET_Africa_8km'
 version='undefined'
 
 # General definitions/switches
-args = {'pipeline_run_level':0, \
+args = {'pipeline_run_level':1, \
         'pipeline_run_touch_only':0, \
-        'pipeline_printout_level':4, \
+        'pipeline_printout_level':0, \
         'pipeline_printout_graph_level':0}
 
 #from apps.processing.processing_std_precip import *
