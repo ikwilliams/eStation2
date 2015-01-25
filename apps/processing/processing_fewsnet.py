@@ -10,7 +10,6 @@
 #   TODO-M.C.test: Activate/deactivate according to DB settings
 #   TODO-M.C.test: Add a mechanism to extract/visualize the 'status' -> pipeline_printout(verbose=3)+grep-like function ?
 #   TODO-M.C.: create unittest-like functions for validating the chain
-#   TODO-M.C.: multiprocessing does not work -> VM issue ?
 #   TODO-M.C.test: add the Np anomalies
 #   TODO-M.C.test: find a robust method to solve the tuple/string issue in filename (fttb: return_as_element_of_list() ?)
 #   TODO-M.C.: add management of 'version' !!
@@ -38,8 +37,6 @@ from apps.processing.processing_switches import *
 from ruffus import *
 
 logger = log.my_logger(__name__)
-
-# Delete a file for re-creating
 
 #   General definitions for this processing chain
 prod="fewsnet_rfe"
@@ -449,13 +446,12 @@ def processing_fewsnet_rfe(pipeline_run_level=0,pipeline_run_touch_only=0, pipel
     create_pipeline(starting_sprod='rfe')
 
     list = pipeline_get_task_names()
-    print list
     logger.info("Entering routine %s" % 'processing_fewsnet_rfe')
-    # if pipeline_run_level > 0:
-    #     pipeline_run(verbose=pipeline_run_level, touch_files_only=pipeline_run_touch_only)
-    #
-    # if pipeline_printout_level > 0:
-    #     pipeline_printout(verbose=pipeline_printout_level)
-    #
-    # if pipeline_printout_graph_level > 0:
-    #     pipeline_printout_graph('flowchart.jpg')
+    if pipeline_run_level > 0:
+         pipeline_run(verbose=pipeline_run_level, touch_files_only=pipeline_run_touch_only)
+    
+    if pipeline_printout_level > 0:
+        pipeline_printout(verbose=pipeline_printout_level)
+    
+    if pipeline_printout_graph_level > 0:
+        pipeline_printout_graph('flowchart.jpg')
