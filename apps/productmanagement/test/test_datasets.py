@@ -135,7 +135,7 @@ class TestDatasets(unittest.TestCase):
         kwargs = self.kwargs.copy()
         kwargs.update({
             'from_date': datetime.date(2014, 1, 1),
-            'to_date': datetime.date(2014, 11, 1),
+            'to_date': datetime.date(2014, 12, 1),
             'product_code': "fewsnet_rfe",
             'sub_product_code': "1monmax",
             'mapset': 'WGS84_Africa_1km'
@@ -149,16 +149,16 @@ class TestDatasets(unittest.TestCase):
             "0601_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
             "0701_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
             "0801_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
-            "0901_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
-            "1001_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
-            "1101_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
-            "1201_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif"
+            "0901_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif"
+            # ,"1001_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif"
+            # ,"1101_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif"
+            # ,"1201_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif"
         ]
         dataset = Dataset(**kwargs)
         dataset.get_filenames = lambda: files
         completeness = dataset.get_dataset_normalized_info()
-        self.assertEquals(completeness['totfiles'], 11)
-        self.assertEquals(completeness['missingfiles'], 2)
+        self.assertEquals(completeness['totfiles'], 12)
+        self.assertEquals(completeness['missingfiles'], 3)
         current_date = datetime.date(2014, 1, 1)
         last_date = datetime.date(2015, 1, 1)
         for i in range(12):
