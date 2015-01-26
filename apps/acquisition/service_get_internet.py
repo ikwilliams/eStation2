@@ -12,7 +12,7 @@ logger = log.my_logger(__name__)
 command=str(sys.argv[1])
 # Define pid file and create daemon
 pid_file = es_constants.get_internet_pid_filename
-daemon = acquisition.GetInternetDaemon(pid_file, dry_run=1)
+daemon = acquisition.GetInternetDaemon(pid_file, dry_run=0)
 
 if command=="status":
         status=daemon.status()

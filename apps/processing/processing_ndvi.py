@@ -7,7 +7,7 @@
 #
 
 # source my definitions
-import locals
+from config import es_constants
 
 # Import std modules
 import glob
@@ -32,7 +32,7 @@ logger = log.my_logger(__name__)
 
 #   General definitions for this processing chain
 prod = "vgt_ndvi"
-mapset = 'WGS84_Africa_1km'
+mapset = 'WGS84_Sahel_1km'
 ext = '.tif'
 version = 'undefined'
 
@@ -129,8 +129,8 @@ activate_1monicn = 1
 starting_sprod = 'ndv'
 in_prod_ident = functions.set_path_filename_no_date(prod, starting_sprod, mapset, ext)
 
-logger.debug('Base data directory is: %s' % locals.es2globals['data_dir'])
-input_dir = locals.es2globals['data_dir']+ \
+logger.debug('Base data directory is: %s' % es_constants.processing_dir)
+input_dir = es_constants.processing_dir+ \
             functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
 
 logger.debug('Input data directory is: %s' % input_dir)
@@ -249,7 +249,7 @@ def generate_parameters_ndvi_linearx1():
         for file_t0 in input_files:
             # Get current date
             date_t0 = functions.get_date_from_path_full(file_t0)
-            output_file = locals.es2globals['data_dir']+subdir_linearx1+str(date_t0)+prod_ident_linearx1
+            output_file = es_constants.processing_dir+subdir_linearx1+str(date_t0)+prod_ident_linearx1
 
             # Get files at t-1 and t+1
             adjac_files = functions.files_temp_ajacent(file_t0)
@@ -279,7 +279,7 @@ subdir_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived'
 
 def generate_parameters_ndvi_linearx2():
 
-        wild_card_linearx1 = locals.es2globals['data_dir']+subdir_linearx1+'*'+prod_ident_linearx1
+        wild_card_linearx1 = es_constants.processing_dir+subdir_linearx1+'*'+prod_ident_linearx1
         #   Look for all input files in input_dir, and sort them
         input_files = glob.glob(wild_card_linearx1)
         input_files.sort()
@@ -287,7 +287,7 @@ def generate_parameters_ndvi_linearx2():
         for file_t0 in input_files:
             # Get current date
             date_t0 = functions.get_date_from_path_full(file_t0)
-            output_file = locals.es2globals['data_dir']+subdir_linearx2+str(date_t0)+prod_ident_linearx2
+            output_file = es_constants.processing_dir+subdir_linearx2+str(date_t0)+prod_ident_linearx2
 
             # Get files at t-1 and t+1
             adjac_files = functions.files_temp_ajacent(file_t0)
@@ -320,7 +320,7 @@ def vgt_ndvi_linearx2(input_files, output_file):
 input_subprod_linearx2 = "ndvi_linearx2"
 in_prod_ident_linearx2 = functions.set_path_filename_no_date(prod, input_subprod_linearx2, mapset, ext)
 
-input_dir_linearx2 = locals.es2globals['data_dir']+ \
+input_dir_linearx2 = es_constants.processing_dir+ \
                    functions.set_path_sub_directory(prod, input_subprod_linearx2, 'Derived', version, mapset)
 
 starting_files_linearx2 = input_dir_linearx2+"*"+in_prod_ident_linearx2
@@ -463,7 +463,7 @@ def vgt_ndvi_year_max_linearx2(input_file, output_file):
 input_subprod_year_min_linearx2 = "year_min_linearx2"
 in_prod_ident_year_min_linearx2 = functions.set_path_filename_no_date(prod, input_subprod_year_min_linearx2, mapset, ext)
 
-input_dir_year_min_linearx2 = locals.es2globals['data_dir']+ \
+input_dir_year_min_linearx2 = es_constants.processing_dir+ \
                    functions.set_path_sub_directory(prod, input_subprod_year_min_linearx2, 'Derived', version, mapset)
 
 starting_files_year_min_linearx2 = input_dir_year_min_linearx2+"*"+in_prod_ident_year_min_linearx2
@@ -493,7 +493,7 @@ def vgt_ndvi_absol_min_linearx2(input_file, output_file):
 input_subprod_year_max_linearx2 = "year_max_linearx2"
 in_prod_ident_year_max_linearx2 = functions.set_path_filename_no_date(prod, input_subprod_year_max_linearx2, mapset, ext)
 
-input_dir_year_max_linearx2 = locals.es2globals['data_dir']+ \
+input_dir_year_max_linearx2 = es_constants.processing_dir+ \
                    functions.set_path_sub_directory(prod, input_subprod_year_max_linearx2, 'Derived', version, mapset)
 
 starting_files_year_max_linearx2 = input_dir_year_max_linearx2+"*"+in_prod_ident_year_max_linearx2
@@ -775,7 +775,7 @@ def vgt_ndvi_monmdvi(input_file, output_file):
 input_subprod_monndvi = "monndvi"
 in_prod_ident_monndvi = functions.set_path_filename_no_date(prod, input_subprod_monndvi, mapset, ext)
 
-input_dir_monndvi = locals.es2globals['data_dir']+ \
+input_dir_monndvi = es_constants.processing_dir+ \
                    functions.set_path_sub_directory(prod, input_subprod_monndvi, 'Derived', version, mapset)
 
 starting_files_monndvi = input_dir_monndvi+"*"+in_prod_ident_monndvi

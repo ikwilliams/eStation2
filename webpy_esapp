@@ -503,15 +503,27 @@ class ExecuteServiceTask:
 
     def POST(self):
         #return web.ctx
+        from apps.acquisition import get_internet
+        
+        # Define pid file and create daemon
+        pid_file = es_constants.get_internet_pid_filename
+        get_internet_daemon = acquisition.GetInternetDaemon(pid_file, dry_run=1)
+        status=get_internet_daemon.status()
+        
         getparams = web.input()
         if getparams.task == 'runinternet':
-            # if internet_on() run getinternet service
+            # if internet_on() run getinternet service            
+            if not status:
+                get_internet_daemon.start()
             print 'run internet'
         if getparams.task == 'stopinternet':
             # if internet_on() run getinternet service
+            if status:
+                get_internet_daemon.stop()            
             print 'stop internet'
         if getparams.task == 'restartinternet':
             # if internet_on() run getinternet service
+            get_internet_daemon.restart()
             print 'restart internet'
 
         servicesstatus_json = '{"success": true, "task": "' + getparams.task + '"}'

@@ -68,8 +68,8 @@ def my_logger(name):
     logger.addHandler(console_handler)
 
     # Define log handlers
-    console_handler.setLevel(logging.DEBUG)
-    file_handler.setLevel(logging.DEBUG)
+    console_handler.setLevel(logging.INFO)
+    file_handler.setLevel(logging.INFO)
 
     return logger
 
