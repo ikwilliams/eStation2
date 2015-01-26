@@ -207,13 +207,11 @@ Ext.define("esapp.view.acquisition.Ingestion",{
                 tooltip: 'Show log of this Ingestion',
                 scope: me,
                 // handler: me.onRemoveClick
-                handler: function (grid, rowIndex, x,y) {
-                    console.info(grid);
-                    console.info(rowIndex);
-                    console.info(x);
-                    console.info(y);
-
-                    var logViewWin = new esapp.view.acquisition.ingestionlog.LogView();
+                handler: function (grid, rowIndex, colIndex, icon) {
+                    var rec = grid.getStore().getAt(rowIndex);
+                    var logViewWin = new esapp.view.acquisition.ingestionlog.LogView({
+                        record: rec
+                    });
                     logViewWin.show();
                 }
             }]

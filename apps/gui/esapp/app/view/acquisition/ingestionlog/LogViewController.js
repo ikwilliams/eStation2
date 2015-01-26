@@ -4,6 +4,12 @@ Ext.define('esapp.view.acquisition.ingestionlog.LogViewController', {
 
     // {{{
     ,getFile: function(record) {
+        console.info("following is the record in getFile: ");
+        console.info(record);
+        console.info(record.get('productcode'));
+        console.info(record.get('mapsetcode'));
+        console.info(record.get('version'));
+        console.info(record.get('subproductcode'));
         Ext.Ajax.request({
            method: 'POST',
            success: function ( result, request ) {
@@ -12,10 +18,12 @@ Ext.define('esapp.view.acquisition.ingestionlog.LogViewController', {
            failure: function ( result, request) {
 
            },
-           url:'ajaxphp/systemmonitoring.php',
-           params:{ task: "getLogFile",
-                     logfilename:record.data.filename,
-                     dirpath:'' //  will be send without slashes!!!!!!
+           url:'getlogfile',
+           params:{
+               productcode:record.get('productcode'),
+               mapsetcode:record.get('mapsetcode'),
+               version:record.get('version'),
+               subproductcode:record.get('subproductcode')
            },
            loadMask:'Loading data...',
            callback:function(callinfo,responseOK,response ){

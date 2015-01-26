@@ -36,12 +36,12 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
                 }
                 if (services.ingest){
                     splitbtn.up().down('button[name=ingestbtn]').setStyle('color','green');
-                    splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=runintgest]').setDisabled(true);
+                    splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=runingest]').setDisabled(true);
                     splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=stopingest]').setDisabled(false);
                     splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=restartingest]').setDisabled(false);
                 } else {
                     splitbtn.up().down('button[name=ingestbtn]').setStyle('color','red');
-                    splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=runintgest]').setDisabled(false);
+                    splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=runingest]').setDisabled(false);
                     splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=stopingest]').setDisabled(true);
                     splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=restartingest]').setDisabled(true);
                 }

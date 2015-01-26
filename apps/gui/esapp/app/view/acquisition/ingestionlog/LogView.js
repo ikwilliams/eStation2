@@ -11,6 +11,8 @@ Ext.define("esapp.view.acquisition.ingestionlog.LogView",{
     requires: [
         'esapp.view.acquisition.ingestionlog.LogViewController',
 
+        'Ext.form.field.HtmlEditor',
+        'Ext.form.field.Text',
         'Ext.layout.container.Center',
         'Ext.XTemplate'
     ],
@@ -20,12 +22,12 @@ Ext.define("esapp.view.acquisition.ingestionlog.LogView",{
         titlePosition: 0,
         titleAlign: 'center'
     },
-    modal: true,
+    modal: false,
     closable: true,
     closeAction: 'destroy', // 'hide',
     maximizable: false,
-    width:850,
-    height:530,
+    width:1000,
+    height:600,
     border:true,
     frame:true,
     layout: {
@@ -34,17 +36,55 @@ Ext.define("esapp.view.acquisition.ingestionlog.LogView",{
     },
     autoScroll: true,
 
+    record: null,
+
     initComponent: function () {
         var me = this;
+
+        me.listeners = {
+            beforerender: function(win,evt){
+                console.info(win);
+                Ext.toast({ html: 'Before render in logview', title: 'Before render', width: 200, align: 't' });
+                // me.getFile(me.record);
+                console.info("following is the record in getFile: ");
+                console.info(me.record);
+                console.info(me.record.get('productcode'));
+                console.info(me.record.get('mapsetcode'));
+                console.info(me.record.get('version'));
+                console.info(me.record.get('subproductcode'));
+                Ext.Ajax.request({
+                   method: 'GET',
+                   url:'getlogfile',
+                   params:{
+                       productcode:me.record.get('productcode'),
+                       mapsetcode:me.record.get('mapsetcode'),
+                       version:me.record.get('version'),
+                       subproductcode:me.record.get('subproductcode')
+                   },
+                   loadMask:'Loading data...',
+                   callback:function(callinfo,responseOK,response ){
+
+                        var response_Text = response.responseText.trim();
+                        Ext.getCmp('logfilecontent').setValue(response_Text);
+                        //eStation.myGlobals.OriginalContent = Ext.getCmp('logfilecontent').getRawValue();
+                        //eStation.LogfileShowPanel.setTitle('File: ' + record.data.filename);
+                   },
+                   success: function ( result, request ) {},
+                   failure: function ( result, request) {}
+                });
+            }
+        };
 
         me.tbar = ['  ',
             {
                 xtype: 'textfield',
                 id:'highlightfindstring',
                 fieldLabel: 'Search',
+                labelWidth: 60,
+                labelAlign: 'left',
                 labelStyle: 'font-weight:bold;',
                 hidden:false,
-                qtip:'Search in current file.',
+                qtip:'Search and highlight in current file.',
                 width:250
 //                scope:this
 //                listeners: {
@@ -68,7 +108,7 @@ Ext.define("esapp.view.acquisition.ingestionlog.LogView",{
                     var searchText = Ext.getCmp('highlightfindstring').getValue().trim();
 
                     if ( searchText != '') {
-                        var targetcontent = eStation.myGlobals.OriginalContent;    // eStation.myGlobals.OriginalContent is set in logfilelist onRowAction
+                        var targetcontent = Ext.getCmp('logfilecontent').getValue(); // eStation.myGlobals.OriginalContent;
                         var textColor = "black";
                         var bgColor = "yellow";
                         var treatAsPhrase = false;
@@ -78,11 +118,11 @@ Ext.define("esapp.view.acquisition.ingestionlog.LogView",{
 
                         var highlightedcontent = highlightSearchTerms(targetcontent, searchText, treatAsPhrase, warnOnFailure, highlightStartTag, highlightEndTag);
 
-                        var contentField = Ext.getCmp('logfilecontent');
+                        // var contentField = Ext.getCmp('logfilecontent');
                         Ext.getCmp('logfilecontent').setValue(highlightedcontent);
 
                     }
-                    else Ext.getCmp('logfilecontent').setValue(eStation.myGlobals.OriginalContent);   // No search terms so reset content to original content
+                    // else Ext.getCmp('logfilecontent').setValue(eStation.myGlobals.OriginalContent);   // No search terms so reset content to original content
                 }
             }
         ];
@@ -91,10 +131,14 @@ Ext.define("esapp.view.acquisition.ingestionlog.LogView",{
             xtype: 'htmleditor',
             id: 'logfilecontent',
             autoScroll: true,
-            width: 830,
-            height: 468,
+            border: true,
+            frame: true,
+            layout: {
+                type  : 'fit',
+                padding: 5
+            },
             enableAlignments: false,
-            enableColors: false,
+            enableColors: true,
             enableFont: true,
             enableFontSize: true,
             enableFormat: false,
