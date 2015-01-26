@@ -141,16 +141,19 @@ class TestDatasets(unittest.TestCase):
             'mapset': 'WGS84_Africa_1km'
         })
         files = [
-            "0101_fewsnet_rfe_1monavg_FEWSNET_Africa_8km.tif",
-            "0201_fewsnet_rfe_1monavg_FEWSNET_Africa_8km.tif",
-            "0301_fewsnet_rfe_1monavg_FEWSNET_Africa_8km.tif",
-            "0401_fewsnet_rfe_1monavg_FEWSNET_Africa_8km.tif",
-            "0501_fewsnet_rfe_1monavg_FEWSNET_Africa_8km.tif",
-            "0601_fewsnet_rfe_1monavg_FEWSNET_Africa_8km.tif",
-            "0701_fewsnet_rfe_1monavg_FEWSNET_Africa_8km.tif",
-            "0801_fewsnet_rfe_1monavg_FEWSNET_Africa_8km.tif",
-            "0901_fewsnet_rfe_1monavg_FEWSNET_Africa_8km.tif",
-                ]
+            "0101_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "0201_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "0301_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "0401_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "0501_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "0601_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "0701_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "0801_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "0901_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "1001_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "1101_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "1201_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif"
+        ]
         dataset = Dataset(**kwargs)
         dataset.get_filenames = lambda: files
         completeness = dataset.get_dataset_normalized_info()

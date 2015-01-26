@@ -25,36 +25,6 @@ def glob_monkey(path):
     return []
 
 
-class TestProduct(unittest.TestCase):
-
-    def Test_get_product(self):
-        productcode = 'fewsnet_rfe'
-        version = 'undefined'
-        p = Product(product_code=productcode, version=version)
-
-        # does the product have mapsets AND subproducts?
-        all_prod_mapsets = p.mapsets
-        all_prod_subproducts = p.subproducts
-        if all_prod_mapsets.__len__() > 0 and all_prod_subproducts.__len__() > 0:
-            for mapset in all_prod_mapsets:
-                mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
-                mapset_dict = functions.row2dict(mapset_info)
-                mapset_dict['mapsetdatasets'] = []
-                all_mapset_datasets = p.get_subproducts(mapset=mapset)
-                for subproductcode in all_mapset_datasets:
-                    dataset_info = querydb.get_subproduct(productcode=productcode,
-                                                          version=version,
-                                                          subproductcode=subproductcode,
-                                                          echo=False)
-
-                    dataset_dict = functions.row2dict(dataset_info)
-                    dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
-                    completeness = dataset.get_dataset_normalized_info()
-                    dataset_dict['datasetcompleteness'] = completeness
-
-                    mapset_dict['mapsetdatasets'].append(dataset_dict)
-
-
 class TestProducts(unittest.TestCase):
     def setUp(self):
         self.kwargs = {'product_code':"vgt_ndvi"}
