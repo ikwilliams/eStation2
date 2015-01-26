@@ -72,6 +72,11 @@ class Frequency(object):
                 return filename[len(self.dateformat)] == "_"
         return False
 
+    def strip_year(self, date):
+        if self.dateformat == self.DATEFORMAT.MONTHDAY:
+            return date[5:]
+        return date
+
     def format_date(self, date):
         if self.dateformat == self.DATEFORMAT.DATE:
             return date.strftime("%Y%m%d")
@@ -236,6 +241,9 @@ class Dataset(object):
     def get_basenames(self):
         return list(os.path.basename(filename) for filename in self.get_filenames())
 
+    def strip_year(self, date):
+        return self._frequency.strip_year(date)
+
     def format_filename(self, date):
         return os.path.join(self.fullpath, self._frequency.format_filename(date, self.mapset))
 
@@ -290,8 +298,8 @@ class Dataset(object):
         if refresh:
             self._clean_cache()
         interval_list = list({'totfiles': interval.length,
-                     'fromdate': interval.from_date.strftime("%Y-%m-%d"),
-                     'todate': interval.to_date.strftime("%Y-%m-%d"),
+                     'fromdate': self.strip_year(interval.from_date.strftime("%Y-%m-%d")),
+                     'todate': self.strip_year(interval.to_date.strftime("%Y-%m-%d")),
                      'intervaltype': interval.interval_type,
                      'missing': interval.missing,
                      'intervalpercentage': interval.percentage} for interval in self.intervals)

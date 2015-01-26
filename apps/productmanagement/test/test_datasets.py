@@ -131,7 +131,7 @@ class TestDatasets(unittest.TestCase):
         self.assertEquals(completeness['missingfiles'], 18288)
         self.assertEquals(completeness['intervals'][0]['intervalpercentage'], 1.0)
 
-    def test_product_only_month_year(self):
+    def test_product_only_month_day(self):
         kwargs = self.kwargs.copy()
         kwargs.update({
             'from_date': datetime.date(2014, 1, 1),
@@ -158,7 +158,11 @@ class TestDatasets(unittest.TestCase):
         dataset.get_filenames = lambda: files
         completeness = dataset.get_dataset_normalized_info()
         self.assertEquals(completeness['totfiles'], 12)
-        self.assertEquals(completeness['missingfiles'], 3)
+        self.assertEquals(completeness['missingfiles'], 0)
+        self.assertEquals(completeness['intervals'][0]['todate'], '12-01')
+        self.assertEquals(completeness['intervals'][0]['fromdate'], '01-01')
+        self.assertEquals(completeness['firstdate'], '01-01')
+        self.assertEquals(completeness['lastdate'], '12-01')
         current_date = datetime.date(2014, 1, 1)
         last_date = datetime.date(2015, 1, 1)
         for i in range(12):
