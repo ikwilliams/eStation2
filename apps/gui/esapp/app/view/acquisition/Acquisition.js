@@ -314,7 +314,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                     items: [
                         // these will render as dropdown menu items when the arrow is clicked:
                         {   text: 'Run',
-                            name: 'runintgest',
+                            name: 'runingest',
                             // iconCls: 'fa-play-circle-o', // xf01d   // fa-play xf04b
                             glyph: 'xf04b@FontAwesome',
                             cls:'menu-glyph-color-green',
@@ -402,7 +402,6 @@ Ext.define("esapp.view.acquisition.Acquisition",{
             header: '<div class="grid-header-style">Product categories</div>',
             menuDisabled: true,
             variableRowHeight : true,
-            // sealed:true,
             defaults: {
                 menuDisabled: true,
                 variableRowHeight : true,

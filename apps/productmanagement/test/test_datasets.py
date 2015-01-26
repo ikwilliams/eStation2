@@ -150,9 +150,9 @@ class TestDatasets(unittest.TestCase):
             "0701_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
             "0801_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
             "0901_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif"
-            # ,"1001_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif"
-            # ,"1101_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif"
-            # ,"1201_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif"
+            ,"1001_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif"
+            ,"1101_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif"
+            ,"1201_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif"
         ]
         dataset = Dataset(**kwargs)
         dataset.get_filenames = lambda: files
