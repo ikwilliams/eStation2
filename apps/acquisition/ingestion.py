@@ -8,7 +8,7 @@
 #   TODO-LinkIT: for MCD45monthly aborts for out-of-memory in re-scaling data ! FTTB ingest only 2 windows
 
 # source eStation2 base definitions
-import locals
+from config import es_constants
 
 # import standard modules
 import re
@@ -35,8 +35,8 @@ from osgeo import osr
 
 logger = log.my_logger(__name__)
 
-ingest_dir_in = locals.es2globals['ingest_dir']
-data_dir_out = locals.es2globals['data_dir']
+ingest_dir_in = es_constants.ingest_dir
+data_dir_out = es_constants.processing_dir
 
 
 def loop_ingestion(dry_run=False):
@@ -107,6 +107,11 @@ def loop_ingestion(dry_run=False):
                 # Loop over ingestion triggers
                 subproducts = list()
                 for ingest in ingestions:
+                    # Create an identifier for the log file
+                    #log_file_id = functions.set_path_filename_no_date(product['productcode'],
+                    #                                               ingest.subproductcode,
+                    #                                               ingest.mapsetcode, ext)
+                    ### To be done logger = log.my_logger(__name__+log_file_id)
                     logger.debug(" --> processing subproduct: %s" % ingest.subproductcode)
                     args = {"productcode": product['productcode'],
                             "subproductcode": ingest.subproductcode,
@@ -283,7 +288,7 @@ def pre_process_modis_hdf4_tile (subproducts, tmpdir , input_files):
 
             file_to_merge = glob.glob(tmpdir + os.path.sep + id_subproduct + '*.tif')
             # Take gdal_merge.py from es2globals
-            command = locals.es2globals['GDAL_merge'] + ' -init 9999 -co \"compress=lzw\" -o '
+            command = es_constants.GDAL_merge + ' -init 9999 -co \"compress=lzw\" -o '
             command += out_tmp_file_gtiff
             for file_add in file_to_merge:
                 command += ' '
@@ -447,7 +452,7 @@ def pre_process_pml_netcdf(subproducts, tmpdir , input_files):
             out_tmp_file_gtiff = tmpdir + os.path.sep + id_subproduct + '_' + id_mapset + '.tif.merged'
 
             # Take gdal_merge.py from es2globals
-            command = locals.es2globals['GDAL_merge'] + ' -init 9999 -co \"compress=lzw\" -o '
+            command = es_constants.GDAL_merge + ' -init 9999 -co \"compress=lzw\" -o '
             command += out_tmp_file_gtiff
             for file_add in geotiff_files:
                 command += ' '
@@ -736,9 +741,9 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
     # Create temp output dir
     try:
         tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_files[0]),
-                                  dir=locals.es2globals['temp_dir'])
+                                  dir=es_constants.base_tmp_dir)
     except IOError:
-        logger.error('Cannot create temporary dir ' + locals.es2globals['temp_dir'] + '. Exit')
+        logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
         return 1
 
     georef_already_done = False
@@ -980,7 +985,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         native_mapset_code = datasource_descr.native_mapset
         orig_ds = gdal.Open(intermFile, gdal.GA_ReadOnly)
-
+        
         if native_mapset_code != 'default':
             native_mapset = mapset.MapSet()
             native_mapset.assigndb(native_mapset_code)
@@ -997,13 +1002,15 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             except:
                 logger.debug('Cannot set the geo-projection .. Continue')
         else:
-            # Read geo-reference from input file
-            orig_cs = osr.SpatialReference()
-            orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
-            orig_geo_transform = orig_ds.GetGeoTransform()
-            orig_size_x = orig_ds.RasterXSize
-            orig_size_y = orig_ds.RasterYSize
-
+            try:
+                # Read geo-reference from input file
+                orig_cs = osr.SpatialReference()
+                orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
+                orig_geo_transform = orig_ds.GetGeoTransform()
+                orig_size_x = orig_ds.RasterXSize
+                orig_size_y = orig_ds.RasterYSize
+            except:
+                logger.debug('Cannot read geo-reference from file .. Continue')
 
         # TODO-M.C.: add a test on the mapset id in DB table !
         trg_mapset = mapset.MapSet()

@@ -2,7 +2,7 @@
 #	purpose: Define the processing service (by using ruffus)
 #	author:  M.Clerici & Jurriaan van't Klooster
 #	date:	 11.06.2014
-#   descr:	 Generate additional derived products / implements processing chains
+#       descr:	 Generate additional derived products / implements processing chains
 #	history: 1.0
 #
 #   Still to be done
@@ -17,11 +17,9 @@
 
 # Source my definitions
 from config import es_constants
-#
 import os
 
 # Import eStation2 modules
-#from config import es_constants
 #from database import querydb
 from lib.python import functions
 from lib.python import metadata
@@ -43,9 +41,6 @@ prod="fewsnet_rfe"
 mapset='FEWSNET_Africa_8km'
 ext='.tif'
 version='undefined'
-
-#   general switch
-#activate_fewsnet_rfe_comput=0
 
 #   switch wrt temporal resolution
 activate_10d_comput=1
@@ -79,9 +74,8 @@ def create_pipeline(starting_sprod):
                 functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
 
     starting_files = input_dir+"*"+in_prod_ident
-    print input_dir
-
-    print starting_files
+    #print input_dir
+    #print starting_files
     #   ---------------------------------------------------------------------
     #   Average
     output_sprod="10davg"
@@ -99,7 +93,6 @@ def create_pipeline(starting_sprod):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_avg_image(**args)
-        # upsert_processed_ruffus(output_file)
 
 
     #   ---------------------------------------------------------------------
@@ -119,7 +112,6 @@ def create_pipeline(starting_sprod):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_min_image(**args)
-        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   Maximum
@@ -138,7 +130,6 @@ def create_pipeline(starting_sprod):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_max_image(**args)
-        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   10dDiff
@@ -164,7 +155,6 @@ def create_pipeline(starting_sprod):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_oper_subtraction(**args)
-        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   10dperc
@@ -190,7 +180,6 @@ def create_pipeline(starting_sprod):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file[0], "avg_file": input_file[1], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_compute_perc_diff_vs_avg(**args)
-        # _processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   10dnp
@@ -221,7 +210,6 @@ def create_pipeline(starting_sprod):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_make_vci(**args)
-        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   1moncum
@@ -242,7 +230,6 @@ def create_pipeline(starting_sprod):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file,"output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_cumulate(**args)
-        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   Monthly Average
@@ -264,7 +251,6 @@ def create_pipeline(starting_sprod):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_avg_image(**args)
-        #upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   Monthly Minimum
@@ -283,7 +269,6 @@ def create_pipeline(starting_sprod):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_min_image(**args)
-        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   Monthly Maximum
@@ -304,7 +289,6 @@ def create_pipeline(starting_sprod):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_max_image(**args)
-        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   1monDiff
@@ -331,7 +315,6 @@ def create_pipeline(starting_sprod):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_oper_subtraction(**args)
-        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   1monperc
@@ -358,7 +341,6 @@ def create_pipeline(starting_sprod):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file[0], "avg_file": input_file[1], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_compute_perc_diff_vs_avg(**args)
-        # upsert_processed_ruffus(output_file)
 
     #   ---------------------------------------------------------------------
     #   1monnp
@@ -389,55 +371,6 @@ def create_pipeline(starting_sprod):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_make_vci(**args)
-        # upsert_processed_ruffus(output_file)
-
-    #   ---------------------------------------------------------------------
-    #   Upsert in the DB table a product generated by ruffus
-
-    def upsert_processed_ruffus(file_fullpath):
-
-            # -------------------------------------------------------------------------
-            # Upsert into DB table 'products_data'
-            # -------------------------------------------------------------------------
-
-            filename = os.path.basename(file_fullpath)
-            dirname = os.path.dirname(file_fullpath)
-
-            # TODO-M.C.: add tests, try/except
-            [productcode, subproductcode, version, mapsetcode] = functions.get_from_path_dir(dirname)
-            str_date = functions.get_date_from_path_filename(filename)
-            [str_year, str_month, str_day, str_hour] = functions.extract_from_date(str_date)
-
-            if str_year == '':
-                str_year='0'
-            cruddb = crud.CrudDB()
-            recordkey = {'productcode': productcode.lower(),
-                         'subproductcode': subproductcode.lower(),
-                         'version': 'undefined',
-                         'mapsetcode': mapsetcode,
-                         'product_datetime': str_date}
-
-
-            record = {'productcode': productcode.lower(),
-                      'subproductcode': subproductcode.lower(),
-                      'version': 'undefined',
-                      'mapsetcode': mapsetcode,
-                      'product_datetime': str_date,
-                      'directory': dirname,
-                      'filename': filename,
-                      'year': int(str_year),
-                      'month': int(str_month),
-                      'day': int(str_day),
-                      'hour': int(str_hour),
-                      'file_role': 'active',
-                      'file_type': 'GTiff'}
-
-            if len(cruddb.read('products.products_data', **recordkey)) > 0:
-                logger.debug('Updating products_data record: ' + str(recordkey))
-                cruddb.update('products.products_data', record)
-            else:
-                logger.debug('Creating products_data record: ' + str(recordkey))
-                cruddb.create('products.products_data', record)
 
 #   ---------------------------------------------------------------------
 #   Run the pipeline

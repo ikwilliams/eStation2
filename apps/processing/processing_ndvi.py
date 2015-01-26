@@ -45,15 +45,6 @@ version = 'undefined'
 #   A list of 'final' (i.e. User selected) output products are defined (now hard-coded)
 #   According to the dependencies, if set, they force the various groups
 
-# switch for 'final' products (e.g. products to be controlled by the User)
-final_ndvi_linearx2=0
-final_diff_linearx2=0
-final_linearx2diff_linearx2=0
-final_vci=0
-final_icn=0
-final_vci_linearx2=0
-final_icn_linearx2=0
-
 #   switch wrt to groups
 group_no_filter_stats = 1                  # 1.a
 group_no_filter_anomalies = 1              # 1.b    -> To be done

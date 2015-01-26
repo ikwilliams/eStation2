@@ -42,6 +42,37 @@ class TestGetInternet(unittest.TestCase):
         self.assertTrue(file_to_check in list)
 
     #   ---------------------------------------------------------------------------
+    #   Test iteration on remote ftp (e.g. ARC2)
+    #   ---------------------------------------------------------------------------
+    def TestRemoteFtp_ARC2(self):
+
+        # Retrieve a list of MODIS burndate file .. check only one present
+        remote_url='ftp://ftp.cpc.ncep.noaa.gov/fews/fewsdata/africa/arc2/geotiff/'
+        usr_pwd='anonymous:@'
+        full_regex   ='africa_arc.2015.....tif.zip'
+        file_to_check='africa_arc.20150121.tif.zip'
+
+        list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+
+        self.assertTrue(file_to_check in list)
+    
+    #   ---------------------------------------------------------------------------
+    #   Test iteration on remote ftp (e.g. CAMS_OPI)
+    #   ---------------------------------------------------------------------------
+    def TestRemoteFtp_CAMS_OPI(self):
+
+        # Retrieve a list of CQMS-OPI .. check only one present
+        remote_url='ftp://ftp.cpc.ncep.noaa.gov/precip/data-req/cams_opi_v0208/'
+        usr_pwd='anonymous:@'
+        full_regex   ='africa_arc.2015.....tif.zip'
+        file_to_check='africa_arc.20150121.tif.zip'
+
+        list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+
+        self.assertTrue(file_to_check in list)
+
+
+    #   ---------------------------------------------------------------------------
     #   Test iteration on remote ftp (e.g. VITO GL-GIO products): Obsolete ?
     #   ---------------------------------------------------------------------------
     # def TestRemoteFtp_FTP_VITO(self):

@@ -163,7 +163,7 @@ class SdsMetadata:
     def assign_es2_version(self):
     #
     #   Assign the es2_version
-        sds_metadata['eStation2_es2_version'] = es_constants.ES2_SW_VERSION
+        sds_metadata['eStation2_es2_version'] = es_constants.es2_sw_version
 
     def assign_comput_time_now(self):
     #
