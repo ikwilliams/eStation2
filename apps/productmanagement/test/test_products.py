@@ -20,8 +20,10 @@ import locals
 from lib.python import functions
 from database import querydb
 
+
 def glob_monkey(path):
     return []
+
 
 class TestProducts(unittest.TestCase):
     def setUp(self):

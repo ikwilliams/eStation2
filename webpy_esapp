@@ -44,6 +44,9 @@ urls = (
     "/ingestion", "Ingestion",
     "/ingestion/update", "UpdateIngestion",
 
+    "/getlogfile", "GetLogFile",
+
+
     "/dataacquisition", "DataAcquisition",
     "/dataacquisition/update", "UpdateDataAcquisition",
 
@@ -79,6 +82,28 @@ class EsApp:
         return render.index()
         #getparam = web.input(lang=self.lang)
         #return render.index(getparam.lang)
+
+
+class GetLogFile:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self):
+        logfilepath = es_constants.es2globals['log_dir']+'apps.acquisition.ingestion.log'
+        logfile = open(logfilepath, 'r')
+        logfilecontent = logfile.read()
+        logfilecontent = logfilecontent.replace(chr(10), '<br />')
+        logfilecontent = logfilecontent.replace(' TRACE ', '<b style="color:gray"> TRACE </b>')
+        logfilecontent = logfilecontent.replace(' DEBUG ', '<b style="color:gray"> DEBUG </b>')
+        logfilecontent = logfilecontent.replace(' INFO ', '<b style="color:green"> INFO </b>')
+        logfilecontent = logfilecontent.replace(' WARNING ', '<b style="color:orange"> WARN </b>')
+        logfilecontent = logfilecontent.replace(' WARN ', '<b style="color:orange"> WARN </b>')
+        logfilecontent = logfilecontent.replace(' ERROR ', '<b style="color:red"> ERROR </b>')
+        logfilecontent = logfilecontent.replace(' CRITICAL ', '<b style="color:red"> FATAL </b>')
+        logfilecontent = logfilecontent.replace(' FATAL ', '<b style="color:red"> FATAL </b>')
+        logfilecontent = logfilecontent.replace(' CLOSED ', '<b style="color:brown"> CLOSED </b>')
+
+        return logfilecontent
 
 
 class ResetSystemSettings:

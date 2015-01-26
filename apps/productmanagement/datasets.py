@@ -194,7 +194,7 @@ class Dataset(object):
 
     def __init__(self, product_code, sub_product_code, mapset, version=None, from_date=None, to_date=None):
         kwargs = {'productcode': product_code,
-                'subproductcode': sub_product_code.lower() if sub_product_code else None}
+                  'subproductcode': sub_product_code.lower() if sub_product_code else None}
         if not version is None:
             kwargs['version'] = version
         if from_date:
@@ -207,10 +207,14 @@ class Dataset(object):
         if isinstance(self._db_product, list):
             self._db_product = self._db_product[0]
         self.mapset = mapset
-        self._path = functions.set_path_sub_directory(product_code, sub_product_code,
-                self._db_product.product_type, version, mapset)
+        self._path = functions.set_path_sub_directory(product_code,
+                                                      sub_product_code,
+                                                      self._db_product.product_type,
+                                                      version,
+                                                      mapset)
         self.fullpath = os.path.join(locals.es2globals['data_dir'], self._path)
-        self._db_frequency = querydb.db.frequency.get(self._db_product.frequency_id)
+        #self._db_frequency = querydb.db.frequency.get(self._db_product.frequency_id)
+        self._db_frequency = querydb.get_frequency(self._db_product.frequency_id)
         if self._db_frequency is None:
             raise NoFrequencyFound(self._db_product)
         self._frequency = Frequency(value=self._db_frequency.frequency,
@@ -243,11 +247,11 @@ class Dataset(object):
 
     def find_intervals(self, from_date=None, to_date=None, only_intervals=True):
         return find_gaps(self.get_basenames(), self._frequency, only_intervals,
-                from_date=from_date or self.from_date, to_date=to_date or self.to_date)
+                         from_date=from_date or self.from_date, to_date=to_date or self.to_date)
 
     def find_gaps(self, from_date=None, to_date=None):
         return find_gaps(self.get_basenames(), self._frequency, only_intervals=False,
-                from_date=from_date or self.from_date, to_date=to_date or self.to_date)
+                         from_date=from_date or self.from_date, to_date=to_date or self.to_date)
 
     def get_interval_dates(self, from_date, to_date, last_included=True, first_included=True):
         dates = []

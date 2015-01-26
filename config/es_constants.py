@@ -29,7 +29,7 @@ for setting, value in usersettings:
         config.set('FACTORY_SETTINGS', setting, value)
     else:
         #config.set('FACTORY_SETTINGS', setting, config.get('FACTORY_SETTINGS', 'factory_setting_'+setting, 0))
-	config.set('FACTORY_SETTINGS', setting, config.get('FACTORY_SETTINGS', setting, 0))
+        config.set('FACTORY_SETTINGS', setting, config.get('FACTORY_SETTINGS', setting, 0))
 
 es2globals = {}
 factorysettings = config.items('FACTORY_SETTINGS')  # dict(config.items('FACTORY_SETTINGS'))

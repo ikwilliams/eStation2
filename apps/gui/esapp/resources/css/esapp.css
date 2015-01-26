@@ -41,11 +41,16 @@ p {
     background-image:url(../img/icons/world_go.png) !important;
 }
 
+.magnifier-left-icon { background: url('../img/icons/magnifier-left.png') no-repeat 0 0 !important; }
+
 
 @font-face {
     font-family: ECSquareSansPro-Regular;
     src: url('../fonts/ECSquareSansPro-Regular.ttf');
 }
+
+.highlight { background-color: yellow }
+
 
 /*#header{position:relative;z-index:10;min-height:0px;background-color:#fff;line-height:1.4;}*/
 /*#header{height:40px;padding:0;margin:0 0 10px 0;overflow:hidden;float:left;clear:both;width:100%;position:relative;}*/
