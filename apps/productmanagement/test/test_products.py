@@ -84,7 +84,8 @@ class TestProducts(unittest.TestCase):
             return d
 
         # get full distinct list of products (native only)
-        db_products = querydb.get_product_native(allrecs=True, echo=False)
+        # db_products = querydb.get_product_native(allrecs=True, echo=False)
+        db_products = querydb.get_products(echo=False)
         self.assertTrue(db_products.__len__() > 0)
         products_dict_all = []
         # loop the products list
@@ -116,7 +117,7 @@ class TestProducts(unittest.TestCase):
 
                         mapset_dict['mapsetdatasets'].append(dataset_dict)
                     prod_dict['productmapsets'].append(mapset_dict)
-                products_dict_all.append(prod_dict)
+            products_dict_all.append(prod_dict)
         self.assertEquals(len(db_products), 31)
 
     def test_get_missing(self):
