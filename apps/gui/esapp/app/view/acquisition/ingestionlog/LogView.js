@@ -43,15 +43,15 @@ Ext.define("esapp.view.acquisition.ingestionlog.LogView",{
 
         me.listeners = {
             beforerender: function(win,evt){
-                console.info(win);
-                Ext.toast({ html: 'Before render in logview', title: 'Before render', width: 200, align: 't' });
+                //console.info(win);
+                //Ext.toast({ html: 'Before render in logview', title: 'Before render', width: 200, align: 't' });
                 // me.getFile(me.record);
-                console.info("following is the record in getFile: ");
-                console.info(me.record);
-                console.info(me.record.get('productcode'));
-                console.info(me.record.get('mapsetcode'));
-                console.info(me.record.get('version'));
-                console.info(me.record.get('subproductcode'));
+                //console.info("following is the record in getFile: ");
+                //console.info(me.record);
+                //console.info(me.record.get('productcode'));
+                //console.info(me.record.get('mapsetcode'));
+                //console.info(me.record.get('version'));
+                //console.info(me.record.get('subproductcode'));
                 Ext.Ajax.request({
                    method: 'GET',
                    url:'getlogfile',
@@ -104,26 +104,7 @@ Ext.define("esapp.view.acquisition.ingestionlog.LogView",{
             },{
                 text: '',
                 iconCls: 'magnifier-left-icon',
-                handler: function() {
-                    var searchText = Ext.getCmp('highlightfindstring').getValue().trim();
-
-                    if ( searchText != '') {
-                        var targetcontent = Ext.getCmp('logfilecontent').getValue(); // eStation.myGlobals.OriginalContent;
-                        var textColor = "black";
-                        var bgColor = "yellow";
-                        var treatAsPhrase = false;
-                        var warnOnFailure=false;
-                        var highlightStartTag = "<span style='color:" + textColor + "; background-color:" + bgColor + ";'>";
-                        var highlightEndTag = "</span>";
-
-                        var highlightedcontent = highlightSearchTerms(targetcontent, searchText, treatAsPhrase, warnOnFailure, highlightStartTag, highlightEndTag);
-
-                        // var contentField = Ext.getCmp('logfilecontent');
-                        Ext.getCmp('logfilecontent').setValue(highlightedcontent);
-
-                    }
-                    // else Ext.getCmp('logfilecontent').setValue(eStation.myGlobals.OriginalContent);   // No search terms so reset content to original content
-                }
+                handler: 'highlightSearchString'
             }
         ];
 

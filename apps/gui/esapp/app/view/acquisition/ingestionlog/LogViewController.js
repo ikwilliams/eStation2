@@ -37,6 +37,28 @@ Ext.define('esapp.view.acquisition.ingestionlog.LogViewController', {
     } // eo getFile
     //   }}}
 
+    // {{{
+    ,highlightSearchString: function() {
+        var searchText = Ext.getCmp('highlightfindstring').getValue().trim();
+
+        if ( searchText != '') {
+            var targetcontent = Ext.getCmp('logfilecontent').getValue(); // eStation.myGlobals.OriginalContent;
+            var textColor = "black";
+            var bgColor = "yellow";
+            var treatAsPhrase = false;
+            var warnOnFailure=false;
+            var highlightStartTag = "<span style='color:" + textColor + "; background-color:" + bgColor + ";'>";
+            var highlightEndTag = "</span>";
+
+            var highlightedcontent = highlightSearchTerms(targetcontent, searchText, treatAsPhrase, warnOnFailure, highlightStartTag, highlightEndTag);
+
+            // var contentField = Ext.getCmp('logfilecontent');
+            Ext.getCmp('logfilecontent').setValue(highlightedcontent);
+
+        }
+        // else Ext.getCmp('logfilecontent').setValue(eStation.myGlobals.OriginalContent);   // No search terms so reset content to original content
+    }
+
     // Animals highlightText function  http://www.extjs.com/forum/showthread.php?t=68599
     ,highlightText: function (node, regex, cls, deep) {
         if (typeof(regex) == 'string') {
