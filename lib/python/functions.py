@@ -455,6 +455,30 @@ def conv_yymmk_2_yyyymmdd(yymmk):
     #date_tmp = datetime.datetime(year=year, month=month, day=day)
     date_yyyymmdd = str(year)+month+day
     return date_yyyymmdd
+######################################################################################
+#   conv_yyyy_mm_k_2_yyyymmdd
+#   Purpose: Function returns a date (YYYYMMDD) with yymmk as input.
+#            K = 1 is day 1
+#            K = 2 is day 11
+#            K = 3 is day 21
+#   Author: Jurriaan van 't Klooster
+#   Date: 2014/05/06
+#   Input: string of numbers in the format YYYY.MM.K
+#   Output: date (YYYYMMDD), otherwise -1
+def conv_yyyy_mm_k_2_yyyymmdd(yyyymmk):
+
+    year = int(str(yyyymmk)[0:4])
+    month = str(yyyymmk)[5:7]
+    dekad = int(str(yyyymmk)[8:9])
+    if dekad == 1:
+        day = '01'
+    if dekad == 2:
+        day = '11'
+    if dekad == 3:
+        day = '21'
+    #date_tmp = datetime.datetime(year=year, month=month, day=day)
+    date_yyyymmdd = str(year)+month+day
+    return date_yyyymmdd
 
 ######################################################################################
 #   extract_from_date

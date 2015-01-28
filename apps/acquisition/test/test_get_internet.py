@@ -147,5 +147,18 @@ class TestGetInternet(unittest.TestCase):
         print(filepath)
         logger.info('File downloaded to: '+filepath)
         self.assertEqual(1,1)
+        
+    #   ---------------------------------------------------------------------------
+    #   Test iteration on remote ftp (CHIRPS)
+    #   ---------------------------------------------------------------------------
+    def TestRemoteFtp_CHIRPS(self):
+        # Retrieve a list of CHIRP
+        remote_url='ftp://chg-ftpout.geog.ucsb.edu/pub/org/chg/products/CHIRPS-latest/prelim/global_pentad/tifs/'
+        usr_pwd='anonymous:anonymous'
+        full_regex   ='chirps-v1.8.*.tif'
+        file_to_check='chirps-v1.8.2014.09.4.tif'
+        
+        list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+        self.assertTrue(file_to_check in list)
 
  
