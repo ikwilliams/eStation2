@@ -149,10 +149,10 @@ class TestDatasets(unittest.TestCase):
             "0601_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
             "0701_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
             "0801_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
-            "0901_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif"
-            ,"1001_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif"
-            ,"1101_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif"
-            ,"1201_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif"
+            "0901_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "1001_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "1101_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "1201_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
         ]
         dataset = Dataset(**kwargs)
         dataset.get_filenames = lambda: files
@@ -209,3 +209,39 @@ class TestDatasets(unittest.TestCase):
         dataset.get_filenames = lambda: files_dekad
         completeness = dataset.get_dataset_normalized_info()
         self.assertEquals(completeness['missingfiles'], 3)
+
+    def test_product_no_dates(self):
+        kwargs = {
+                'product_code':"fewsnet_rfe",
+                'sub_product_code': "rfe",
+                'sub_product_code': "1monmax",
+                'mapset': 'WGS84_Africa_1km',
+        }
+        files = [
+            "0101_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "0201_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "0301_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "0401_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "0501_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "0601_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "0701_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "0801_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "0901_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "1001_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "1101_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "1201_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+        ]
+        dataset = Dataset(**kwargs)
+        dataset.get_filenames = lambda: files
+        completeness = dataset.get_dataset_normalized_info()
+        self.assertEquals(completeness['totfiles'], 12)
+        self.assertEquals(completeness['missingfiles'], 0)
+        self.assertEquals(completeness['intervals'][0]['todate'], '12-01')
+        self.assertEquals(completeness['intervals'][0]['fromdate'], '01-01')
+        self.assertEquals(completeness['firstdate'], '01-01')
+        self.assertEquals(completeness['lastdate'], '12-01')
+        current_date = datetime.date(2014, 1, 1)
+        last_date = datetime.date(2015, 1, 1)
+        for i in range(12):
+            current_date = dataset.next_date(current_date)
+        self.assertEquals(last_date, current_date)

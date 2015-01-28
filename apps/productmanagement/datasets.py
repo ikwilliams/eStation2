@@ -72,8 +72,11 @@ class Frequency(object):
                 return filename[len(self.dateformat)] == "_"
         return False
 
+    def no_year(self):
+        return self.dateformat == self.DATEFORMAT.MONTHDAY
+
     def strip_year(self, date):
-        if self.dateformat == self.DATEFORMAT.MONTHDAY:
+        if self.no_year():
             return date[5:]
         return date
 
@@ -226,6 +229,10 @@ class Dataset(object):
                                     unit=self._db_frequency.time_unit,
                                     frequency_type=self._db_frequency.frequency_type,
                                     dateformat=self._db_product.date_format)
+        if not from_date and self.no_year():
+            from_date = datetime.date(datetime.date.today().year, 1, 1)
+        if not to_date and self.no_year():
+            to_date = datetime.date(datetime.date.today().year, 12, 1)
         self.from_date = from_date or None
         self.to_date = to_date or self._frequency.today()
 
@@ -240,6 +247,9 @@ class Dataset(object):
 
     def get_basenames(self):
         return list(os.path.basename(filename) for filename in self.get_filenames())
+
+    def no_year(self):
+        return self._frequency.no_year()
 
     def strip_year(self, date):
         return self._frequency.strip_year(date)
