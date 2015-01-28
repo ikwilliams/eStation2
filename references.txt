@@ -64,6 +64,7 @@ Git:
 ----
 a. take a deleted file from HEAD: git checkout HEAD^ <file_name>
    (HEAD is the latest-current commit)
+---- 
 
 G EarthEngine python API (on VM22) - https://sites.google.com/site/earthengineapidocs/python-api
 ------------------------------------------------------------------------------------------------
