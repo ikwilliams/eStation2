@@ -34,12 +34,12 @@ Ext.define('esapp.view.dashboard.PC2Controller', {
                 }
                 if (services.ingest){
                     splitbtn.up().down('button[name=ingestbtn]').setStyle('color','green');
-                    splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=runintgest]').setDisabled(true);
+                    splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=runingest]').setDisabled(true);
                     splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=stopingest]').setDisabled(false);
                     splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=restartingest]').setDisabled(false);
                 } else {
                     splitbtn.up().down('button[name=ingestbtn]').setStyle('color','red');
-                    splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=runintgest]').setDisabled(false);
+                    splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=runingest]').setDisabled(false);
                     splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=stopingest]').setDisabled(true);
                     splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=restartingest]').setDisabled(true);
                 }
@@ -72,12 +72,13 @@ Ext.define('esapp.view.dashboard.PC2Controller', {
             url: 'services/execservicetask',
             // extraParams: {task: menuitem.name},
             params: {
-                task: menuitem.name
+                service: menuitem.service,
+                task: menuitem.task
             },
             success: function(response, opts){
                 var runresult = Ext.JSON.decode(response.responseText);
                 if (runresult.success){
-                    Ext.toast({ html: 'Execute Service Task' + menuitem.name, title: 'Execute Service Task', width: 200, align: 't' });
+                    Ext.toast({ html: 'Execute Service ' + menuitem.service + 'is ' + menuitem.task + 'ed', title: 'Service Task Executed', width: 200, align: 't' });
                     // menuitem.up().up().fireEvent('click', this);
                     me.getView().getController('acquisition').checkStatusServices(menuitem.up().up());
                 }

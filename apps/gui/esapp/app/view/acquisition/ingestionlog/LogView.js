@@ -38,42 +38,16 @@ Ext.define("esapp.view.acquisition.ingestionlog.LogView",{
 
     record: null,
 
+    listeners: {
+            beforerender: "getFile"
+    },
+
     initComponent: function () {
         var me = this;
 
-        me.listeners = {
-            beforerender: function(win,evt){
-                //console.info(win);
-                //Ext.toast({ html: 'Before render in logview', title: 'Before render', width: 200, align: 't' });
-                // me.getFile(me.record);
-                //console.info("following is the record in getFile: ");
-                //console.info(me.record);
-                //console.info(me.record.get('productcode'));
-                //console.info(me.record.get('mapsetcode'));
-                //console.info(me.record.get('version'));
-                //console.info(me.record.get('subproductcode'));
-                Ext.Ajax.request({
-                   method: 'GET',
-                   url:'getlogfile',
-                   params:{
-                       productcode:me.record.get('productcode'),
-                       mapsetcode:me.record.get('mapsetcode'),
-                       version:me.record.get('version'),
-                       subproductcode:me.record.get('subproductcode')
-                   },
-                   loadMask:'Loading data...',
-                   callback:function(callinfo,responseOK,response ){
-
-                        var response_Text = response.responseText.trim();
-                        Ext.getCmp('logfilecontent').setValue(response_Text);
-                        //eStation.myGlobals.OriginalContent = Ext.getCmp('logfilecontent').getRawValue();
-                        //eStation.LogfileShowPanel.setTitle('File: ' + record.data.filename);
-                   },
-                   success: function ( result, request ) {},
-                   failure: function ( result, request) {}
-                });
-            }
-        };
+        //me.listeners = {
+        //    beforerender: "getFile"
+        //};
 
         me.tbar = ['  ',
             {

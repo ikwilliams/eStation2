@@ -16,7 +16,7 @@ Ext.define('esapp.store.DataSetsStore', {
     ,remoteSort: false
     ,remoteGroup: false
 
-//    sorters: {property: 'productcode', direction: 'ASC'}
+    ,sorters: {property: 'order_index', direction: 'DESC'}
 
     ,proxy: {
         type: 'rest',
@@ -54,7 +54,7 @@ Ext.define('esapp.store.DataSetsStore', {
              // property: 'cat_descr_name',
              groupFn : function (item) {
                  return "<span style='display: none;'>" + item.get('order_index') + "</span>" + item.get('cat_descr_name')
-//                                "</span><span class='group-header-style'>" + item.get('cat_descr_name') + "</span>"
+                 //return item.get('cat_descr_name')
              },
              sortProperty: 'order_index'
     }

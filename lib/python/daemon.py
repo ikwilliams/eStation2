@@ -16,6 +16,7 @@ if not os.path.isdir(es_constants.processed_list_eum_dir):
 if not os.path.isdir(es_constants.processed_list_int_dir):
         os.makedirs(es_constants.processed_list_int_dir)
 
+
 class Daemon:
     """
     A generic daemon class.
@@ -63,9 +64,15 @@ class Daemon:
         # redirect standard file descriptors
         sys.stdout.flush()
         sys.stderr.flush()
+
         si = file(self.stdin, 'r')
         so = file(self.stdout, 'a+')
         se = file(self.stderr, 'a+', 0)
+
+        # logger.debug("sys.stdin.fileno %i" % sys.stdin.fileno())
+        # logger.debug("sys.stdout.fileno %i" % sys.stdout.fileno())
+        # logger.debug("sys.stderr.fileno %i" % sys.stderr.fileno())
+
         os.dup2(si.fileno(), sys.stdin.fileno())
         os.dup2(so.fileno(), sys.stdout.fileno())
         os.dup2(se.fileno(), sys.stderr.fileno())
@@ -113,7 +120,7 @@ class Daemon:
         if pid is None:
             message = "pidfile %s does not exist. Daemon not running?\n"
             sys.stderr.write(message % self.pidfile)
-            return # not an error in a restart
+            return  # not an error in a restart
 
         # Try killing the daemon process
         try:
@@ -156,8 +163,10 @@ class Daemon:
             pid = None
         return pid
 
+
 #    Moved here as it is used by acquisition.py and processing.py
 class DaemonDryRunnable(Daemon):
     def __init__(self, *args, **kwargs):
         self.dry_run = kwargs.pop('dry_run', True)
+        # super(DaemonDryRunnable, self).__init__(*args, **kwargs)
         Daemon.__init__(self, *args, **kwargs)
