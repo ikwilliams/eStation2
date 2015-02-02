@@ -84,8 +84,11 @@ class TestProducts(unittest.TestCase):
             return d
 
         # get full distinct list of products (native only)
-        # db_products = querydb.get_product_native(allrecs=True, echo=False)
         db_products = querydb.get_products(echo=False)
+        try:
+            db_products.__len__()
+        except AttributeError:
+            db_products = querydb.get_product_native(allrecs=True, echo=False)
         self.assertTrue(db_products.__len__() > 0)
         products_dict_all = []
         # loop the products list

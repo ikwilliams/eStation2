@@ -583,9 +583,10 @@ def do_oper_subtraction(input_file='', output_file='', input_nodata=None, output
     assign_metadata_processing(input_file, output_file)
 
 # _____________________________
-def do_oper_division(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
+def do_oper_division_perc(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
            output_type=None, options=''):
-    #
+    
+    # Returns the IN1/IN2 * 100; IN1/IN2 might have various datatype (int, float, ...) but internally treated as float
     # Notes:'The command expects exactly 2 files in input.'
     epsilon = 1e-10
 
@@ -622,6 +623,14 @@ def do_oper_division(input_file='', output_file='', input_nodata=None, output_no
     else:
         outFormat=output_format
 
+    # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
+    # TODO-M.C. Replace by calling ReturnNoData
+    if input_nodata is None:
+        input_nodata = -32768
+
+    if output_nodata is None and input_nodata is not None:
+        output_nodata = input_nodata
+
     # instantiate output
     outDrv = gdal.GetDriverByName(outFormat)
     outDS = outDrv.Create(output_file, ns, nl, nb, outType,options_list)
@@ -639,13 +648,14 @@ def do_oper_division(input_file='', output_file='', input_nodata=None, output_no
                 wtc = (data0 != input_nodata) * (data1 != input_nodata) * (N.abs(data1) > epsilon)
 
             # TODO-M.C.: check this assignment is done for the other functions as well
-            dataout=N.zeros(ns)
-            if input_nodata is None:
-                dataout=N.zeros(ns) + output_nodata
+            dataout=N.zeros(ns,GDT_Float32)
+            if output_nodata is None:
+                dataout=N.zeros(ns,GDT_Float32) + output_nodata
 
             if wtc.any():
                 dataout[wtc] = data0[wtc] / data1[wtc]
-
+            
+            dataout = dataout.round()
             dataout.shape=(1,-1)
             outDS.GetRasterBand(ib+1).WriteArray(N.array(dataout), 0, il)
 
@@ -710,7 +720,9 @@ def do_oper_scalar_multiplication(input_file='', output_file='', scalar=1, input
                 dataout = data0 * scalarArray
             else:
                 wtc = (data0 != input_nodata)
-                dataout = N.zeros(ns) + output_nodata
+                dataout = N.zeros(ns)
+                if input_nodata is not None:
+                    dataout = N.zeros(ns) + output_nodata
                 if wtc.any():
                     dataout[wtc] = data0[wtc] * scalarArray[wtc]
 
@@ -1312,6 +1324,35 @@ def ParseType(type):
 	return GDT_Int16
     elif type == 'UInt16':
 	return GDT_UInt16
+    elif type == 'Int32':
+	return GDT_Int32
+    elif type == 'UInt32':
+	return GDT_UInt32
+    elif type == 'Float32':
+	return GDT_Float32
+    elif type == 'Float64':
+	return GDT_Float64
+    elif type == 'CInt16':
+	return GDT_CInt16
+    elif type == 'CInt32':
+	return GDT_CInt32
+    elif type == 'CFloat32':
+	return GDT_CFloat32
+    elif type == 'CFloat64':
+	return GDT_CFloat64
+    else:
+	return GDT_Byte
+
+# _____________________________
+#   Merge/move wrt processing.py functions
+#   To be completed !!!!
+def ReturnNoData(type):
+    if type == 'Byte':
+	return 255
+    elif type == 'Int16':
+	return -32768
+    elif type == 'UInt16':
+	return 65536
     elif type == 'Int32':
 	return GDT_Int32
     elif type == 'UInt32':

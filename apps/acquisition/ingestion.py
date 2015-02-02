@@ -185,7 +185,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, echo
 
     do_preprocess = 0
 
-    if preproc_type != '':
+    if preproc_type != 'None':
         do_preprocess = 1
 
     if do_preprocess == 1:
@@ -752,31 +752,33 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
         if preproc_type == 'MSG_MPE':
             interm_files = pre_process_msg_mpe (subproducts, tmpdir , input_files)
 
-        if preproc_type == 'MODIS_HDF4_TILE':
+        elif preproc_type == 'MODIS_HDF4_TILE':
             interm_files = pre_process_modis_hdf4_tile (subproducts, tmpdir, input_files)
 
-        if preproc_type == 'LSASAF_HDF5':
+        elif preproc_type == 'LSASAF_HDF5':
             interm_files = pre_process_lsasaf_hdf5 (subproducts, tmpdir, input_files)
 
-        if preproc_type == 'PML_NETCDF':
+        elif preproc_type == 'PML_NETCDF':
             interm_files = pre_process_pml_netcdf (subproducts, tmpdir, input_files)
 
-        if preproc_type == 'UNZIP':
+        elif preproc_type == 'UNZIP':
             interm_files = pre_process_unzip (subproducts, tmpdir, input_files)
 
-        if preproc_type == 'BZIP2':
+        elif preproc_type == 'BZIP2':
             interm_files = pre_process_bzip2 (subproducts, tmpdir, input_files)
 
-        if preproc_type == 'GEOREF_NETCDF':
+        elif preproc_type == 'GEOREF_NETCDF':
             interm_files = pre_process_georef_netcdf(subproducts, native_mapset_code, tmpdir, input_files)
             georef_already_done = True
 
-        if preproc_type == 'BZ2_HDF4':
+        elif preproc_type == 'BZ2_HDF4':
             interm_files = pre_process_bz2_hdf4 (subproducts, tmpdir, input_files)
 
-        if preproc_type == 'HDF5_ZIP':
+        elif preproc_type == 'HDF5_ZIP':
             interm_files = pre_process_hdf5_zip (subproducts, tmpdir, input_files)
 
+        else:
+            logger.error('Preproc_type not recognized:[%s] Check in DB table. Exit' % preproc_type)
     except:
         logger.error('Error in pre-processing routine. Exit')
         return 1

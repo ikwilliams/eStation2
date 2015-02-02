@@ -2,7 +2,7 @@
 #	purpose: Define the processing service (by using ruffus)
 #	author:  M.Clerici & Jurriaan van't Klooster
 #	date:	 11.06.2014
-#       descr:	 Generate additional derived products / implements processing chains
+#   descr:	 Generate additional derived products / implements processing chains
 #	history: 1.0
 #
 #   Still to be done
@@ -53,6 +53,7 @@ activate_10dmin_comput=1
 activate_10dmax_comput=1
 # 2.a 10d prod anom
 activate_10ddiff_comput=1
+activate_10davgperc_comput=1
 activate_10dperc_comput=1
 activate_10dnp_comput=1
 
@@ -74,8 +75,7 @@ def create_pipeline(starting_sprod):
                 functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
 
     starting_files = input_dir+"*"+in_prod_ident
-    #print input_dir
-    #print starting_files
+
     #   ---------------------------------------------------------------------
     #   Average
     output_sprod="10davg"
@@ -155,7 +155,31 @@ def create_pipeline(starting_sprod):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_oper_subtraction(**args)
+   #   ---------------------------------------------------------------------
+    #   10dAvgPerc
+    output_sprod="10davgperc"
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
+    #   Starting files + avg
+    formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
+    formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+
+    ancillary_sprod = "10davg"
+    ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
+    ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived',version, mapset)
+    ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
+
+    @follows(fewsnet_10ddiff)
+    @active_if(activate_fewsnet_rfe_comput, activate_10d_comput, activate_10davgperc_comput)
+    @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
+    def fewsnet_10davgperc(input_file, output_file):
+
+        output_file = functions.list_to_element(output_file)
+        functions.check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
+        raster_image_math.do_oper_division_perc(**args)
+        
     #   ---------------------------------------------------------------------
     #   10dperc
     output_sprod="10dperc"
