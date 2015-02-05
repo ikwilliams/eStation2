@@ -5,9 +5,6 @@
 #   descr:	 Reads the definition from eStation DB and execute the copy to local disk
 #	history: 1.0
 
-# Import local definitions
-import locals
-
 # Import standard modules
 import pycurl
 import signal
@@ -32,9 +29,9 @@ logger = log.my_logger(__name__)
 #   General definitions
 c = pycurl.Curl()
 buffer = StringIO.StringIO()
-if not os.path.isdir(locals.es2globals['base_tmp_dir']):
-    os.makedirs(locals.es2globals['base_tmp_dir'])
-tmpdir = tempfile.mkdtemp(prefix=__name__, dir=locals.es2globals['base_tmp_dir'])
+if not os.path.isdir(es_constants.base_tmp_dir):
+    os.makedirs(es_constants.base_tmp_dir)
+tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.base_tmp_dir)
 echo_query = False
 user_def_sleep = es_constants.es2globals['poll_frequency']
 
