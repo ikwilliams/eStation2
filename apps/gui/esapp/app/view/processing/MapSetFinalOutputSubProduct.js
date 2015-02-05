@@ -59,24 +59,24 @@ Ext.define("esapp.view.processing.MapSetFinalOutputSubProduct",{
                     // scope: me,
                     // handler: me.onToggleActivation
                     getClass: function(v, meta, rec) {
-                        if (rec.get('activated')) {
+                        if (rec.get('subactivated')) {
                             return 'activated';
                         } else {
                             return 'deactivated';
                         }
                     },
                     getTip: function(v, meta, rec) {
-                        if (rec.get('activated')) {
-                            return 'Deactivate Product';
+                        if (rec.get('subactivated')) {
+                            return 'Deactivate SubProduct';
                         } else {
-                            return 'Activate Product';
+                            return 'Activate SubProduct';
                         }
                     },
                     handler: function(grid, rowIndex, colIndex) {
                         var rec = grid.getStore().getAt(rowIndex),
-                            action = (rec.get('activated') ? 'deactivated' : 'activated');
-                        Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
-                        rec.get('activated') ? rec.set('activated', false) : rec.set('activated', true);
+                            action = (rec.get('subactivated') ? 'deactivated' : 'activated');
+                        //Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
+                        rec.get('subactivated') ? rec.set('subactivated', false) : rec.set('subactivated', true);
                     }
                 }]
 //        },{

@@ -1,7 +1,7 @@
 Ext.define('esapp.model.Processing', {
     extend : 'esapp.model.Base',
 
-//    idProperty : 'productID',
+    //idProperty : 'process_id',
     fields: [
         {name: 'process_id', mapping: 'process_id'},
         {name: 'process_defined_by', mapping: 'process_defined_by'},
@@ -19,7 +19,6 @@ Ext.define('esapp.model.Processing', {
 
         {name: 'productID', type: 'string', mapping: 'productID'},
         {name: 'defined_by', mapping: 'defined_by'},
-        // {name: 'activated', type: 'boolean', mapping: 'activated'},
         {name: 'product_type', mapping: 'product_type'},
         {name: 'prod_descriptive_name', mapping: 'prod_descriptive_name'},
         {name: 'description', mapping: 'description'},
@@ -33,6 +32,7 @@ Ext.define('esapp.model.Processing', {
 Ext.define('esapp.model.ProcessingProductMapSet', {
     extend : 'esapp.model.Base',
 
+    //idProperty : 'productID',
     fields: [
         {name: 'productID', reference:'Processing', type: 'string'},
         {name: 'mapsetcode'},
@@ -55,8 +55,8 @@ Ext.define('esapp.model.ProcessingProductMapSet', {
 
 Ext.define('esapp.model.MapSetFinalOutputSubProducts', {
     extend : 'esapp.model.Base',
-//    extend: 'Ext.data.Model',
 
+//    idProperty : 'datasetID',
     fields: [
        {name: 'mapsetcode', reference:'ProcessingProductMapSet', type: 'string'},
        {name: 'datasetID'},
@@ -64,7 +64,7 @@ Ext.define('esapp.model.MapSetFinalOutputSubProducts', {
        {name: 'subproductcode'},
        {name: 'version'},
        {name: 'defined_by'},
-       {name: 'activated', type: 'boolean'},
+       {name: 'subactivated', type: 'boolean'},
        {name: 'product_type'},
        {name: 'prod_descriptive_name'},
        {name: 'description'}

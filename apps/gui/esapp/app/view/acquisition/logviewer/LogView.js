@@ -1,23 +1,24 @@
 
-Ext.define("esapp.view.acquisition.ingestionlog.LogView",{
+Ext.define("esapp.view.acquisition.logviewer.LogView",{
     "extend": "Ext.window.Window",
-    "controller": "acquisition-ingestionlog-logview",
+    "controller": "acquisition-logviewer-logview",
     "viewModel": {
-        "type": "acquisition-ingestionlog-logview"
+        "type": "acquisition-logviewer-logview"
     },
 
-    xtype: "ingestionlogview",
+    xtype: "logviewer",
 
     requires: [
-        'esapp.view.acquisition.ingestionlog.LogViewController',
+        'esapp.view.acquisition.logviewer.LogViewController',
 
         'Ext.form.field.HtmlEditor',
         'Ext.form.field.Text',
         'Ext.layout.container.Center',
         'Ext.XTemplate'
     ],
+    // id: null,
 
-    title: 'Ingested product log file',
+    title: 'Log viewer',
     header: {
         titlePosition: 0,
         titleAlign: 'center'
@@ -36,23 +37,24 @@ Ext.define("esapp.view.acquisition.ingestionlog.LogView",{
     },
     autoScroll: true,
 
-    record: null,
+    params: {
+       logtype: null,
+       record: null
+    },
 
     listeners: {
-            beforerender: "getFile"
+        beforerender: "getFile"
     },
 
     initComponent: function () {
         var me = this;
 
-        //me.listeners = {
-        //    beforerender: "getFile"
-        //};
+        //me.id = 'logviewer' + me.params.logtype + me.params.record.get('productID');
 
         me.tbar = ['  ',
             {
                 xtype: 'textfield',
-                id:'highlightfindstring',
+                id:'highlightfindstring', // + me.logtype + me.params.record.get('productID'),
                 fieldLabel: 'Search',
                 labelWidth: 60,
                 labelAlign: 'left',
@@ -84,7 +86,7 @@ Ext.define("esapp.view.acquisition.ingestionlog.LogView",{
 
         me.items = [{
             xtype: 'htmleditor',
-            id: 'logfilecontent',
+            id: 'logfilecontent', // + me.logtype + me.params.record.get('productID'),
             autoScroll: true,
             border: true,
             frame: true,

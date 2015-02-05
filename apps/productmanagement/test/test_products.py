@@ -113,6 +113,7 @@ class TestProducts(unittest.TestCase):
                                                               version=version,
                                                               subproductcode=subproductcode,
                                                               echo=False)
+
                         dataset_dict = row2dict(dataset_info)
                         dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
                         completeness = dataset.get_dataset_normalized_info()

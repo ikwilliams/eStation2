@@ -8,6 +8,8 @@ Ext.define("esapp.view.dashboard.PC3",{
     xtype  : 'dashboard-pc3',
 
     requires: [
+        'esapp.view.widgets.ServiceMenuButton',
+
         'Ext.layout.container.Border',
         'Ext.Img'
     ],
@@ -44,174 +46,33 @@ Ext.define("esapp.view.dashboard.PC3",{
             },
             items: [
             {
-                xtype: 'splitbutton',
-                name: 'eumetcastbtn',
-                text: 'EumetCast',
-                iconCls: 'fa fa-cog fa-2x', // fa-spin 'icon-play', // icomoon fonts
-                style: { color: 'gray' },
-                // glyph: 'xf0c7@FontAwesome',
-                scale: 'medium',
-                handler: 'checkStatusServices',
-                listeners : {
-                    // beforerender: 'checkStatusServices'
-                },
-                menu: Ext.create('Ext.menu.Menu', {
-                    width: 100,
-                    margin: '0 0 10 0',
-                    floating: true,  // usually you want this set to True (default)
-                    items: [
-                        // these will render as dropdown menu items when the arrow is clicked:
-                        {   text: 'Run',
-                            name: 'runeumetcast',
-                            // iconCls: 'fa-play-circle-o', // xf01d   // fa-play xf04b
-                            glyph: 'xf04b@FontAwesome',
-                            cls:'menu-glyph-color-green',
-                            // style: { color: 'green' },
-                            handler: 'execServiceTask'
-                        },
-                        {   text: 'Stop',
-                            name: 'stopeumetcast',
-                            // iconCls: 'fa fa-stop',
-                            glyph: 'xf04d@FontAwesome',
-                            cls:'menu-glyph-color-red',
-                            // style: { color: 'red' },
-                            handler: 'execServiceTask'
-                        },
-                        {   text: 'Restart',
-                            name: 'restarteumetcast',
-                            // iconCls: 'fa fa-refresh',
-                            glyph: 'xf021@FontAwesome',
-                            cls:'menu-glyph-color-orange',
-                            // style: { color: 'orange' },
-                            handler: 'execServiceTask'
-                        }
-                    ]
-                })
+                xtype: 'servicemenubutton',
+                service: 'eumetcast',
+                text: 'Eumetcast',
+                //listeners : {
+                //    beforerender: 'checkStatusServices'
+                //},
+                handler: 'checkStatusServices'
             }, ' ',
             {
-                xtype: 'splitbutton',
-                name: 'internetbtn',
+                xtype: 'servicemenubutton',
+                service: 'internet',
                 text: 'Internet',
-                iconCls: 'fa fa-cog fa-2x',  // 'icon-stop', // icomoon fonts
-                style: { color: 'gray' },
-                // glyph: 0xf05a,
-                scale: 'medium',
-                handler: 'checkStatusServices',
-                menu: Ext.create('Ext.menu.Menu', {
-                    width: 100,
-                    margin: '0 0 10 0',
-                    floating: true,  // usually you want this set to True (default)
-                    items: [
-                        // these will render as dropdown menu items when the arrow is clicked:
-                        {   text: 'Run',
-                            name: 'runinternet',
-                            // iconCls: 'fa-play-circle-o', // xf01d   // fa-play xf04b
-                            glyph: 'xf04b@FontAwesome',
-                            cls:'menu-glyph-color-green',
-                            // style: { color: 'green' },
-                            handler: 'execServiceTask'
-                        },
-                        {   text: 'Stop',
-                            name: 'stopinternet',
-                            // iconCls: 'fa fa-stop',
-                            glyph: 'xf04d@FontAwesome',
-                            cls:'menu-glyph-color-red',
-                            // style: { color: 'red' },
-                            handler: 'execServiceTask'
-                        },
-                        {   text: 'Restart',
-                            name: 'restartinternet',
-                            // iconCls: 'fa fa-refresh',
-                            glyph: 'xf021@FontAwesome',
-                            cls:'menu-glyph-color-orange',
-                            // style: { color: 'orange' },
-                            handler:'execServiceTask'
-                        }
-                    ]
-                })
-            }, ' ', {
-                xtype: 'splitbutton',
-                name: 'ingestbtn',
+                handler: 'checkStatusServices'
+            }, ' ',
+            {
+                xtype: 'servicemenubutton',
+                service: 'ingest',
                 text: 'Ingest',
-                iconCls: 'fa fa-cog fa-2x',  //  fa-spin 'icon-loop', // icomoon fonts
-                style: { color: 'gray' },
-                // glyph: 'e600@icomoon',
-                scale: 'medium',
-                handler: 'checkStatusServices',
-                menu: Ext.create('Ext.menu.Menu', {
-                    width: 100,
-                    margin: '0 0 10 0',
-                    floating: true,  // usually you want this set to True (default)
-                    items: [
-                        // these will render as dropdown menu items when the arrow is clicked:
-                        {   text: 'Run',
-                            name: 'runintgest',
-                            // iconCls: 'fa-play-circle-o', // xf01d   // fa-play xf04b
-                            glyph: 'xf04b@FontAwesome',
-                            cls:'menu-glyph-color-green',
-                            // style: { color: 'green' },
-                            handler: 'execServiceTask'
-                        },
-                        {   text: 'Stop',
-                            name: 'stopingest',
-                            // iconCls: 'fa fa-stop',
-                            glyph: 'xf04d@FontAwesome',
-                            cls:'menu-glyph-color-red',
-                            // style: { color: 'red' },
-                            handler: 'execServiceTask'
-                        },
-                        {   text: 'Restart',
-                            name: 'restartingest',
-                            // iconCls: 'fa fa-refresh',
-                            glyph: 'xf021@FontAwesome',
-                            cls:'menu-glyph-color-orange',
-                            // style: { color: 'orange' },
-                            handler: 'execServiceTask'
-                        }
-                    ]
-                })
-            }, ' ', {
-                xtype: 'splitbutton',
-                name: 'processingbtn',
+                handler: 'checkStatusServices'
+            }, ' ',
+            {
+                xtype: 'servicemenubutton',
+                service: 'processing',
                 text: 'Processing',
-                iconCls: 'fa fa-cog fa-2x',  //  fa-spin 'icon-loop', // icomoon fonts
-                style: { color: 'gray' },
-                // glyph: 'e600@icomoon',
-                scale: 'medium',
-                handler: 'checkStatusServices',
-                menu: Ext.create('Ext.menu.Menu', {
-                    width: 100,
-                    margin: '0 0 10 0',
-                    floating: true,  // usually you want this set to True (default)
-                    items: [
-                        // these will render as dropdown menu items when the arrow is clicked:
-                        {   text: 'Run',
-                            name: 'runprocessing',
-                            // iconCls: 'fa-play-circle-o', // xf01d   // fa-play xf04b
-                            glyph: 'xf04b@FontAwesome',
-                            cls:'menu-glyph-color-green',
-                            // style: { color: 'green' },
-                            handler: 'execServiceTask'
-                        },
-                        {   text: 'Stop',
-                            name: 'stopprocessing',
-                            // iconCls: 'fa fa-stop',
-                            glyph: 'xf04d@FontAwesome',
-                            cls:'menu-glyph-color-red',
-                            // style: { color: 'red' },
-                            handler: 'execServiceTask'
-                        },
-                        {   text: 'Restart',
-                            name: 'restartprocessing',
-                            // iconCls: 'fa fa-refresh',
-                            glyph: 'xf021@FontAwesome',
-                            cls:'menu-glyph-color-orange',
-                            // style: { color: 'orange' },
-                            handler: 'execServiceTask'
-                        }
-                    ]
-                })
-            }, '-',{
+                handler: 'checkStatusServices'
+            }, '-',
+            {
                 xtype: 'splitbutton',
                 name: 'datasyncbtn',
                 text: 'Data Syncronization',

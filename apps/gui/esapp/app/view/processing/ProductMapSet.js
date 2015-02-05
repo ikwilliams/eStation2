@@ -56,10 +56,47 @@ Ext.define("esapp.view.processing.ProductMapSet",{
             onWidgetAttach: function(widget, record) {
                 Ext.suspendLayouts();
                 var mapset_finaloutput_subproduct = record.getData().mapsetoutputproducts; //mapset_finaloutput_subproduct;
-                // console.info(mapset_finaloutput_subproduct);
+                //console.info(mapset_finaloutput_subproduct);
                 var newstore = Ext.create('Ext.data.JsonStore', {
                     model: 'MapSetFinalOutputSubProducts',
                     data: mapset_finaloutput_subproduct
+                    ,storeId : 'MapSetFinalOutputSubProductsStore' + mapset_finaloutput_subproduct.datasetID
+                    ,autoSync: true
+                    ,requires : [
+                        'esapp.model.MapSetFinalOutputSubProducts',
+                        'Ext.data.proxy.Rest'
+                    ]
+                    ,proxy: {
+                        type: 'rest',
+                        appendId: false,
+                        api: {
+                            read: 'processing',
+                            create: 'processing/create',
+                            update: 'processing/update',
+                            destroy: 'processing/delete'
+                        },
+                        reader: {
+                             type: 'json'
+                            ,successProperty: 'success'
+                            ,rootProperty: 'products'
+                            ,messageProperty: 'message'
+                        },
+                        writer: {
+                            type: 'json',
+                            writeAllFields: true,
+                            rootProperty: 'products'
+                        },
+                        listeners: {
+                            exception: function(proxy, response, operation){
+                                Ext.MessageBox.show({
+                                    title: 'PROCESSING STORE - REMOTE EXCEPTION',
+                                    msg: operation.getError(),
+                                    icon: Ext.MessageBox.ERROR,
+                                    buttons: Ext.Msg.OK
+                                });
+                            }
+                        }
+                    }
                 });
                 widget.setStore(newstore);
                 Ext.resumeLayouts(true);

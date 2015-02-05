@@ -13,7 +13,7 @@ Ext.define("esapp.view.acquisition.Ingestion",{
     requires: [
         'esapp.view.acquisition.IngestionModel',
         'esapp.view.acquisition.IngestionController',
-        'esapp.view.acquisition.ingestionlog.LogView',
+        'esapp.view.acquisition.logviewer.LogView',
 
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.column.Action',
@@ -21,15 +21,15 @@ Ext.define("esapp.view.acquisition.Ingestion",{
         'Ext.grid.column.Check'
     ],
 
-// mixins: [],
-// events: ['my_event_name'],
-// register handler for 'my_event_name' event
-//    component.on('my_event_name', function(cmp, btn) {
-//            alert(this.getString()); // invoke miixin  method
-//        }, frm);
-//    store: 'IngestionsStore',
-//    bind: '{ProductAcquisitionsGrid.selection.Ingestions}',
-//    bind: '{ingestions}',
+    //mixins: [],
+    //events: ['my_event_name'],
+    //register handler for 'my_event_name' event
+    //    component.on('my_event_name', function(cmp, btn) {
+    //            alert(this.getString()); // invoke miixin  method
+    //        }, frm);
+    //    store: 'IngestionsStore',
+    //    bind: '{ProductAcquisitionsGrid.selection.Ingestions}',
+    //    bind: '{ingestions}',
     bind:{
         store:'{productingestions}'
     },
@@ -49,8 +49,8 @@ Ext.define("esapp.view.acquisition.Ingestion",{
     hideHeaders: true,
     columnLines: false,
     rowLines:false,
-//    frame: false,
-//    border: false,
+    //frame: false,
+    //border: false,
 
     initComponent: function () {
         var me = this;
@@ -79,19 +79,13 @@ Ext.define("esapp.view.acquisition.Ingestion",{
             //dataIndex: 'completeness',
             //bind: '{ingestions.completeness}',
             width: 360,
-//            margin:0,
-//            bodyPadding:0,
+            //margin:0,
+            //bodyPadding:0,
             widget: {
                 xtype: 'datasetchart',
                 height:30
-                //,fromdate: '01-01-2012'
-                //,todate: '21-08-2014'
-                //,values:[1,1,0,1,-1,1,-1,0,0,1,1,1,0,1,1,1,-1,1,1,1]
             },
             onWidgetAttach: function(widget, record) {
-
-                // console.info(record.getAssociatedData().completeness); // get all associated data, including deep nested
-                // console.info(record.completeness); // get completeness model!
 
                 var completeness = record.getAssociatedData().completeness;
 
@@ -186,7 +180,7 @@ Ext.define("esapp.view.acquisition.Ingestion",{
                 handler: function(grid, rowIndex, colIndex) {
                     var rec = grid.getStore().getAt(rowIndex),
                         action = (rec.get('activated') ? 'deactivated' : 'activated');
-                    Ext.toast({ html: action + ' ' + rec.get('productcode') + ' ' + rec.get('mapsetcode') + ' ' + rec.get('subproductcode'), title: 'Action', width: 300, align: 't' });
+                    //Ext.toast({ html: action + ' ' + rec.get('productcode') + ' ' + rec.get('mapsetcode') + ' ' + rec.get('subproductcode'), title: 'Action', width: 300, align: 't' });
                     rec.get('activated') ? rec.set('activated', false) : rec.set('activated', true);
                 }
             }]
@@ -209,8 +203,11 @@ Ext.define("esapp.view.acquisition.Ingestion",{
                 // handler: me.onRemoveClick
                 handler: function (grid, rowIndex, colIndex, icon) {
                     var rec = grid.getStore().getAt(rowIndex);
-                    var logViewWin = new esapp.view.acquisition.ingestionlog.LogView({
-                        record: rec
+                    var logViewWin = new esapp.view.acquisition.logviewer.LogView({
+                        params: {
+                            logtype: 'ingest',
+                            record: rec
+                        }
                     });
                     logViewWin.show();
                 }

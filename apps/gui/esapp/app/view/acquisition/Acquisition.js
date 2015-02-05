@@ -103,7 +103,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                     if (btn.pressed){
                         // ToDo: check if logged in!
 
-                        acq_main[0].columns[3].setWidth(420);
+                        acq_main[0].columns[3].setWidth(475);
                         acq_main[0].columns[3].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 111px; left: 0px; tabindex="-1">' +
                         '           <div data-ref="titleEl" class="x-column-header-inner">' +
                         '               <span data-ref="textEl" class="x-column-header-text">Type</span>' +
@@ -119,9 +119,14 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                         '               <span data-ref="textEl" class="x-column-header-text">Last executed</span>' +
                         '           </div>' +
                         '       </div>' +
-                        '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 60px; left: 332px; margin: 0px; top: 0px;" tabindex="-1">' +
+                        '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 60px; right: auto; left: 332px; margin: 0px; top: 0px;" tabindex="-1">' +
                         '           <div data-ref="titleEl" class="x-column-header-inner">' +
                         '               <span data-ref="textEl" class="x-column-header-text">Active</span>' +
+                        '           </div>' +
+                        '       </div>' +
+                        '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 55px; left: 392px; margin: 0px; top: 0px;" tabindex="-1">' +
+                        '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                        '               <span data-ref="textEl" class="x-column-header-text">Log</span>' +
                         '           </div>' +
                         '       </div>');
 
@@ -146,15 +151,20 @@ Ext.define("esapp.view.acquisition.Acquisition",{
 
                     }
                     else {
-                        acq_main[0].columns[3].setWidth(190);
+                        acq_main[0].columns[3].setWidth(245);
                         acq_main[0].columns[3].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 111px; left: 0px; tabindex="-1">' +
                                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                                 '               <span data-ref="textEl" class="x-column-header-text">Type</span>' +
                                 '           </div>' +
                                 '       </div>' +
-                                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 60px; left: 111px; margin: 0px; top: 0px;" tabindex="-1">' +
+                                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 60px; left: 111px; margin: 0px; top: 0px;" tabindex="-1">' +
                                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                                 '               <span data-ref="textEl" class="x-column-header-text">Active</span>' +
+                                '           </div>' +
+                                '       </div>' +
+                                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 55px; left: 171px; margin: 0px; top: 0px;" tabindex="-1">' +
+                                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                                '               <span data-ref="textEl" class="x-column-header-text">Log</span>' +
                                 '           </div>' +
                                 '       </div>');
 
@@ -210,135 +220,30 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                     view.getFeature('productcategories').collapseAll();
                     view.refresh();
                 }
-            }, '->', {
-                xtype: 'splitbutton',
-                name: 'eumetcastbtn',
-                text: 'EumetCast',
-                iconCls: 'fa fa-cog fa-2x', // fa-spin 'icon-play', // icomoon fonts
-                style: { color: 'gray' },
-                // glyph: 'xf0c7@FontAwesome',
-                scale: 'medium',
-                handler: 'checkStatusServices',
+            }, '->',
+            {
+                xtype: 'servicemenubutton',
+                service: 'eumetcast',
+                text: 'Eumetcast',
                 listeners : {
-                    render: 'checkStatusServices'
+                    afterrender: 'checkStatusServices'
                 },
-                menu: Ext.create('Ext.menu.Menu', {
-                    width: 100,
-                    margin: '0 0 10 0',
-                    floating: true,  // usually you want this set to True (default)
-                    items: [
-                        // these will render as dropdown menu items when the arrow is clicked:
-                        {   text: 'Run',
-                            name: 'runeumetcast',
-                            // iconCls: 'fa-play-circle-o', // xf01d   // fa-play xf04b
-                            glyph: 'xf04b@FontAwesome',
-                            cls:'menu-glyph-color-green',
-                            // style: { color: 'green' },
-                            handler: 'execServiceTask'
-                        },
-                        {   text: 'Stop',
-                            name: 'stopeumetcast',
-                            // iconCls: 'fa fa-stop',
-                            glyph: 'xf04d@FontAwesome',
-                            cls:'menu-glyph-color-red',
-                            // style: { color: 'red' },
-                            handler: 'execServiceTask'
-                        },
-                        {   text: 'Restart',
-                            name: 'restarteumetcast',
-                            // iconCls: 'fa fa-refresh',
-                            glyph: 'xf021@FontAwesome',
-                            cls:'menu-glyph-color-orange',
-                            // style: { color: 'orange' },
-                            handler: 'execServiceTask'
-                        }
-                    ]
-                })
+                handler: 'checkStatusServices'
             },
             // add a vertical separator bar between toolbar items
             '-', // same as {xtype: 'tbseparator'} to create Ext.toolbar.Separator
             {
-                xtype: 'splitbutton',
-                name: 'internetbtn',
+                xtype: 'servicemenubutton',
+                service: 'internet',
                 text: 'Internet',
-                iconCls: 'fa fa-cog fa-2x',  // 'icon-stop', // icomoon fonts
-                style: { color: 'gray' },
-                // glyph: 0xf05a,
-                scale: 'medium',
-                handler: 'checkStatusServices',
-                menu: Ext.create('Ext.menu.Menu', {
-                    width: 100,
-                    margin: '0 0 10 0',
-                    floating: true,  // usually you want this set to True (default)
-                    items: [
-                        // these will render as dropdown menu items when the arrow is clicked:
-                        {   text: 'Run',
-                            name: 'runinternet',
-                            // iconCls: 'fa-play-circle-o', // xf01d   // fa-play xf04b
-                            glyph: 'xf04b@FontAwesome',
-                            cls:'menu-glyph-color-green',
-                            // style: { color: 'green' },
-                            handler: 'execServiceTask'
-                        },
-                        {   text: 'Stop',
-                            name: 'stopinternet',
-                            // iconCls: 'fa fa-stop',
-                            glyph: 'xf04d@FontAwesome',
-                            cls:'menu-glyph-color-red',
-                            // style: { color: 'red' },
-                            handler: 'execServiceTask'
-                        },
-                        {   text: 'Restart',
-                            name: 'restartinternet',
-                            // iconCls: 'fa fa-refresh',
-                            glyph: 'xf021@FontAwesome',
-                            cls:'menu-glyph-color-orange',
-                            // style: { color: 'orange' },
-                            handler:'execServiceTask'
-                        }
-                    ]
-                })
-            }, '-', {
-                xtype: 'splitbutton',
-                name: 'ingestbtn',
+                handler: 'checkStatusServices'
+            },
+            '-',
+            {
+                xtype: 'servicemenubutton',
+                service: 'ingest',
                 text: 'Ingest',
-                iconCls: 'fa fa-cog fa-2x',  //  fa-spin 'icon-loop', // icomoon fonts
-                style: { color: 'gray' },
-                // glyph: 'e600@icomoon',
-                scale: 'medium',
-                handler: 'checkStatusServices',
-                menu: Ext.create('Ext.menu.Menu', {
-                    width: 100,
-                    margin: '0 0 10 0',
-                    floating: true,  // usually you want this set to True (default)
-                    items: [
-                        // these will render as dropdown menu items when the arrow is clicked:
-                        {   text: 'Run',
-                            name: 'runingest',
-                            // iconCls: 'fa-play-circle-o', // xf01d   // fa-play xf04b
-                            glyph: 'xf04b@FontAwesome',
-                            cls:'menu-glyph-color-green',
-                            // style: { color: 'green' },
-                            handler: 'execServiceTask'
-                        },
-                        {   text: 'Stop',
-                            name: 'stopingest',
-                            // iconCls: 'fa fa-stop',
-                            glyph: 'xf04d@FontAwesome',
-                            cls:'menu-glyph-color-red',
-                            // style: { color: 'red' },
-                            handler: 'execServiceTask'
-                        },
-                        {   text: 'Restart',
-                            name: 'restartingest',
-                            // iconCls: 'fa fa-refresh',
-                            glyph: 'xf021@FontAwesome',
-                            cls:'menu-glyph-color-orange',
-                            // style: { color: 'orange' },
-                            handler: 'execServiceTask'
-                        }
-                    ]
-                })
+                handler: 'checkStatusServices'
             },
             '->', // same as { xtype: 'tbfill' }
             {
@@ -362,31 +267,23 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                         ingestiongridstore.load();
                     }
                     // btn.up().up().doLayout();
-        //                var view = btn.up().up().getView();
-        //                view.getFeature('productcategories').expandAll();
-        //                view.refresh();
+                    //    var view = btn.up().up().getView();
+                    //    view.getFeature('productcategories').expandAll();
+                    //    view.refresh();
                 }
-        //        {
-        //            xtype: 'textfield',
-        //            width: 300,
-        //            hidden:true,
-        //            name: 'search_acq',
-        //            emptyText: 'enter search term'
-        //        }
-            // ,'Search' // same as {xtype: 'tbtext', text: 'text1'} to create Ext.toolbar.TextItem
             }]
         });
 
-//        me.listeners = {
-//            afterrender: function(gridpanel,func){
-//                Ext.toast({ html: 'Afterrender', title: 'Afterrender', width: 200, align: 't' });
-//
-//                var view = gridpanel.getView();
-//                view.getFeature('productcategories').expandAll();
-//                view.refresh();
-//                // gridpanel.doLayout();
-//            }
-//        };
+        //me.listeners = {
+        //    afterrender: function(gridpanel,func){
+        //        Ext.toast({ html: 'Afterrender', title: 'Afterrender', width: 200, align: 't' });
+        //
+        //        var view = gridpanel.getView();
+        //        view.getFeature('productcategories').expandAll();
+        //        view.refresh();
+        //        // gridpanel.doLayout();
+        //    }
+        //};
 
         me.defaults = {
             variableRowHeight : true,
@@ -517,39 +414,23 @@ Ext.define("esapp.view.acquisition.Acquisition",{
             },
             columns: [{
                 xtype: 'widgetcolumn',
-                width: 190,
+                width: 245,
 
                 header: ' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 111px; left: 0px; tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">Type</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 60px; left: 111px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 60px; left: 111px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">Active</span>' +
                 '           </div>' +
+                '       </div>' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 55px; left: 171px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                '               <span data-ref="textEl" class="x-column-header-text">Log</span>' +
+                '           </div>' +
                 '       </div>',
-
-//                header: ' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 111px; left: 0px; tabindex="-1">' +
-//                '           <div data-ref="titleEl" class="x-column-header-inner">' +
-//                '               <span data-ref="textEl" class="x-column-header-text">Type</span>' +
-//                '           </div>' +
-//                '       </div>' +
-//                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 110px; right: auto; left: 111px; margin: 0px; top: 0px;" tabindex="-1">' +
-//                '           <div data-ref="titleEl" class="x-column-header-inner">' +
-//                '               <span data-ref="textEl" class="x-column-header-text">Last copied</span>' +
-//                '           </div>' +
-//                '       </div>' +
-//                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 110px; right: auto; left: 221px; margin: 0px; top: 0px;" tabindex="-1">' +
-//                '           <div data-ref="titleEl" class="x-column-header-inner">' +
-//                '               <span data-ref="textEl" class="x-column-header-text">Last executed</span>' +
-//                '           </div>' +
-//                '       </div>' +
-//                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 60px; left: 332px; margin: 0px; top: 0px;" tabindex="-1">' +
-//                '           <div data-ref="titleEl" class="x-column-header-inner">' +
-//                '               <span data-ref="textEl" class="x-column-header-text">Active</span>' +
-//                '           </div>' +
-//                '       </div>',
 
                 listeners: {
                     render: function(column){
@@ -611,26 +492,23 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                 '       </div>' +
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 695px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Actions</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">Log</span>' +
                 '           </div>' +
                 '       </div>',
                 listeners: {
                   render: function(column){
                       column.titleEl.removeCls('x-column-header-inner');
-                      // column.doLayout();
                   }
                 },
                 onWidgetAttach: function(widget, record) {
-                    // Ext.suspendLayouts();
-
-                    // widget.setVisible(record.get('score') > 50);
+                    Ext.suspendLayouts();
                     var daStore = widget.getViewModel().get('productingestions');
                     daStore.setFilters({
                          property:'productID'
                         ,value:record.id
                         ,anyMatch:true
                     });
-                    // Ext.resumeLayouts(true);
+                    Ext.resumeLayouts(true);
                 },
                 widget: {
                     xtype: 'ingestiongrid'

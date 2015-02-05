@@ -140,6 +140,15 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
+    def Test_get_subproduct(self):
+
+        subproduct = querydb.get_subproduct(productcode='fewsnet_rfe',
+                                            subproductcode='rfe',
+                                            version='undefined')
+        logger.info("Subproduct: %s", subproduct)
+
+        self.assertEqual(1, 1)
+
     def Test_get_dataacquisitions(self):
 
         dataacquisitions = querydb.get_dataacquisitions()

@@ -16,11 +16,10 @@ Ext.define('esapp.store.ProcessingStore', {
     ,remoteSort: false
     ,remoteGroup: false
 
-//    sorters: {property: 'productcode', direction: 'ASC'}
+    //sorters: {property: 'productcode', direction: 'ASC'}
 
     ,proxy: {
         type: 'rest',
-        // url: '',
         appendId: false,
         api: {
             read: 'processing',
@@ -36,7 +35,12 @@ Ext.define('esapp.store.ProcessingStore', {
         },
         writer: {
             type: 'json',
+            allDataOptions: {
+                associated: true
+                //,changes: true
+            },
             writeAllFields: true,
+            //appendId: false,
             rootProperty: 'products'
         },
         listeners: {
@@ -60,7 +64,7 @@ Ext.define('esapp.store.ProcessingStore', {
     }
     ,listeners: {
         write: function(store, operation){
-            Ext.toast({ html: operation.getResultSet().message, title: operation.action, width: 200, align: 't' });
+            Ext.toast({ html: operation.getResultSet().message, title: "Processing chain update", width: 300, align: 't' });
         }
     }
 
