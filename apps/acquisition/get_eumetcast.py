@@ -7,9 +7,7 @@
 #   descr:	 Reads the definition from eStation DB and execute the copy to local disk
 #	history: 1.0
 #   Arguments: dry_run -> if 1, read tables and report activity ONLY
-
-# Import local definitions
-#import locals
+#
 
 # Import standard modules
 import signal
@@ -38,7 +36,6 @@ output_dir = es_constants.ingest_dir
 user_def_sleep = es_constants.poll_frequency
 
 echo_query = False
-
 
 def find_files(directory, pattern):
     lst = []
@@ -128,6 +125,8 @@ def loop_eumetcast(dry_run=False):
             # Loop over active triggers
             for eumetcast_source in eumetcast_sources_list:
 
+                # Define a file_handler logger 'source-specific' (for GUI)
+                logger_spec = log.my_logger('apps.get_eumetcast.'+eumetcast_source.eumetcast_id)
                 logger.debug("Processing eumetcast source  %s.", eumetcast_source.eumetcast_id)
 
                 processed_list_filename = es_constants.get_eumetcast_processed_list_prefix+str(eumetcast_source.eumetcast_id)+'.list'
@@ -150,19 +149,22 @@ def loop_eumetcast(dry_run=False):
 
                 logger.debug("Create current list of file to process for trigger %s.", eumetcast_source.eumetcast_id)
                 current_list = find_files(input_dir, eumetcast_source.filter_expression_jrc)
-                logger.debug("Number of files currently on PC1 for trigger %s is %i", eumetcast_source.eumetcast_id, len(current_list))
+                #logger.debug("Number of files currently on PC1 for trigger %s is %i", eumetcast_source.eumetcast_id, len(current_list))
+                logger_spec.debug("Number of files currently on PC1 for trigger %s is %i", eumetcast_source.eumetcast_id, len(current_list))
                 if len(current_list) > 0:
 
-                    logger.debug("Number of files already copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(processed_list))
+                    #logger.debug("Number of files already copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(processed_list))
+                    logger_spec.debug("Number of files already copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(processed_list))
                     listtoprocess = []
                     listtoprocess = set(current_list) - set(processed_list)
-                    logger.debug("Number of files to be copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(listtoprocess))
+                    #logger.debug("Number of files to be copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(listtoprocess))
+                    logger_spec.debug("Number of files to be copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(listtoprocess))
                     if listtoprocess != set([]):
-                        logger.debug("Loop on the found files.")
+                        logger_spec.debug("Loop on the found files.")
                         for filename in list(listtoprocess):
                             if os.path.isfile(os.path.join(input_dir, filename)):
                                 if os.stat(os.path.join(input_dir, filename)).st_mtime < int(time.time()):
-                                    logger.debug("Processing file: "+os.path.basename(filename))
+                                    logger_spec.debug("Processing file: "+os.path.basename(filename))
                                     if not dry_run:
                                         if commands.getstatusoutput("cp " + filename + " " + output_dir + os.sep + os.path.basename(filename))[0] == 0:
                                             logger.info("File %s copied.", filename)
@@ -171,11 +173,11 @@ def loop_eumetcast(dry_run=False):
                                             processed_info['time_latest_copy']=datetime.datetime.now()
                                             processed_info['lenght_proc_list']=len(processed_list)
                                         else:
-                                            logger.warning("Problem while copying file: %s.", filename)
+                                            logger_spec.warning("Problem while copying file: %s.", filename)
                                     else:
-                                        logger.info('Dry_run is set: do not get files')
+                                        logger_spec.info('Dry_run is set: do not get files')
                             else:
-                                logger.error("File %s removed by the system before being processed.", filename)
+                                logger_spec.error("File %s removed by the system before being processed.", filename)
                     else:
                         logger.debug("Nothing to process - go to next trigger.")
                         pass

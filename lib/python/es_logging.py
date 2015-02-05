@@ -18,12 +18,10 @@ except ImportError:
 
 # Get log_dir
 try:
-    log_dir = es_constants.es2globals['log_dir']
+    log_dir = es_constants.log_dir
 except EnvironmentError:
     print 'Error - log_dir not defined in es_constants.  Exit'
     exit(1)
-
-#log_dir = base_dir+'/log/'
 
 
 #class GroupWriteRotatingFileHandler(logging.handlers.RotatingFileHandler):
@@ -44,17 +42,12 @@ def my_logger(name):
         h = logger.handlers[0]
         logger.removeHandler(h)
 
-    #os.chmod(log_dir, stat.S_IRWXU)
-    #os.chmod(log_dir, stat.S_IRWXG)
-    #os.chmod(log_dir, stat.S_IRWXO)
-
     # Create handlers
     null_handler = logging.NullHandler()
     logger.addHandler(null_handler)
     console_handler = logging.StreamHandler()
 
-    file_handler = logging.handlers.RotatingFileHandler(log_dir+name+'.log', maxBytes=10000, backupCount=5)
-    file_handler = logging.FileHandler(log_dir+name+'.log')
+    file_handler = logging.handlers.RotatingFileHandler(log_dir+name+'.log', maxBytes=50000, backupCount=3)
 
     # Create formatter
     plain_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%d %H:%M:%S")
@@ -63,7 +56,6 @@ def my_logger(name):
     console_handler.setFormatter(plain_formatter)
     file_handler.setFormatter(plain_formatter)
 
-    #handler=logging.FileHandler(os.path.join('/some/path/',name+'.log'),'w')
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
 
