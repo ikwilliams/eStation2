@@ -11,7 +11,15 @@ Ext.define('esapp.overrides.view.Table', {
             if (this.el != parentParentGridView){
                 return false;
             }
-            else { return true; }
+            else {
+                var parentParentParentGridView = target.up().up().up('.x-grid-view');
+                if (this.el != parentParentParentGridView){
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            }
         }
     },
     processItemEvent: function(record, row, rowIndex, e) {

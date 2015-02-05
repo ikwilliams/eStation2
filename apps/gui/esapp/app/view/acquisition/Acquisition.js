@@ -450,8 +450,6 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                 align: 'center',
                 shrinkWrap: 0,
                 items: [{
-                    // scope: me,
-                    // handler: me.onToggleActivation
                     getClass: function(v, meta, rec) {
                         if (rec.get('activated')) {
                             return 'activated';
@@ -466,10 +464,14 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                             return 'Activate Product';
                         }
                     },
+                    isDisabled: function(view, rowIndex, colIndex, item, record) {
+                        // Returns true if 'editable' is false (, null, or undefined)
+                        return false // !record.get('editable');
+                    },
                     handler: function(grid, rowIndex, colIndex) {
                         var rec = grid.getStore().getAt(rowIndex),
                             action = (rec.get('activated') ? 'deactivated' : 'activated');
-                        Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
+                        // Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
                         rec.get('activated') ? rec.set('activated', false) : rec.set('activated', true);
                     }
                 }]

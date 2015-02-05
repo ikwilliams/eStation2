@@ -69,6 +69,47 @@ Ext.define("esapp.view.processing.Processing",{
                     view.getFeature('processprodcat').collapseAll();
                     view.refresh();
                 }
+            }, '->', {
+                xtype: 'splitbutton',
+                name: 'processingbtn',
+                text: 'Processing',
+                iconCls: 'fa fa-cog fa-2x',  //  fa-spin 'icon-loop', // icomoon fonts
+                style: { color: 'gray' },
+                // glyph: 'e600@icomoon',
+                scale: 'medium',
+                handler: 'checkStatusServices',
+                menu: Ext.create('Ext.menu.Menu', {
+                    width: 100,
+                    margin: '0 0 10 0',
+                    floating: true,  // usually you want this set to True (default)
+                    items: [
+                        // these will render as dropdown menu items when the arrow is clicked:
+                        {   text: 'Run',
+                            name: 'runprocessing',
+                            // iconCls: 'fa-play-circle-o', // xf01d   // fa-play xf04b
+                            glyph: 'xf04b@FontAwesome',
+                            cls:'menu-glyph-color-green',
+                            // style: { color: 'green' },
+                            handler: 'execServiceTask'
+                        },
+                        {   text: 'Stop',
+                            name: 'stopprocessing',
+                            // iconCls: 'fa fa-stop',
+                            glyph: 'xf04d@FontAwesome',
+                            cls:'menu-glyph-color-red',
+                            // style: { color: 'red' },
+                            handler: 'execServiceTask'
+                        },
+                        {   text: 'Restart',
+                            name: 'restartprocessing',
+                            // iconCls: 'fa fa-refresh',
+                            glyph: 'xf021@FontAwesome',
+                            cls:'menu-glyph-color-orange',
+                            // style: { color: 'orange' },
+                            handler: 'execServiceTask'
+                        }
+                    ]
+                })
             },
             '->',
             {

@@ -33,6 +33,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         trackOver:true
     },
 
+    bufferedRenderer: false,
     collapsible: false,
     enableColumnMove:false,
     enableColumnResize:false,
@@ -48,9 +49,22 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         groupHeaderTpl: Ext.create('Ext.XTemplate', '<div class="group-header-style">{name} ({children.length})</div>'),
         hideGroupedHeader: true,
         enableGroupingMenu: false,
-        startCollapsed : false,
+        startCollapsed : true,
         groupByText: 'Product category'
     }],
+
+    listeners: {
+        beforerender: function (){
+            //console.info(this.getView().getFeature('prodcat'));
+            this.getView().getFeature('prodcat').expand("<span style='display: none;'>1</span>Vegetation", true);  // rainfall
+            //this.getView().getFeature('prodcat').expand("Vegetation", true);  // rainfall
+        },
+        groupclick: function(view, rowElement, groupName, e){
+            //console.info('groupname: '+ groupName);
+            //view.features[0].collapseAll();
+            //view.features[0].expand(groupName);
+        }
+    },
 
     initComponent: function () {
         var me = this;

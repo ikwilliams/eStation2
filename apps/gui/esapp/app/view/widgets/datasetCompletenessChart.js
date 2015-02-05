@@ -33,9 +33,8 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
 
     initComponent: function() {
         var me = this,
-            spriteY = 7;
-
-//        debugger;
+            spriteY = 7,
+            fontsize = 10;
 
         me.items = [{
             xtype: 'cartesian',
@@ -54,33 +53,33 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
             insetPadding: {top: 10, left: 15, right: 15, bottom: 0},
             flipXY: true,
 
-//            store: Ext.create('Ext.data.JsonStore', {
-//                fields: me.storefields,
-//                data: me.datasetdata
-//            }),
+            //store: Ext.create('Ext.data.JsonStore', {
+            //    fields: me.storefields,
+            //    data: me.datasetdata
+            //}),
             sprites:  [{
                 type: 'text',
                 text: 'Files: ' + me.totfiles,
-                fontSize: 9,
+                fontSize: fontsize,
                 x: 120,
                 y: spriteY
             },{
                 type: 'text',
                 text: 'Missing: ' + me.missingfiles,
-                fontSize: 9,
+                fontSize: fontsize,
                 x: 190,
                 y: spriteY
             },{
                 type: 'text',
                 text: me.firstdate,
-                fontSize: 9,
+                fontSize: fontsize,
                 x: 0,
                 y: spriteY
             },{
                 type: 'text',
                 text: me.lastdate,
-                fontSize: 9,
-                x: 292,
+                fontSize: fontsize,
+                x: 286,
                 y: spriteY
             }],
 
@@ -108,20 +107,19 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
                 style: {
                     opacity: 0.80
                 },
-//                highlight: {
-//                    fillStyle: 'white' // 'transparent'
-//                    ,strokeStyle: "black"
-//                    ,opacity: 30
-//                    ,segment: {
-//                        margin: 5
-//                    }
-//                },
+                //highlight: {
+                //    fillStyle: 'white' // 'transparent'
+                //    ,strokeStyle: "black"
+                //    ,opacity: 30
+                //    ,segment: {
+                //        margin: 5
+                //    }
+                //},
                 tooltip: {
                     trackMouse: false,
                     dismissDelay:2000,
                     style: 'background: #fff',
                     renderer: function (storeItem, item) {
-                        // console.info(item.series.getTitle());
                         var allperiods = '';
                         var arrayLength = item.series.getTitle().length;
                         var thisperiodindex = Ext.Array.indexOf(item.series.getYField(), item.field);

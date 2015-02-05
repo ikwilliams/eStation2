@@ -4,7 +4,7 @@ import sys
 from lib.python import es_logging as log
 
 # Import eStation lib modules
-import locals
+# import locals
 from config import es_constants
 
 import sqlalchemy
@@ -30,10 +30,10 @@ class ConnectDB(object):
         #                else -> connect to postgresql
 
         if getattr(ConnectDB, "_testing", None) is None:
-            setattr(ConnectDB, "_testing", locals.es2globals.get('db_test_mode' == 1)
+            setattr(ConnectDB, "_testing", es_constants.es2globals.get('db_test_mode' == 1)
                     or "nosetests" in sys.argv[0].lower())
         # Force through a global variable
-        #if locals.es2globals.get('db_test_mode'):
+        #if es_constants.es2globals.get('db_test_mode'):
         #    setattr(ConnectDB, "_testing", 1)
         return ConnectDB._testing
 
@@ -75,7 +75,7 @@ class ConnectDB(object):
 
         try:
             self.schema = schema or es_constants.es2globals['schema_products']
-            logger.debug("Usesqlsoup is: %s " % usesqlsoup)
+            # logger.debug("Usesqlsoup is: %s " % usesqlsoup)
             if usesqlsoup:
                 dburl = ConnectDB.get_db_url()
                 self.db = sqlsoup.SQLSoup(dburl)
@@ -85,7 +85,7 @@ class ConnectDB(object):
                 Mysession = sessionmaker(bind=self.db, autoflush=True)
                 self.session = Mysession()
 
-            logger.debug("is_testing is: %s " % self.is_testing())
+            # logger.debug("is_testing is: %s " % self.is_testing())
             if self.is_testing():
                 self.schema = None
             else:

@@ -3,36 +3,35 @@ Ext.define('esapp.view.acquisition.ingestionlog.LogViewController', {
     alias: 'controller.acquisition-ingestionlog-logview'
 
     // {{{
-    ,getFile: function(record) {
-        console.info("following is the record in getFile: ");
-        console.info(record);
-        console.info(record.get('productcode'));
-        console.info(record.get('mapsetcode'));
-        console.info(record.get('version'));
-        console.info(record.get('subproductcode'));
+    ,getFile: function(win) {
+        //console.info(win);
+        //Ext.toast({ html: 'Before render in logview', title: 'Before render', width: 200, align: 't' });
+        // me.getFile(me.record);
+        //console.info("following is the record in getFile: ");
+        console.info(win);
+        //console.info(me.record.get('productcode'));
+        //console.info(me.record.get('mapsetcode'));
+        //console.info(me.record.get('version'));
+        //console.info(me.record.get('subproductcode'));
         Ext.Ajax.request({
-           method: 'POST',
-           success: function ( result, request ) {
-
-           },
-           failure: function ( result, request) {
-
-           },
+           method: 'GET',
            url:'getlogfile',
            params:{
-               productcode:record.get('productcode'),
-               mapsetcode:record.get('mapsetcode'),
-               version:record.get('version'),
-               subproductcode:record.get('subproductcode')
+               productcode:win.record.get('productcode'),
+               mapsetcode:win.record.get('mapsetcode'),
+               version:win.record.get('version'),
+               subproductcode:win.record.get('subproductcode')
            },
            loadMask:'Loading data...',
            callback:function(callinfo,responseOK,response ){
 
                 var response_Text = response.responseText.trim();
                 Ext.getCmp('logfilecontent').setValue(response_Text);
-                eStation.myGlobals.OriginalContent = Ext.getCmp('logfilecontent').getRawValue();
-                eStation.LogfileShowPanel.setTitle('File: ' + record.data.filename);
-           }
+                //eStation.myGlobals.OriginalContent = Ext.getCmp('logfilecontent').getRawValue();
+                //eStation.LogfileShowPanel.setTitle('File: ' + record.data.filename);
+           },
+           success: function ( result, request ) {},
+           failure: function ( result, request) {}
         });
     } // eo getFile
     //   }}}
@@ -50,7 +49,7 @@ Ext.define('esapp.view.acquisition.ingestionlog.LogViewController', {
             var highlightStartTag = "<span style='color:" + textColor + "; background-color:" + bgColor + ";'>";
             var highlightEndTag = "</span>";
 
-            var highlightedcontent = highlightSearchTerms(targetcontent, searchText, treatAsPhrase, warnOnFailure, highlightStartTag, highlightEndTag);
+            var highlightedcontent = this.highlightSearchTerms(targetcontent, searchText, treatAsPhrase, warnOnFailure, highlightStartTag, highlightEndTag);
 
             // var contentField = Ext.getCmp('logfilecontent');
             Ext.getCmp('logfilecontent').setValue(highlightedcontent);
@@ -189,7 +188,7 @@ Ext.define('esapp.view.acquisition.ingestionlog.LogViewController', {
       }
 
       for (var i = 0; i < searchArray.length; i++) {
-        targetcontent = doHighlight(targetcontent, searchArray[i], highlightStartTag, highlightEndTag);
+        targetcontent = this.doHighlight(targetcontent, searchArray[i], highlightStartTag, highlightEndTag);
       }
 
       return targetcontent;

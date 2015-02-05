@@ -9,6 +9,7 @@ from apps.acquisition import get_internet
 from apps.acquisition import ingestion
 from lib.python.daemon import DaemonDryRunnable
 
+
 # class DaemonDryRunnable(Daemon):
 #     def __init__(self, *args, **kwargs):
 #         self.dry_run = kwargs.pop('dry_run', True)

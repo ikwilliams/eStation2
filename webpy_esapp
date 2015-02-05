@@ -492,7 +492,7 @@ class CheckStatusAllServices:
 
     def POST(self):
         #return web.ctx
-        dry_run = True
+        dry_run = False
 
         ingest = "false"
         pid_file = es_constants.ingestion_pid_filename
@@ -527,31 +527,125 @@ class ExecuteServiceTask:
         self.lang = "en"
 
     def POST(self):
-        #return web.ctx
-        from apps.acquisition import get_internet
-        
-        # Define pid file and create daemon
-        pid_file = es_constants.get_internet_pid_filename
-        get_internet_daemon = acquisition.GetInternetDaemon(pid_file, dry_run=1)
-        status=get_internet_daemon.status()
-        
+        # return web.ctx
+        # from apps.acquisition import acquisition
+        message = ''
+        dryrun = False
         getparams = web.input()
-        if getparams.task == 'runinternet':
-            # if internet_on() run getinternet service            
-            if not status:
-                get_internet_daemon.start()
-            print 'run internet'
-        if getparams.task == 'stopinternet':
-            # if internet_on() run getinternet service
-            if status:
-                get_internet_daemon.stop()            
-            print 'stop internet'
-        if getparams.task == 'restartinternet':
-            # if internet_on() run getinternet service
-            get_internet_daemon.restart()
-            print 'restart internet'
 
-        servicesstatus_json = '{"success": true, "task": "' + getparams.task + '"}'
+        if getparams.service == 'eumetcast':
+            # Define pid file and create daemon
+            pid_file = es_constants.get_eumetcast_pid_filename
+            eumetcast_daemon = acquisition.GetEumetcastDaemon(pid_file, dry_run=dryrun)
+            status = eumetcast_daemon.status()
+
+            if getparams.task == 'run':
+                if not status:
+                    eumetcast_daemon.start()
+                    if eumetcast_daemon.status():
+                        message = 'eumetcast service started'
+                    else:
+                        logger.error("failure starting eumetcast service")
+                else:
+                    message = 'eumetcast service allready started'
+
+            if getparams.task == 'stop':
+                if status:
+                    eumetcast_daemon.stop()
+                    if not eumetcast_daemon.status():
+                        message = 'eumetcast service stopped'
+                    else:
+                        logger.error("failure stopping eumetcast service")
+                else:
+                    message = 'eumetcast service allready stopped'
+
+            if getparams.task == 'restart':
+                if status:
+                    eumetcast_daemon.restart()
+                    if eumetcast_daemon.status():
+                        message = 'eumetcast service restarted'
+                    else:
+                        logger.error("failure restarting eumetcast service")
+                else:
+                    eumetcast_daemon.start()
+                    message = 'eumetcast service started'
+
+        if getparams.service == 'internet':
+            # Define pid file and create daemon
+            pid_file = es_constants.get_internet_pid_filename
+            internet_daemon = acquisition.GetInternetDaemon(pid_file, dry_run=dryrun)
+            status = internet_daemon.status()
+
+            if getparams.task == 'run':
+                if not status:
+                    internet_daemon.start()
+                    if internet_daemon.status():
+                        message = 'internet service started'
+                    else:
+                        logger.error("failure starting internet service")
+                else:
+                    message = 'internet service allready started'
+
+            if getparams.task == 'stop':
+                if status:
+                    internet_daemon.stop()
+                    if not internet_daemon.status():
+                        message = 'internet service stopped'
+                    else:
+                        logger.error("failure stopping internet service")
+                else:
+                    message = 'internet service allready stopped'
+
+            if getparams.task == 'restart':
+                if status:
+                    internet_daemon.restart()
+                    if internet_daemon.status():
+                        message = 'internet service restarted'
+                    else:
+                        logger.error("failure restarting internet service")
+                else:
+                    internet_daemon.start()
+                    message = 'internet service started'
+
+        if getparams.service == 'ingest':
+            # Define pid file and create daemon
+            pid_file = es_constants.ingestion_pid_filename
+            ingest_daemon = acquisition.IngestionDaemon(pid_file, dry_run=dryrun)
+            status = ingest_daemon.status()
+
+            if getparams.task == 'run':
+                if not status:
+                    ingest_daemon.start()
+                    if ingest_daemon.status():
+                        message = 'ingest service started'
+                    else:
+                        logger.error("failure starting ingest service")
+                else:
+                    message = 'ingest service allready started'
+
+            if getparams.task == 'stop':
+                if status:
+                    ingest_daemon.stop()
+                    if not ingest_daemon.status():
+                        message = 'ingest service stopped'
+                    else:
+                        logger.error("failure stopping ingest service")
+                else:
+                    message = 'ingest service allready stopped'
+
+            if getparams.task == 'restart':
+                if status:
+                    ingest_daemon.restart()
+                    if ingest_daemon.status():
+                        message = 'ingest service restarted'
+                    else:
+                        logger.error("failure restarting ingest service")
+                else:
+                    ingest_daemon.start()
+                    message = 'ingest service started'
+
+        logger.info(message)
+        servicesstatus_json = '{"success": true, "message": "' + message + '"}'
         return servicesstatus_json
 
 
