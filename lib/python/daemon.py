@@ -17,7 +17,7 @@ if not os.path.isdir(es_constants.processed_list_int_dir):
         os.makedirs(es_constants.processed_list_int_dir)
 
 
-class Daemon:
+class Daemon(object):
     """
     A generic daemon class.
 
@@ -61,22 +61,27 @@ class Daemon:
 
         # Now I am a daemon!
         logger.debug("Daemon created")
-        # redirect standard file descriptors
-        sys.stdout.flush()
-        sys.stderr.flush()
 
-        si = file(self.stdin, 'r')
-        so = file(self.stdout, 'a+')
-        se = file(self.stderr, 'a+', 0)
 
-        # logger.debug("sys.stdin.fileno %i" % sys.stdin.fileno())
-        # logger.debug("sys.stdout.fileno %i" % sys.stdout.fileno())
-        # logger.debug("sys.stderr.fileno %i" % sys.stderr.fileno())
+        if(isinstance(sys.stdout, file)):
+            # redirect standard file descriptors
+            sys.stdout.flush()
+            sys.stderr.flush()
+            si = file(self.stdin, 'r')
+            so = file(self.stdout, 'a+')
+            se = file(self.stderr, 'a+', 0)
+            os.dup2(si.fileno(), sys.stdin.fileno())
+            os.dup2(so.fileno(), sys.stdout.fileno())
+            os.dup2(se.fileno(), sys.stderr.fileno())
+            logger.debug("Inputs and Outputs redirected")
+        else:
+            logger.debug("Inputs and Outputs not redirected")
 
-        os.dup2(si.fileno(), sys.stdin.fileno())
-        os.dup2(so.fileno(), sys.stdout.fileno())
-        os.dup2(se.fileno(), sys.stderr.fileno())
-        logger.debug("Outputs redirected")
+        #logger.debug("sys.stdout %s %s %s" % (sys.stdout, type(sys.stdout), str(dir(sys.stdout))))
+        #logger.debug("sys.stdin.fileno %i" % sys.stdin.fileno())
+        #logger.debug("sys.stdout.fileno %i" % sys.stdout.fileno())
+        #logger.debug("sys.stderr.fileno %i" % sys.stderr.fileno())
+
 
         # write pidfile
         atexit.register(self.delpid)
@@ -168,5 +173,5 @@ class Daemon:
 class DaemonDryRunnable(Daemon):
     def __init__(self, *args, **kwargs):
         self.dry_run = kwargs.pop('dry_run', True)
-        # super(DaemonDryRunnable, self).__init__(*args, **kwargs)
-        Daemon.__init__(self, *args, **kwargs)
+        super(DaemonDryRunnable, self).__init__(*args, **kwargs)
+        #Daemon.__init__(self, *args, **kwargs)
