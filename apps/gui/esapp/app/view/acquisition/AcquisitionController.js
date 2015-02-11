@@ -5,7 +5,6 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
 
 
     checkStatusServices: function(splitbtn, ev){
-        // Ext.toast({ html: 'checkStatusServices', title: 'checkStatusServices', width: 200, align: 't' });
         // AJAX call to check the status of all 3 services
         Ext.Ajax.request({
             method: 'POST',
@@ -50,34 +49,33 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
                 console.info(response.status);
             }
         });
-    },
-
-
-    execServiceTask: function(menuitem, ev){
-        var me = this;
-
-        // AJAX call to run/start a specified service (specified through the menuitem name).
-        // Ext.Ajax.extraParams = {task: menuitem.name};
-        Ext.Ajax.request({
-            method: 'POST',
-            url: 'services/execservicetask',
-            // extraParams: {task: menuitem.name},
-            params: {
-                task: menuitem.name
-            },
-            success: function(response, opts){
-                var runresult = Ext.JSON.decode(response.responseText);
-                if (runresult.success){
-                    Ext.toast({ html: 'Execute Service Task' + menuitem.name, title: 'Execute Service Task', width: 200, align: 't' });
-                    // menuitem.up().up().fireEvent('click', this);
-                    me.getView().getController('acquisition').checkStatusServices(menuitem.up().up());
-                }
-            },
-            failure: function(response, opts) {
-                console.info(response.status);
-            }
-        });
     }
+
+
+    //execServiceTask: function(menuitem, ev){
+    //    var me = this;
+    //
+    //    // AJAX call to run/start a specified service (specified through the menuitem name).
+    //    Ext.Ajax.request({
+    //        method: 'POST',
+    //        url: 'services/execservicetask',
+    //        // extraParams: {task: menuitem.name},
+    //        params: {
+    //            task: menuitem.name
+    //        },
+    //        success: function(response, opts){
+    //            var runresult = Ext.JSON.decode(response.responseText);
+    //            if (runresult.success){
+    //                Ext.toast({ html: 'Execute Service Task' + menuitem.name, title: 'Execute Service Task', width: 200, align: 't' });
+    //                // menuitem.up().up().fireEvent('click', this);
+    //                me.getView().getController('acquisition').checkStatusServices(menuitem.up().up());
+    //            }
+    //        },
+    //        failure: function(response, opts) {
+    //            console.info(response.status);
+    //        }
+    //    });
+    //}
 
 
     ,selectProduct: function(btn, event) {
@@ -118,20 +116,20 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
 
     ,onAddClick: function(){
         // Create a model instance
-//        var rec = new esapp.model.ProductAcquisition({
-//            productcode: 'newproductcode',
-//            version: 'undefined',
-//            activated: false,
-//            category_id: 'fire',
-//            descriptive_name: false,
-//            order_index:1
-//        });
-//
-//        this.getStore().insert(0, rec);
-//        this.cellEditing.startEditByPosition({
-//            row: 0,
-//            column: 0
-//        });
+        //var rec = new esapp.model.ProductAcquisition({
+        //    productcode: 'newproductcode',
+        //    version: 'undefined',
+        //    activated: false,
+        //    category_id: 'fire',
+        //    descriptive_name: false,
+        //    order_index:1
+        //});
+        //
+        //this.getStore().insert(0, rec);
+        //this.cellEditing.startEditByPosition({
+        //    row: 0,
+        //    column: 0
+        //});
     }
 
 });

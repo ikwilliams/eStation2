@@ -1,37 +1,35 @@
-Ext.define('esapp.view.acquisition.ingestionlog.LogViewController', {
+Ext.define('esapp.view.acquisition.logviewer.LogViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.acquisition-ingestionlog-logview'
+    alias: 'controller.acquisition-logviewer-logview'
 
     // {{{
     ,getFile: function(win) {
         //console.info(win);
-        //Ext.toast({ html: 'Before render in logview', title: 'Before render', width: 200, align: 't' });
-        // me.getFile(me.record);
-        //console.info("following is the record in getFile: ");
-        console.info(win);
-        //console.info(me.record.get('productcode'));
-        //console.info(me.record.get('mapsetcode'));
-        //console.info(me.record.get('version'));
-        //console.info(me.record.get('subproductcode'));
+
+        //var params = Ext.JSON.encode(win.params);
+        var params = {
+               logtype: win.params.logtype,
+               gettype: win.params.record.get('type'),
+               productcode:win.params.record.get('productcode'),
+               mapsetcode:win.params.record.get('mapsetcode'),
+               version:win.params.record.get('version'),
+               subproductcode:win.params.record.get('subproductcode')
+        };
+
         Ext.Ajax.request({
-           method: 'GET',
-           url:'getlogfile',
-           params:{
-               productcode:win.record.get('productcode'),
-               mapsetcode:win.record.get('mapsetcode'),
-               version:win.record.get('version'),
-               subproductcode:win.record.get('subproductcode')
-           },
-           loadMask:'Loading data...',
-           callback:function(callinfo,responseOK,response ){
+            method: 'GET',
+            url:'getlogfile',
+            params: params,
+            loadMask:'Loading data...',
+            callback:function(callinfo,responseOK,response ){
 
                 var response_Text = response.responseText.trim();
                 Ext.getCmp('logfilecontent').setValue(response_Text);
                 //eStation.myGlobals.OriginalContent = Ext.getCmp('logfilecontent').getRawValue();
                 //eStation.LogfileShowPanel.setTitle('File: ' + record.data.filename);
-           },
-           success: function ( result, request ) {},
-           failure: function ( result, request) {}
+            },
+            success: function ( result, request ) {},
+            failure: function ( result, request) {}
         });
     } // eo getFile
     //   }}}

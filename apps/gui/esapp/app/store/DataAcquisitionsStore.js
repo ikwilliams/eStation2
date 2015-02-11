@@ -52,7 +52,7 @@ Ext.define('esapp.store.DataAcquisitionsStore', {
 
     ,listeners: {
         write: function(store, operation){
-            Ext.toast({ html: operation.getResultSet().message, title: operation.action, width: 200, align: 't' });
+            Ext.toast({ html: operation.getResultSet().message, title: "Get update", width: 300, align: 't' });
         }
     }
 });

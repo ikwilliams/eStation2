@@ -1,6 +1,5 @@
 
 Ext.define("esapp.view.acquisition.product.selectProduct",{
-//    "extend": "Ext.panel.Panel",
     "extend": "Ext.window.Window",
 
     "controller": "acquisition-product-selectproduct",
@@ -12,17 +11,12 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
     requires: [
         'Ext.layout.container.Center',
         'Ext.grid.plugin.CellEditing',
-//        'Ext.grid.column.Widget',
-//        'Ext.grid.column.Boolean',
-//        'Ext.grid.column.Template',
-        'Ext.grid.column.Check',
-//        'Ext.button.Split',
-//        'Ext.menu.Menu',
+        //'Ext.grid.column.Check',
         'Ext.XTemplate',
         'Ext.grid.column.Action'
     ],
 
-    title: 'Product selection',
+    title: 'Activate Product',
     header: {
         titlePosition: 0,
         titleAlign: 'center'
@@ -31,16 +25,14 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
     closable: true,
     closeAction: 'destroy', // 'hide',
     maximizable: false,
-//    animateTarget: addproduct,
-    width: 650,
+    width: 685,
     height: 800,
-//    tools: [{type: 'pin'}],
     layout: {
-        type  : 'fit',
-        // align : 'stretch',
+        type  : 'border',
         padding: 5
     },
-    autoScroll: true,
+    autoScroll: false,
+    //changesmade:false,
 
 //    tbar: Ext.create('Ext.toolbar.Toolbar', {
 //            items: [
@@ -60,7 +52,7 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
 
     initComponent: function () {
         var me = this
-            ,cfg = {}
+            ,cfg = {changesmade:false}
         ;
         Ext.apply(cfg, {
             listeners: {
@@ -69,9 +61,8 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
 
             items : [{
                 xtype : 'grid',
-                // flex  : 1,
-
-                // bind: '{products}',
+                region: 'center',
+                width: 650,
                 store: 'ProductsInactiveStore',
                 session:true,
 
@@ -79,7 +70,6 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                     ptype:'cellediting'
                 }],
 
-                // title: 'Product Selection',
                 viewConfig: {
                     stripeRows: false,
                     enableTextSelection: true,
@@ -100,9 +90,8 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                 multiColumnSort: false,
                 columnLines: false,
                 rowLines: true,
-                frame: true,
-                border: true,
-
+                frame: false,
+                border: false,
 
                 features: [{
                     id: 'selectproductcategories',
@@ -113,6 +102,15 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                     startCollapsed : false,
                     groupByText: 'Product category'
                 }],
+
+                listeners: {
+                    rowclick: function(gridview, record){
+                        console.info(this);
+                        console.info(record);
+                        var productinfo = Ext.ComponentQuery.query('panel[id=productinfo]')[0];
+                        productinfo.expand(true);
+                    }
+                },
 
                 columns : [{
                     text: '<div class="grid-header-style">Product categories</div>',
@@ -153,27 +151,84 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                         variableRowHeight : true,
                         menuDisabled:true
                     }, {
-                        xtype: 'checkcolumn',
+                        xtype: 'actioncolumn',
                         header: 'Active',
-                        width: 80,
-                        sortable: false,
-                        dataIndex: 'activated',
-                        stopSelection: false,
-                        disabled: false,
-                        menuDisabled:true,
-                        listeners: {
-                          checkchange: function(chkBox, rowIndex, checked, eOpts){
-        //                      console.info(chkBox);
-        //                      console.info(rowIndex);
-        //                      console.info(checked);
-        //                      console.info(eOpts);
-                          }
-                        }
+                        hideable: false,
+                        hidden:false,
+                        width: 65,
+                        align: 'center',
+                        shrinkWrap: 0,
+                        items: [{
+                            getClass: function(v, meta, rec) {
+                                if (rec.get('activated')) {
+                                    return 'activated';
+                                } else {
+                                    return 'deactivated';
+                                }
+                            },
+                            getTip: function(v, meta, rec) {
+                                if (rec.get('activated')) {
+                                    return 'Deactivate Product';
+                                } else {
+                                    return 'Activate Product';
+                                }
+                            },
+                            isDisabled: function(view, rowIndex, colIndex, item, record) {
+                                // Returns true if 'editable' is false (, null, or undefined)
+                                return false // !record.get('editable');
+                            },
+                            handler: function(grid, rowIndex, colIndex) {
+                                var rec = grid.getStore().getAt(rowIndex),
+                                    action = (rec.get('activated') ? 'deactivated' : 'activated');
+                                // Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
+                                rec.get('activated') ? rec.set('activated', false) : rec.set('activated', true);
+                                console.info(grid.up().up());
+                                grid.up().up().changesmade = true;
+                            }
+                        }]
+        //                xtype: 'checkcolumn',
+        //                header: 'Active',
+        //                width: 80,
+        //                sortable: false,
+        //                dataIndex: 'activated',
+        //                stopSelection: false,
+        //                disabled: false,
+        //                menuDisabled:true,
+        //                listeners: {
+        //                  checkchange: function(chkBox, rowIndex, checked, eOpts){
+        ////                      console.info(chkBox);
+        ////                      console.info(rowIndex);
+        ////                      console.info(checked);
+        ////                      console.info(eOpts);
+        //                  }
+        //                }
                     }]
                 }]
-//            },{
-//                html : 'product details with acquisition and ingestion assignments',
-//                flex  : 1
+            }, {
+                region: 'east',
+                id: 'productinfo',
+                title: 'Product info',
+                autoWidth:true,
+                split: true,
+                collapsible: true,
+                collapsed: true,
+                floatable: false,
+                html: "TEST",
+                listeners: {
+                    expand: function(){
+                        this.setWidth(600);
+                        this.up().setWidth(1285);
+                    },
+                    collapse: function(){
+                        this.setWidth(5);
+                        this.up().setWidth(685);
+                    }
+                },
+                items: [
+                    {
+                        xtype:''
+                    }
+                ]
             }]
         });
 
@@ -183,6 +238,9 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
     ,onClose: function(win, ev) {
         // var acq_main = Ext.ComponentQuery.query('panel[name=acquisitionmain]');
         // acq_main.store.load();
-        Ext.data.StoreManager.lookup('ProductsActiveStore').load();
+        console.info(win);
+        if (win.changesmade){
+            Ext.data.StoreManager.lookup('ProductsActiveStore').load();
+        }
     }
 });

@@ -13,15 +13,17 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
     requires: [
         'esapp.view.acquisition.DataAcquisitionModel',
         'esapp.view.acquisition.DataAcquisitionController',
+        'esapp.view.acquisition.logviewer.LogView',
+
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.column.Action',
         'Ext.grid.column.Check'
     ],
 
-//    store: 'DataAcquisitionsStore',
-//    bind: '{ProductAcquisitionsGrid.selection.DataAcquisitions}',
-//    bind: '{products.dataacquisitions}',
-//    bind: '{dataacquisitions}',
+    //store: 'DataAcquisitionsStore',
+    //bind: '{ProductAcquisitionsGrid.selection.DataAcquisitions}',
+    //bind: '{products.dataacquisitions}',
+    //bind: '{dataacquisitions}',
 
     // get the chained store from view model
     bind:{
@@ -68,34 +70,32 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
             // text: '', // 'Type',
             width: 105,
             dataIndex: 'type'
-//            bind: '{products.dataacquisitions.type}'
-//            bind: '{dataacquisitions.type}'
+            //bind: '{products.dataacquisitions.type}'
+            //bind: '{dataacquisitions.type}'
         }, {
             // text: '', // 'Latest Acquired',
             width: 110,
             dataIndex: 'time_latest_copy',
             hidden: true
-//            bind: '{products.dataacquisitions.latest}'
-//            bind: '{dataacquisitions.latest}'
+            //bind: '{products.dataacquisitions.latest}'
+            //bind: '{dataacquisitions.latest}'
         }, {
             // text: '', // 'Latest Acquired',
             width: 110,
             dataIndex: 'time_latest_exec',
             hidden: true
-//            bind: '{products.dataacquisitions.latest}'
-//            bind: '{dataacquisitions.latest}'
+            //bind: '{products.dataacquisitions.latest}'
+            //bind: '{dataacquisitions.latest}'
         }, {
             xtype: 'actioncolumn',
             // header: 'Active',
             hideable: false,
             hidden:false,
             // disabled: true,
-            // stopSelection: false,
             width: 65,
             align: 'center',
             items: [{
                 // scope: me,
-                // handler: me.onToggleActivation
                 disabled: false,
                 getClass: function(v, meta, rec) {
                     if (rec.get('activated')) {
@@ -106,16 +106,35 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
                 },
                 getTip: function(v, meta, rec) {
                     if (rec.get('activated')) {
-                        return 'Deactivate Acquisition';
+                        return 'Deactivate Get';
                     } else {
-                        return 'Activate Acquisition';
+                        return 'Activate Get';
                     }
                 },
                 handler: function(grid, rowIndex, colIndex) {
                     var rec = grid.getStore().getAt(rowIndex),
                         action = (rec.get('activated') ? 'deactivated' : 'activated');
-                    Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
+                    // Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
                     rec.get('activated') ? rec.set('activated', false) : rec.set('activated', true);
+                }
+            }]
+        },{
+            xtype: 'actioncolumn',
+            width: 55,
+            align:'center',
+            items: [{
+                icon: 'resources/img/icons/file-extension-log-icon-32x32.png',
+                tooltip: 'Show log of this Get',
+                scope: me,
+                handler: function (grid, rowIndex, colIndex, icon) {
+                    var rec = grid.getStore().getAt(rowIndex);
+                    var logViewWin = new esapp.view.acquisition.logviewer.LogView({
+                        params: {
+                            logtype: 'get',
+                            record: rec
+                        }
+                    });
+                    logViewWin.show();
                 }
             }]
         }];

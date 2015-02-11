@@ -53,21 +53,32 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         groupByText: 'Product category'
     }],
 
-    listeners: {
-        beforerender: function (){
-            //console.info(this.getView().getFeature('prodcat'));
-            this.getView().getFeature('prodcat').expand("<span style='display: none;'>1</span>Vegetation", true);  // rainfall
-            //this.getView().getFeature('prodcat').expand("Vegetation", true);  // rainfall
-        },
-        groupclick: function(view, rowElement, groupName, e){
-            //console.info('groupname: '+ groupName);
-            //view.features[0].collapseAll();
-            //view.features[0].expand(groupName);
-        }
-    },
+    //listeners: {
+    //    beforerender: function (){
+    //        //this.suspendEvents(true);
+    //        //console.info(this.getView().getFeature('prodcat'));
+    //        //var groupFeature = this.getView().getFeature('prodcat');
+    //        //groupFeature.collapseAllButTop();
+    //
+    //        //groupFeature.expand("<span style='display: none;'>1</span>Vegetation", true);  // rainfall
+    //        //this.getView().getFeature('prodcat').expand("Vegetation", true);  // rainfall
+    //        //this.resumeEvents();
+    //    },
+    //    groupclick: function(view, rowElement, groupName, e){
+    //        //console.info('groupname: '+ groupName);
+    //        //view.features[0].collapseAll();
+    //        //view.features[0].expand(groupName);
+    //    }
+    //},
 
     initComponent: function () {
         var me = this;
+
+        //me.getStore().load({
+        //    callback:function(){
+        //        me.getView().getFeature('prodcat').collapseAllButTop();
+        //    }
+        //});
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             items: [{
@@ -239,5 +250,22 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         }];
 
         me.callParent();
+
+        var store = this.getStore();
+
+        this.groupingFeature = this.view.getFeature('prodcat');
+
+        // Create checkbox menu items to toggle associated group
+        store.getGroups().each(function(group) {
+            console.info(group.getGroupKey());
+            this.firstGroupName = group.getGroupKey();
+        }, this);
+
+        this.mon(this, 'afterrender', this.onAfterRender, this);
+    }
+
+    ,onAfterRender: function() {
+        //var groupName = this.firstGroupName;
+        //this.groupingFeature.expand(groupName, true);
     }
 });

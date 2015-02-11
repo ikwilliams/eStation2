@@ -89,7 +89,15 @@ class GetLogFile:
         self.lang = "en"
 
     def GET(self):
-        logfilepath = es_constants.es2globals['log_dir']+'apps.acquisition.ingestion.log'
+        getparams = web.input()
+        if getparams['logtype'] == 'get':
+            if getparams['gettype'] == 'EUMETCAST':
+                logfilepath = es_constants.es2globals['log_dir']+'apps.acquisition.get_eumetcast.log'
+            else:
+                logfilepath = es_constants.es2globals['log_dir']+'apps.acquisition.get_internet.log'
+        else:
+            logfilepath = es_constants.es2globals['log_dir']+'apps.acquisition.ingestion.log'
+
         logfile = open(logfilepath, 'r')
         logfilecontent = logfile.read()
         logfilecontent = logfilecontent.replace(chr(10), '<br />')
@@ -385,7 +393,7 @@ class Processing:
                 mapset_dict['mapsetoutputproducts'] = []
                 output_products = querydb.get_processingchain_output_products(process_id)
                 for outputproduct in output_products:
-                    #outputproduct_dict = functions.row2dict(outputproduct)
+                    # outputproduct_dict = functions.row2dict(outputproduct)
                     outputproduct_dict = outputproduct.__dict__
                     del outputproduct_dict['_labels']
                     mapset_dict['mapsetoutputproducts'].append(outputproduct_dict)
@@ -460,8 +468,12 @@ class DataSets:
                                                                   version=version,
                                                                   subproductcode=subproductcode,
                                                                   echo=False)
-
+                            # dataset_info = querydb.db.product.get(productcode, version, subproductcode)
+                            # dataset_dict = {}
+                            # if dataset_info:
                             dataset_dict = functions.row2dict(dataset_info)
+                            # dataset_dict = dataset_info.__dict__
+                            # del dataset_dict['_labels']
                             dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
                             completeness = dataset.get_dataset_normalized_info()
                             dataset_dict['datasetcompleteness'] = completeness
@@ -686,9 +698,15 @@ class UpdateDataAcquisition:
                                'activated': getparams['dataacquisitions']['activated']}
 
         if self.crud_db.update('product_acquisition_data_source', dataacquisitioninfo):
-            updatestatus = '{"success":true, "message":"Data source updated!"}'
+            if getparams['dataacquisitions']['activated']:
+                message = '<b>Activated</b> Get for productcode: </br><b>' + \
+                          getparams['dataacquisitions']['productcode'] + '</b>'
+            else:
+                message = '<b>Deactivated</b> Get for productcode: </br><b>' + \
+                          getparams['dataacquisitions']['productcode'] + '</b>'
+            updatestatus = '{"success":true, "message":"' + message + '"}'
         else:
-            updatestatus = '{"success":false, "message":"An error occured while updating the data source!"}'
+            updatestatus = '{"success":false, "message":"An error occured while updating the Get!"}'
 
         return updatestatus
 
@@ -707,9 +725,17 @@ class UpdateIngestion:
                          'mapsetcode': getparams['ingestions']['mapsetcode'],
                          'defined_by': getparams['ingestions']['defined_by'],
                          'activated': getparams['ingestions']['activated']}
-        #print ingestioninfo
+
         if self.crud_db.update('ingestion', ingestioninfo):
-            updatestatus = '{"success":true, "message":"Ingestion updated!"}'
+            message = 'Ingestion for: </br>' + \
+                      'Productcode: <b>' + getparams['ingestions']['productcode'] + '</b></br>'\
+                      'Mapsetcode: <b>' + getparams['ingestions']['mapsetcode'] + '</b></br>'\
+                      'Subproductcode: <b>' + getparams['ingestions']['subproductcode'] + '</b>'
+            if getparams['ingestions']['activated']:
+                message = '<b>Activated</b> ' + message
+            else:
+                message = '<b>Deactivated</b> '  + message
+            updatestatus = '{"success":true, "message":"' + message + '"}'
         else:
             updatestatus = '{"success":false, "message":"An error occured while updating the Ingestion!"}'
 
@@ -721,7 +747,7 @@ class Ingestion:
         self.lang = "en"
 
     def GET(self):
-        #return web.ctx
+        # return web.ctx
         ingestions = querydb.get_ingestions(echo=False)
 
         if ingestions.__len__() > 0:
@@ -731,14 +757,14 @@ class Ingestion:
                           'sub_product_code': row.subproductcode,
                           'version': row.version,
                           'mapset': row.mapsetcode}
-                #kwargs.update({'to_date': datetime.date(2013, 12, 31)})
+                # kwargs.update({'to_date': datetime.date(2013, 12, 31)})
                 dataset = Dataset(**kwargs)
                 completeness = dataset.get_dataset_normalized_info()
                 ingest_dict = functions.row2dict(row)
                 ingest_dict['completeness'] = completeness
                 ingest_dict_all.append(ingest_dict)
 
-            #ingestions_json = tojson(ingestions)
+            # ingestions_json = tojson(ingestions)
             ingestions_json = json.dumps(ingest_dict_all,
                                          ensure_ascii=False,
                                          sort_keys=True,
@@ -756,12 +782,12 @@ class DataAcquisition:
         self.lang = "en"
 
     def GET(self):
-        #return web.ctx
+        # return web.ctx
 
         dataacquisitions = querydb.get_dataacquisitions(echo=False)
 
         if dataacquisitions.__len__() > 0:
-            #dataacquisitions_json = tojson(dataacquisitions)
+            # dataacquisitions_json = tojson(dataacquisitions)
 
             acq_dict_all = []
             for row in dataacquisitions:
@@ -771,7 +797,7 @@ class DataAcquisition:
                 acq_dates = get_eumetcast.get_eumetcast_info(row.data_source_id)
                 if acq_dates:
                     for key in acq_dates.keys():
-                        #acq_info += '"%s": "%s", ' % (key, acq_dates[key])
+                        # acq_info += '"%s": "%s", ' % (key, acq_dates[key])
                         if isinstance(acq_dates[key], datetime.date):
                             datetostring = acq_dates[key].strftime("%y-%m-%d %H:%M")
                             acq_dict[key] = datetostring
@@ -802,21 +828,13 @@ class ProductAcquisition:
         self.lang = "en"
 
     def GET(self, params):
-        #return web.ctx
+        # return web.ctx
         getparams = web.input()
         products = querydb.get_products(echo=False, activated=getparams.activated)
         products_json = functions.tojson(products)
         products_json = '{"success":true, "total":'+str(products.__len__())+',"products":['+products_json+']}'
         return products_json
 
-
-class TemplatePage:
-    def __init__(self):
-        self.render = web.template.render(es_constants.es2globals['base_dir']+'/templates/')
-
-    def GET(self):
-        getInput=web.input(name="World")
-        return self.render.mytemplate("mytitle", getInput.name)
 
 if __name__ == "__main__":
     app.run()

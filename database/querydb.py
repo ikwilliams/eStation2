@@ -1013,7 +1013,7 @@ def get_processingchain_output_products(process_id=None):
                                                              processfinaloutput.version,
                                                              processfinaloutput.mapsetcode,
                                                              processfinaloutput.type,
-                                                             processfinaloutput.activated,
+                                                             processfinaloutput.activated.label('subactivated'),
                                                              processfinaloutput.final,
                                                              processfinaloutput.date_format,
 
@@ -1021,7 +1021,6 @@ def get_processingchain_output_products(process_id=None):
                                                                          product.c.subproductcode, '_',
                                                                          product.c.version).label('productID'),
                                                              product.c.defined_by,
-                                                             #product.c.activated,
                                                              product.c.product_type,
                                                              product.c.descriptive_name.label('prod_descriptive_name'),
                                                              product.c.description,

@@ -41,6 +41,7 @@ Ext.define('esapp.Application', {
         'system.systemsettings',
 
         'widgets.datasetCompletenessChart',
+        'widgets.ServiceMenuButton',
 
         'analysis.analysisMain'
     ],
