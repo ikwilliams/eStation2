@@ -1,5 +1,4 @@
 # Import local definitions
-#import locals
 
 outputfile = 'test.tif'
 testdir = '/tmp/eStation2/test_files/'
