@@ -1,6 +1,5 @@
 __author__ = "Jurriaan van 't Klooster"
 
-#import locals
 import sys
 
 # Import eStation lib modules

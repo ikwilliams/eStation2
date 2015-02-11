@@ -30,9 +30,6 @@ __author__ = 'clerima'
 #                               a <valid> data to replace a <nodata>
 #
 
-# source eStation2 base definitions
-#import locals
-
 # import standard modules
 
 # Import eStation lib modules

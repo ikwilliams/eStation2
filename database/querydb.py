@@ -5,7 +5,6 @@
 #   descr:	 Functions to access and query the DB using SQLSoup and SQLAlchemy as Database Abstraction Layer and ORM.
 ####################################################################################################################
 
-#import locals
 import sys
 import traceback
 import sqlsoup

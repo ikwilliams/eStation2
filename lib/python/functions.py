@@ -13,9 +13,6 @@
 #   TODO-M.C.: replace, where needed/applicable,  datetime()
 #
 
-# source eStation2 base definitions
-#import locals
-
 # Import standard modules
 import os
 import math

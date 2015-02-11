@@ -1,6 +1,5 @@
 _author__ = "Marco Clerici"
 
-# import locals
 import sys
 # import os, time
 from config import es_constants

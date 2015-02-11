@@ -10,7 +10,7 @@ import os
 import glob
 import tarfile
 
-import locals
+from config import es_constants
 from lib.python import es_logging as log
 from lib.python import functions
 from database import querydb
@@ -32,7 +32,7 @@ class Product(object):
         self._db_product = querydb.get_product_native(**kwargs)
         if self._db_product is None:
             raise NoProductFound(kwargs)
-        self._fullpath = os.path.join(locals.es2globals['data_dir'], product_code)
+        self._fullpath = os.path.join(es_constants.es2globals['data_dir'], product_code)
 
     @property
     def mapsets(self):
