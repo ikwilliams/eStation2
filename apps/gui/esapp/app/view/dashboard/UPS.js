@@ -4,6 +4,6 @@ Ext.define("esapp.view.dashboard.UPS",{
     "controller": "dashboard-ups",
     "viewModel": {
         "type": "dashboard-ups"
-    },
-    "html": "Hello, World!!"
+    }
+
 });

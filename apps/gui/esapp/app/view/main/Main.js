@@ -9,8 +9,10 @@ Ext.define('esapp.view.main.Main', {
 
     xtype: 'app-main',
     requires: [
+        'esapp.view.main.MainModel',
+        'esapp.view.main.MainController',
+
         'Ext.layout.container.Center'
-        //,'Ext.chart.CartesianChart'
     ],
     controller: 'main',
     viewModel: {
@@ -37,33 +39,36 @@ Ext.define('esapp.view.main.Main', {
             region: 'west',
             stateId: 'navigation-panel',
             id: 'west-panel', // see Ext.getCmp() below
-            title: '',
+            title: '<span class="panel-title-style">eStation 2.0</span>',
             split: true,
-            width: 200,
+            width: 0,
             collapsible: true,
-            collapsed: true,
-            animCollapse: true,
-            margins: '0 0 0 5',
-            layout: 'accordion',
-            items: [{
-                contentEl: 'west',
-                title: 'Navigation',
-                iconCls: 'nav' // see the HEAD section for style used
-            }, {
-                title: 'Settings',
-                html: '<p>Some settings in here.</p>',
-                iconCls: 'settings'
-            }, {
-                title: 'Information',
-                html: '<p>Some info in here.</p>',
-                iconCls: 'info'
-            }]
+            collapsed: true
+            //animCollapse: true,
+            //margins: '0 0 0 5',
+            //layout: 'accordion',
+            //items: [{
+            //    contentEl: 'west',
+            //    title: 'Navigation',
+            //    iconCls: 'nav' // see the HEAD section for style used
+            //}, {
+            //    title: 'Settings',
+            //    html: '<p>Some settings in here.</p>',
+            //    iconCls: 'settings'
+            //}, {
+            //    title: 'Information',
+            //    html: '<p>Some info in here.</p>',
+            //    iconCls: 'info'
+            //}]
         },{
             region: 'center',
             xtype: 'tabpanel',
             layout: 'fit',
             deferredRender: false,
+            layoutOnTabChange: true,
             activeTab: 'dashboardtab',     // first tab initially active
+
+            defaults:{hideMode: 'offsets'}, // For performance resons to pre-render in the background.
 
 //            tbar: { xtype: 'app-main-toolbar' },
 //            dockedItems: [{
@@ -83,9 +88,11 @@ Ext.define('esapp.view.main.Main', {
                     xtype: 'dashboard-main'
                 }],
                 listeners: {
-                   activate: function (analisistab) {
-                        var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
-                        headerlogos.setHidden(false);
+                   activate: function (dashboardtab) {
+                       var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
+                       headerlogos.setHidden(false);
+                       dashboardtab.up().down('container[id=acquisitionmaintab]').doLayout();
+                       dashboardtab.up().down('container[id=datamanagementmaintab]').doLayout();
                    }
                 }
             }, {
@@ -101,7 +108,7 @@ Ext.define('esapp.view.main.Main', {
                     id:'acquisitionmain'
                 }],
                 listeners: {
-                   activate: function () {
+                   activate: function (acquisitiontab) {
                         var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
                         headerlogos.setHidden(false);
 ////                       console.info(this.down('toolbar > button[name=eumetcastbtn]'));
@@ -120,7 +127,7 @@ Ext.define('esapp.view.main.Main', {
                    id:'processingmain'
                 }],
                 listeners: {
-                   activate: function (analisistab) {
+                   activate: function (processingtab) {
                         var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
                         headerlogos.setHidden(false);
                    }
@@ -136,7 +143,7 @@ Ext.define('esapp.view.main.Main', {
                    id:'datamanagementmain'
                 }],
                 listeners: {
-                   activate: function (analisistab) {
+                   activate: function (datamanagementtab) {
                         var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
                         headerlogos.setHidden(false);
                    }
@@ -148,13 +155,18 @@ Ext.define('esapp.view.main.Main', {
                 autoScroll: true,
                 layout : 'fit',
 	            items: [{
-                   xtype  : 'analysis-main',
-                   id:'analysismain'
+                    xtype  : 'analysis-main',
+                    id:'analysismain',
+                    hidden: false
                 }],
                 listeners: {
-                   activate: function (analisistab) {
-                        var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
-                        headerlogos.setHidden(true);
+                   activate: function (analysistab) {
+                       var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
+                       headerlogos.setHidden(true);
+                       //analysistab.down().render();
+                       //analysistab.down().updateLayout();
+                       //analysistab.down().show();
+                       //analysistab.down().controller.newMapView();
                    }
                 }
             }, {
@@ -167,7 +179,7 @@ Ext.define('esapp.view.main.Main', {
                    id:'systemsettings'
                 }],
                 listeners: {
-                   activate: function (analisistab) {
+                   activate: function (systemtab) {
                         var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
                         headerlogos.setHidden(false);
                    }
@@ -178,7 +190,7 @@ Ext.define('esapp.view.main.Main', {
                 autoScroll: true,
                 html: '', // '<a id="hideit" href="#">Toggle the west region</a>',
                 listeners: {
-                   activate: function (analisistab) {
+                   activate: function (helptab) {
                         var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
                         headerlogos.setHidden(false);
                    }

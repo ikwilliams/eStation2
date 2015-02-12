@@ -11,6 +11,11 @@ Ext.define("esapp.view.dashboard.Dashboard",{
     xtype  : 'dashboard-main',
 
     requires: [
+        'esapp.view.dashboard.PC1',
+        'esapp.view.dashboard.PC2',
+        'esapp.view.dashboard.PC3',
+        'esapp.view.dashboard.Connection',
+
         'Ext.layout.container.HBox',
         'Ext.layout.container.VBox',
         'Ext.layout.container.Center'

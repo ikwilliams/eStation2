@@ -1,6 +1,50 @@
-.f2f49728362fe28fd261396086b858b4142276ca{display:block;}
+.5a57c82fec376012d602bbce5fddbf6793073501{display:block;}
 p {
     margin:5px;
+}
+
+.layers {
+    background-image:url(../img/layers.png);
+}
+
+.legends {
+    background-image:url(../img/legends.png);
+}
+
+.chart-curve {
+    background-image:url(../img/chart_curve.png);
+}
+
+.chart-line {
+    background-image:url(../img/line_chart.png);
+}
+
+.africa {
+    background-image:url(../img/africa.png);
+}
+
+.system-settings {
+    background-image:url(../img/system_settings.png);
+}
+
+.map-search {
+    background-image:url(../img/map_magnify.png);
+}
+
+.map_add  {
+    background-image:url(../img/map_add.png);
+}
+
+.link {
+    background-image:url(../img/link.png);
+}
+
+.unlink {
+    background-image:url(../img/link_break.png);
+}
+
+.estation {
+    background-image:url(../img/icon_eStation.png);
 }
 
 .activated {

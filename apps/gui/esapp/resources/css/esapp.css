@@ -3,6 +3,50 @@ p {
     margin:5px;
 }
 
+.layers {
+    background-image:url(../img/layers.png);
+}
+
+.legends {
+    background-image:url(../img/legends.png);
+}
+
+.chart-curve {
+    background-image:url(../img/chart_curve.png);
+}
+
+.chart-line {
+    background-image:url(../img/line_chart.png);
+}
+
+.africa {
+    background-image:url(../img/africa.png);
+}
+
+.system-settings {
+    background-image:url(../img/system_settings.png);
+}
+
+.map-search {
+    background-image:url(../img/map_magnify.png);
+}
+
+.map_add  {
+    background-image:url(../img/map_add.png);
+}
+
+.link {
+    background-image:url(../img/link.png);
+}
+
+.unlink {
+    background-image:url(../img/link_break.png);
+}
+
+.estation {
+    background-image:url(../img/icon_eStation.png);
+}
+
 .activated {
     background-image:url(../img/icons/check.png);
 }

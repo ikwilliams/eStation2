@@ -545,6 +545,9 @@ class ExecuteServiceTask:
         dryrun = False
         getparams = web.input()
 
+        logger.info(getparams.service)
+        logger.info(getparams.task)
+
         if getparams.service == 'eumetcast':
             # Define pid file and create daemon
             pid_file = es_constants.get_eumetcast_pid_filename

@@ -7,6 +7,11 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
     },
     xtype: "editproduct",
 
+    requires: [
+        'esapp.view.acquisition.product.editProductModel',
+        'esapp.view.acquisition.product.editProductController',
+    ],
+
     title: 'Layout Window with title <em>after</em> tools',
     header: {
         titlePosition: 2,
