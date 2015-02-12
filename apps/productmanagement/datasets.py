@@ -11,7 +11,7 @@ import datetime
 import os
 import glob
 
-import locals
+from config import es_constants
 from lib.python import es_logging as log
 from lib.python import functions
 from database import querydb
@@ -220,7 +220,7 @@ class Dataset(object):
                                                       self._db_product.product_type,
                                                       version,
                                                       mapset)
-        self.fullpath = os.path.join(locals.es2globals['data_dir'], self._path)
+        self.fullpath = os.path.join(es_constants.es2globals['data_dir'], self._path)
         #self._db_frequency = querydb.db.frequency.get(self._db_product.frequency_id)
         self._db_frequency = querydb.get_frequency(self._db_product.frequency_id)
         if self._db_frequency is None:

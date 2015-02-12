@@ -8,7 +8,7 @@ _author__ = "Marco Clerici"
 #
 
 # source eStation2 base definitions
-import locals, os, sys
+import os, sys
 import shutil
 
 # import standard modules
@@ -21,7 +21,7 @@ from lib.python import es_logging as log
 from config import es_constants
 
 logger = log.my_logger(__name__)
-data_dir= locals.es2globals['data_dir']
+data_dir= es_constants.es2globals['data_dir']
 
 #   Main module in processing, driving a specific pipeline
 

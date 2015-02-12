@@ -75,12 +75,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, list_subprods=None):
     activate_1monperc_comput=1
     activate_1monnp_comput=1
 
+    es2_data_dir = es_constants.es2globals['data_dir']
+
     #   ---------------------------------------------------------------------
     #   Define input files
     in_prod_ident = functions.set_path_filename_no_date(prod, starting_sprod, mapset, ext)
 
-    logger.debug('Base data directory is: %s' % locals.es2globals['data_dir'])
-    input_dir = locals.es2globals['data_dir']+ \
+    logger.debug('Base data directory is: %s' % es2_data_dir)
+    input_dir = es2_data_dir+ \
                 functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
 
     logger.debug('Input data directory is: %s' % input_dir)

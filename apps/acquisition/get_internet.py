@@ -225,7 +225,7 @@ def get_list_matching_files_subdir_local(list, local_dir, regex, level, max_leve
 def get_file_from_url(remote_url_file, target_file=None, target_dir=None, userpwd=''):
 
     if target_dir is None:
-        tmpdir = tempfile.mkdtemp(prefix=__name__, dir=locals.es2globals['base_tmp_dir'])
+        tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.es2globals['base_tmp_dir'])
     else:
         tmpdir = target_dir
 
@@ -252,7 +252,7 @@ def get_file_from_url(remote_url_file, target_file=None, target_dir=None, userpw
 def get_dir_contents_from_url(remote_url_dir, target_file=None, target_dir=None, userpwd=''):
 
     if target_dir is None:
-        tmpdir = tempfile.mkdtemp(prefix=__name__, dir=locals.es2globals['base_tmp_dir'])
+        tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.es2globals['base_tmp_dir'])
     else:
         tmpdir = target_dir
 

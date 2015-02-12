@@ -7,7 +7,6 @@
 #			 Maximum length of the file/backup files are also managed. 
 #	history: 1.0 
 #
-#import locals
 from config import es_constants
 
 try:

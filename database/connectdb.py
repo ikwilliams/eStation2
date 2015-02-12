@@ -4,7 +4,6 @@ import sys
 from lib.python import es_logging as log
 
 # Import eStation lib modules
-# import locals
 from config import es_constants
 
 import sqlalchemy

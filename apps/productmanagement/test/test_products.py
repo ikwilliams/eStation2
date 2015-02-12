@@ -16,7 +16,7 @@ from ..products import Product
 from ..datasets import Dataset
 from ..exceptions import (NoProductFound, MissingMapset)
 
-import locals
+from config import es_constants
 from lib.python import functions
 from database import querydb
 
@@ -30,7 +30,7 @@ class TestProducts(unittest.TestCase):
         self.kwargs = {'product_code':"vgt_ndvi"}
         self.mapsets = ('WGS84_Africa_1km', 'WGS84_Sahel_1km')
         self.subproducts = ('sm', 'ndv')
-        self.files_mapsets = [os.path.join(locals.es2globals['data_dir'],
+        self.files_mapsets = [os.path.join(es_constants.es2globals['data_dir'],
                               self.kwargs['product_code'], mapset) for mapset in self.mapsets]
         self.files_subproducts = [os.path.join(file_mapset, subproduct_type, subproduct)
                 for file_mapset in self.files_mapsets
