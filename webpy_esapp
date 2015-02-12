@@ -76,12 +76,9 @@ class EsApp:
         self.lang = "en"
 
     def GET(self):
-        #return sys.path
         #return web.ctx
         render = web.template.render(es_constants.es2globals['base_dir']+'/apps/gui/esapp')
         return render.index()
-        #getparam = web.input(lang=self.lang)
-        #return render.index(getparam.lang)
 
 
 class GetLogFile:
@@ -120,16 +117,19 @@ class ResetSystemSettings:
 
     def GET(self):
         import ConfigParser
-        configfilepath = es_constants.es2globals['config_dir']+'/es_constants.ini'
+        usersettingsinifile = es_constants.es2globals['settings_dir']+'/user_settings.ini'
+        # usersettingsinifile = '/eStation2/settings/user_settings.ini'
+
         config = ConfigParser.ConfigParser()
-        config.read(['es_constants.ini', configfilepath])
+        config.read(['user_settings.ini', usersettingsinifile])
 
         for option in config.options('USER_SETTINGS'):
             config.set('USER_SETTINGS', option, '')
 
         # Writing our configuration file to 'example.cfg' - COMMENTS ARE NOT PRESERVED!
-        with open(configfilepath, 'wb') as configfile:
+        with open(usersettingsinifile, 'wb') as configfile:
             config.write(configfile)
+        # ToDo: After changing the settings restart apache to apply the new settings
 
         updatestatus = '{"success":true, "message":"System settings reset to factory settings!"}'
 
@@ -142,21 +142,27 @@ class UpdateSystemSettings:
 
     def PUT(self):
         import ConfigParser
-        configfilepath = es_constants.es2globals['config_dir']+'/es_constants.ini'
-        config = ConfigParser.ConfigParser()
-        config.read(['es_constants.ini', configfilepath])
+        config_factorysettings = ConfigParser.ConfigParser()
+        config_factorysettings.read(['factory_settings.ini',
+                                     es_constants.es2globals['config_dir'] + '/factory_settings.ini'])
+
+        usersettingsfilepath = es_constants.es2globals['settings_dir']+'/user_settings.ini'
+        # usersettingsfilepath = '/eStation2/settings/user_settings.ini'
+        config_usersettings = ConfigParser.ConfigParser()
+        config_usersettings.read(['user_settings.ini', usersettingsfilepath])
 
         getparams = json.loads(web.data())
         for setting in getparams['systemsettings']:
-            if config.has_option('FACTORY_SETTINGS', setting) \
-               and config.get('FACTORY_SETTINGS', setting, 0) == getparams['systemsettings'][setting]:
-                config.set('USER_SETTINGS', setting, '')
-            elif config.has_option('USER_SETTINGS', setting):
-                config.set('USER_SETTINGS', setting, getparams['systemsettings'][setting])
+            if config_factorysettings.has_option('FACTORY_SETTINGS', setting) \
+               and config_factorysettings.get('FACTORY_SETTINGS', setting, 0) == getparams['systemsettings'][setting]:
+                config_usersettings.set('USER_SETTINGS', setting, '')
+            elif config_usersettings.has_option('USER_SETTINGS', setting):
+                config_usersettings.set('USER_SETTINGS', setting, getparams['systemsettings'][setting])
 
         # Writing our configuration file to 'example.cfg' - COMMENTS ARE NOT PRESERVED!
-        with open(configfilepath, 'wb') as configfile:
-            config.write(configfile)
+        with open(usersettingsfilepath, 'wb') as configfile:
+            config_usersettings.write(configfile)
+        # ToDo: After changing the settings restart apache to apply the new settings
 
         updatestatus = '{"success":true, "message":"System settings updated!"}'
 
@@ -169,16 +175,21 @@ class SystemSettings:
 
     def GET(self):
         import ConfigParser
-        config = ConfigParser.ConfigParser()
-        config.read(['es_constants.ini', es_constants.es2globals['config_dir']+'/es_constants.ini'])
+        config_usersettings = ConfigParser.ConfigParser()
+        config_usersettings.read(['user_settings.ini',
+                                  es_constants.es2globals['settings_dir']+'/user_settings.ini'])
+
+        config_factorysettings = ConfigParser.ConfigParser()
+        config_factorysettings.read(['factory_settings.ini',
+                                     es_constants.es2globals['config_dir'] + '/factory_settings.ini'])
 
         systemsettings = {}
-        usersettings = config.items('USER_SETTINGS')
+        usersettings = config_usersettings.items('USER_SETTINGS')
         for setting, value in usersettings:
             if not value is None and value != "":
                 systemsettings[setting] = value
             else:
-                systemsettings[setting] = config.get('FACTORY_SETTINGS', setting, 0)
+                systemsettings[setting] = config_factorysettings.get('FACTORY_SETTINGS', setting, 0)
 
         #systemsettings = {'base_dir': '',
         #                  'base_tmp_dir': '',

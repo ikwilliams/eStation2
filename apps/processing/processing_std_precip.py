@@ -13,7 +13,7 @@
 #
 
 # Source my definitions
-import locals
+# import locals
 #
 import os, sys
 
