@@ -32,7 +32,7 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
         padding: 5
     },
     autoScroll: false,
-    //changesmade:false,
+    changesmade:false,
 
 //    tbar: Ext.create('Ext.toolbar.Toolbar', {
 //            items: [
@@ -175,14 +175,13 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                             },
                             isDisabled: function(view, rowIndex, colIndex, item, record) {
                                 // Returns true if 'editable' is false (, null, or undefined)
-                                return false // !record.get('editable');
+                                return false;    // !record.get('editable');
                             },
                             handler: function(grid, rowIndex, colIndex) {
                                 var rec = grid.getStore().getAt(rowIndex),
                                     action = (rec.get('activated') ? 'deactivated' : 'activated');
                                 // Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
                                 rec.get('activated') ? rec.set('activated', false) : rec.set('activated', true);
-                                console.info(grid.up().up());
                                 grid.up().up().changesmade = true;
                             }
                         }]
@@ -236,9 +235,6 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
         me.callParent(arguments);
     }
     ,onClose: function(win, ev) {
-        // var acq_main = Ext.ComponentQuery.query('panel[name=acquisitionmain]');
-        // acq_main.store.load();
-        console.info(win);
         if (win.changesmade){
             Ext.data.StoreManager.lookup('ProductsActiveStore').load();
         }

@@ -13,19 +13,20 @@ Ext.define("esapp.view.analysis.mapView",{
         'Ext.slider.Single'
     ],
 
-    title: '<span class="panel-title-style">MAP title</span>',
+    //title: '<span class="panel-title-style">MAP title</span>',
     margin: '0 0 0 0',
     layout: {
         type: 'fit'
     },
-    width:500,
-    height:500,
-    minWidth:400,
-    minHeight:400,
+    width:600,
+    height:600,
+    minWidth:50,
+    minHeight:50,
     // glyph : 'xf080@FontAwesome',
     constrain: true,
     autoShow : false,
     closeable: true,
+    closeAction: 'destroy', // 'hide',
     maximizable: true,
     collapsible: true,
     frame: false,
@@ -66,37 +67,25 @@ Ext.define("esapp.view.analysis.mapView",{
             hidden: false,
             border: false,
             shadow: false,
-//            layout: {
-//                type: 'fit'
-//            },
             style:{
-                // 'z-index': 1,
                 'background-color':'transparent'
             },
             items: [{
-                text: 'Tools',
-                iconCls: 'cog',
-                menu: [{text: 'Product navigator'}, {text: 'Vector layers'}, {text: 'Menu Button 3'}]
+                text: 'Product navigator',
+                iconCls: 'africa',
+                scale: 'medium',
+                handler: 'openProductNavigator'
             },{
-                text: 'Layers',
-                iconCls: 'add16',
-                menu: [{text: 'Layer 1'}, {text: 'Layer 2'}]
+                text: 'Add Layer',
+                iconCls: 'layers',
+                scale: 'medium'
             },{
                 text: 'Unlink',
                 enableToggle: true,
-                iconCls: 'add16',
+                iconCls: 'unlink',
+                scale: 'medium',
                 handler: 'toggleLink'
-//            }, {
-//                xtype: 'slider',
-//                // cls: 'custom-slider',
-//                hideLabel: false,
-//                border: true,
-//                width: 214,
-//                increment: 10,
-//                minValue: 0,
-//                maxValue: 100
             },
-            '->',
             {
                 xtype: 'box',
                 width: 200,
@@ -114,6 +103,7 @@ Ext.define("esapp.view.analysis.mapView",{
         });
 
         me.name ='mapviewwindow_' + me.id;
+
         me.items = [{
             xtype:'container',
             html: '<div id="mapview_' + me.id + '"></div>'
@@ -171,7 +161,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     controls: ol.control.defaults({
                         attribution:false,
                         attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
-                          collapsible: true // false to show always without the icon.
+                            collapsible: true // false to show always without the icon.
                         })
                     }).extend([mousePositionControl])
                 });

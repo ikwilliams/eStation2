@@ -17,7 +17,8 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         'Ext.grid.column.Check',
         'Ext.button.Split',
         'Ext.menu.Menu',
-        'Ext.XTemplate'
+        'Ext.XTemplate',
+        'Ext.util.DelayedTask'
     ],
 
     store: 'DataSetsStore',
@@ -53,32 +54,34 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         groupByText: 'Product category'
     }],
 
-    //listeners: {
-    //    beforerender: function (){
-    //        //this.suspendEvents(true);
-    //        //console.info(this.getView().getFeature('prodcat'));
-    //        //var groupFeature = this.getView().getFeature('prodcat');
-    //        //groupFeature.collapseAllButTop();
-    //
-    //        //groupFeature.expand("<span style='display: none;'>1</span>Vegetation", true);  // rainfall
-    //        //this.getView().getFeature('prodcat').expand("Vegetation", true);  // rainfall
-    //        //this.resumeEvents();
-    //    },
-    //    groupclick: function(view, rowElement, groupName, e){
-    //        //console.info('groupname: '+ groupName);
-    //        //view.features[0].collapseAll();
-    //        //view.features[0].expand(groupName);
-    //    }
-    //},
+    listeners: {
+        viewready: function (){
+            //this.suspendEvents(true);
+            var groupFeature = this.getView().getFeature('prodcat');
+            var me = this;
+            if ( !this.getStore().isLoaded() ){
+                var task = new Ext.util.DelayedTask(function(){
+                    if (this.firstGroupKey != 'undefined') {
+                        groupFeature.expand(me.firstGroupKey, true);
+                    } else {
+                        groupFeature.expand("<span style='display: none;'>1</span>Vegetation", true);  // rainfall
+                    }
+                });
+                task.delay(5000);
+
+            } else {
+                if (this.firstGroupKey != 'undefined') {
+                    groupFeature.expand(me.firstGroupKey, true);
+                } else {
+                    groupFeature.expand("<span style='display: none;'>1</span>Vegetation", true);  // rainfall
+                }
+            }
+            //this.resumeEvents();
+        }
+    },
 
     initComponent: function () {
         var me = this;
-
-        //me.getStore().load({
-        //    callback:function(){
-        //        me.getView().getFeature('prodcat').collapseAllButTop();
-        //    }
-        //});
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             items: [{
@@ -251,21 +254,18 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
 
         me.callParent();
 
-        var store = this.getStore();
+        me.groupingFeature = me.view.getFeature('prodcat');
 
-        this.groupingFeature = this.view.getFeature('prodcat');
-
-        // Create checkbox menu items to toggle associated group
-        store.getGroups().each(function(group) {
-            console.info(group.getGroupKey());
-            this.firstGroupName = group.getGroupKey();
-        }, this);
-
-        this.mon(this, 'afterrender', this.onAfterRender, this);
+        me.mon(me, 'afterrender', me.onAfterRender, me);
     }
 
     ,onAfterRender: function() {
-        //var groupName = this.firstGroupName;
-        //this.groupingFeature.expand(groupName, true);
+        var me = this;
+        me.getStore().load({
+            callback:function(){
+                me.firstGroupKey = me.getStore().getGroups().items[0].getGroupKey();
+                //me.view.getFeature('prodcat').expand(firstGroupKey, true);
+            }
+        });
     }
 });
