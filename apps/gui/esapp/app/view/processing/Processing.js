@@ -10,7 +10,11 @@ Ext.define("esapp.view.processing.Processing",{
     name:'processingmain',
 
     requires: [
+        'esapp.view.processing.ProcessingModel',
         'esapp.view.processing.ProcessingController',
+        'esapp.view.processing.ProductMapSet',
+        'esapp.view.processing.MapSetFinalOutputSubProduct',
+
         'Ext.grid.column.Widget',
         'Ext.grid.column.Template',
         'Ext.grid.column.Check',

@@ -9,7 +9,12 @@ Ext.define("esapp.view.analysis.analysisMain",{
     xtype  : 'analysis-main',
 
     requires: [
-        'Ext.window.Window'
+        'esapp.view.analysis.analysisMainModel',
+        'esapp.view.analysis.analysisMainController',
+        'esapp.view.analysis.mapView',
+        'esapp.view.analysis.ProductNavigator'
+
+        //,'Ext.window.Window'
     ],
 
     name: 'analysismain',

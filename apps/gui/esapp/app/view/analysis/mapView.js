@@ -8,6 +8,9 @@ Ext.define("esapp.view.analysis.mapView",{
     xtype: 'mapview-window',
 
     requires: [
+        'esapp.view.analysis.mapViewModel',
+        'esapp.view.analysis.mapViewController',
+
         'Ext.window.Window',
         'Ext.toolbar.Toolbar',
         'Ext.slider.Single'

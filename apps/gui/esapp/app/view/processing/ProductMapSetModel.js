@@ -1,8 +1,5 @@
 Ext.define('esapp.view.processing.ProductMapSetModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.processing-productmapset',
-    data: {
-        name: 'esapp'
-    }
+    alias: 'viewmodel.processing-productmapset'
 
 });

@@ -8,6 +8,9 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
     xtype: "productnavigator",
 
     requires: [
+        'esapp.view.analysis.ProductNavigatorModel',
+        'esapp.view.analysis.ProductNavigatorController',
+
         'Ext.layout.container.Center',
         'Ext.grid.plugin.RowExpander',
         'Ext.XTemplate'

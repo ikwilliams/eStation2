@@ -10,6 +10,7 @@ Ext.define("esapp.view.acquisition.logviewer.LogView",{
 
     requires: [
         'esapp.view.acquisition.logviewer.LogViewController',
+        'esapp.view.acquisition.logviewer.LogViewModel',
 
         'Ext.form.field.HtmlEditor',
         'Ext.form.field.Text',

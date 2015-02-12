@@ -11,6 +11,8 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
     requires: [
         'esapp.view.datamanagement.DataManagementModel',
         'esapp.view.datamanagement.DataManagementController',
+        'esapp.view.datamanagement.ProductMapSet',
+        'esapp.view.datamanagement.MapSetDataSet',
 
         'Ext.grid.column.Widget',
         'Ext.grid.column.Template',

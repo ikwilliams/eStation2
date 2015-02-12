@@ -11,7 +11,13 @@ Ext.define("esapp.view.acquisition.Acquisition",{
     xtype  : 'acquisition-main',
 
     requires: [
-        // 'esapp.model.*',
+        'esapp.view.acquisition.AcquisitionModel',
+        'esapp.view.acquisition.AcquisitionController',
+        'esapp.view.acquisition.DataAcquisition',
+        'esapp.view.acquisition.Ingestion',
+        'esapp.view.acquisition.product.selectProduct',
+        'esapp.view.acquisition.product.editProduct',
+
         'Ext.layout.container.Center',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.column.Widget',

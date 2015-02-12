@@ -9,6 +9,9 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
     xtype: "selectproduct",
 
     requires: [
+        'esapp.view.acquisition.product.selectProductModel',
+        'esapp.view.acquisition.product.selectProductController',
+
         'Ext.layout.container.Center',
         'Ext.grid.plugin.CellEditing',
         //'Ext.grid.column.Check',

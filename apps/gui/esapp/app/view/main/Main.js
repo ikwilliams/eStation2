@@ -9,8 +9,10 @@ Ext.define('esapp.view.main.Main', {
 
     xtype: 'app-main',
     requires: [
+        'esapp.view.main.MainModel',
+        'esapp.view.main.MainController',
+
         'Ext.layout.container.Center'
-        //,'Ext.chart.CartesianChart'
     ],
     controller: 'main',
     viewModel: {
