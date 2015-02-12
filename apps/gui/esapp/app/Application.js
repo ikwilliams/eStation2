@@ -11,6 +11,7 @@ Ext.define('esapp.Application', {
     requires: [
         // 'Ext.app.bindinspector.*',
         'Ext.app.*',
+        'Ext.window.Toast',
         'Ext.state.CookieProvider',
         'Ext.window.MessageBox',
         'Ext.tip.QuickTipManager',

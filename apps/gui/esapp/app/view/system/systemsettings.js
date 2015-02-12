@@ -48,7 +48,7 @@ Ext.define("esapp.view.system.systemsettings",{
     form_fieldlabel_static_data_dir             : 'Static data directory',
     form_fieldlabel_archive_dir                 : 'Archive directory',
     form_fieldlabel_eumetcast_files_dir         : 'Eumetcast files directory',
-    form_fieldlabel_ingest_server_in_dir        : 'Ingest server in directory',
+    //form_fieldlabel_ingest_server_in_dir        : 'Ingest server in directory',
 
     tools: [
     {
@@ -180,14 +180,14 @@ Ext.define("esapp.view.system.systemsettings",{
                fieldLabel: me.form_fieldlabel_eumetcast_files_dir,
                style:'font-weight: bold;',
                allowBlank: false
-            },{
-               id: 'ingest_server_in_dir',
-               name: 'ingest_server_in_dir',
-               bind: '{system_setting.ingest_server_in_dir}',
-               xtype: 'textfield',
-               fieldLabel: me.form_fieldlabel_ingest_server_in_dir,
-               style:'font-weight: bold;',
-               allowBlank: false
+            //},{
+            //   id: 'ingest_server_in_dir',
+            //   name: 'ingest_server_in_dir',
+            //   bind: '{system_setting.ingest_server_in_dir}',
+            //   xtype: 'textfield',
+            //   fieldLabel: me.form_fieldlabel_ingest_server_in_dir,
+            //   style:'font-weight: bold;',
+            //   allowBlank: false
             }]
         },{
             xtype: 'fieldset',

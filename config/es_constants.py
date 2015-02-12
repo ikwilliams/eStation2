@@ -1,6 +1,6 @@
 #
 #	purpose: Define all variables for es2
-#	author:  M.Clerici
+#	author:  M.Clerici & Jurriaan van 't Klooster
 #	date:	 13.03.2014
 #   descr:	 Define all variables for es2
 #	history: 1.0
@@ -20,19 +20,23 @@ import ConfigParser
 from osgeo import gdalconst
 
 thisfiledir = os.path.dirname(os.path.abspath(__file__))
-config = ConfigParser.ConfigParser()
-config.read(['es_constants.ini', thisfiledir+'/es_constants.ini'])
+config_factorysettings = ConfigParser.ConfigParser()
+config_factorysettings.read(['factory_settings.ini', thisfiledir+'/factory_settings.ini'])
 
-usersettings = config.items('USER_SETTINGS')
+config_usersettings = ConfigParser.ConfigParser()
+config_usersettings.read(['user_settings.ini', '/eStation2/settings/user_settings.ini'])
+
+usersettings = config_usersettings.items('USER_SETTINGS')
 for setting, value in usersettings:
     if not value is None and value != "":
-        config.set('FACTORY_SETTINGS', setting, value)
+        config_factorysettings.set('FACTORY_SETTINGS', setting, value)
     else:
-        #config.set('FACTORY_SETTINGS', setting, config.get('FACTORY_SETTINGS', 'factory_setting_'+setting, 0))
-        config.set('FACTORY_SETTINGS', setting, config.get('FACTORY_SETTINGS', setting, 0))
+        config_factorysettings.set('FACTORY_SETTINGS',
+                                   setting,
+                                   config_factorysettings.get('FACTORY_SETTINGS', setting, 0))
 
 es2globals = {}
-factorysettings = config.items('FACTORY_SETTINGS')  # dict(config.items('FACTORY_SETTINGS'))
+factorysettings = config_factorysettings.items('FACTORY_SETTINGS')
 for setting, value in factorysettings:
     es2globals[setting] = value
     locals()[setting] = value
@@ -44,5 +48,3 @@ ES2_OUTFILE_FORMAT = 'GTiff'
 ES2_OUTFILE_EXTENSION = '.tif'
 ES2_OUTFILE_OPTIONS = 'COMPRESS=LZW'
 ES2_OUTFILE_INTERP_METHOD = gdalconst.GRA_NearestNeighbour
-
-
