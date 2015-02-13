@@ -51,3 +51,29 @@ class TestFrequency(unittest.TestCase):
     def test_today_monthday(self):
         frequency =  Frequency(4, Frequency.UNIT.HOUR, Frequency.TYPE.PER, dateformat=Frequency.DATEFORMAT.MONTHDAY)
         self.assertEqual(type(frequency.today()), type(datetime.date.today()))
+
+    def test_wrong_date(self):
+        frequency =  Frequency(4, Frequency.UNIT.HOUR, Frequency.TYPE.PER, dateformat=Frequency.DATEFORMAT.MONTHDAY)
+        from_date = datetime.date(2014, 1, 1)
+        to_date = datetime.date(2014, 12, 31)
+        self.assertRaises(Exception, frequency.get_dates, *(to_date, from_date))
+
+    def test_count_dates(self):
+        frequency =  Frequency(1, Frequency.UNIT.MONTH, Frequency.TYPE.PER, dateformat=Frequency.DATEFORMAT.MONTHDAY)
+        from_date = datetime.date(2014, 1, 1)
+        to_date = datetime.date(2014, 12, 31)
+        self.assertEqual(frequency.count_dates(from_date, to_date), 12)
+
+    def test_get_dates(self):
+        frequency =  Frequency(1, Frequency.UNIT.MONTH, Frequency.TYPE.PER, dateformat=Frequency.DATEFORMAT.MONTHDAY)
+        from_date = datetime.date(2014, 1, 1)
+        to_date = datetime.date(2014, 12, 31)
+        self.assertEqual(len(frequency.get_dates(from_date, to_date)), 12)
+
+    def test_get_internet_dates(self):
+        frequency =  Frequency(1, Frequency.UNIT.MONTH, Frequency.TYPE.PER, dateformat=Frequency.DATEFORMAT.MONTHDAY)
+        from_date = datetime.date(2014, 1, 1)
+        to_date = datetime.date(2014, 12, 31)
+        dates = frequency.get_dates(from_date, to_date)
+        templates = frequency.get_internet_dates(dates, "pippo%Y-%m-%d")
+        self.assertEqual(templates[0], 'pippo2014-01-01')

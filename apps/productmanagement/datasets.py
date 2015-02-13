@@ -154,9 +154,26 @@ class Frequency(object):
         date = self.next_date(fromdate)
         count = 1
         while date <= todate:
-            date = self.next_date(date)
+            date_next = self.next_date(date)
+            if date_next == date:
+                raise Exception("Endless loop: %s" % date)
+            date = date_next
             count += 1
         return count
+
+    def get_dates(self, fromdate, todate):
+        if fromdate > todate:
+            raise Exception("'To date' must be antecedent respect 'From date': %s %s" % (
+                fromdate, todate))
+        dates = [fromdate]
+        while dates[-1] <= todate:
+            dates.append(self.next_date(dates[-1]))
+            if dates[-1] == dates[-2]:
+                raise Exception("Endless loop: %s" % dates[-1])
+        return dates[:-1]
+
+    def get_internet_dates(self, dates, template):
+        return [date.strftime(template) for date in dates]
 
     def next_filename(self, filename):
         date = self.next_date(self.extract_date(filename))
