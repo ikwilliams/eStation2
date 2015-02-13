@@ -384,7 +384,7 @@ def loop_get_internet(dry_run=False):
                     functions.dump_obj_to_pickle(processed_list, processed_list_filename)
                     functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
-                sleep(float(user_def_sleep))
+            sleep(float(user_def_sleep))
 
 #        except Exception, e:
 #            logger.fatal(str(e))
