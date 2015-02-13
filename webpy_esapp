@@ -6,6 +6,9 @@
 
 import sys
 import os
+
+os.umask(0000)
+
 cur_dir = os.path.dirname(__file__)
 if not cur_dir in sys.path:
     sys.path.append(cur_dir)
