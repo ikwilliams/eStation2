@@ -88,6 +88,7 @@ def loop_ingestion(dry_run=False):
                         # TODO-M.C.: check the most performing options in real-cases
                        #files = [f for f in os.listdir(ingest_dir_in) if re.match(str(eumetcast_filter), f)]
                         files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(eumetcast_filter, os.path.basename(f))]
+                        logger.info("Internet Source: looking for files in %s - named like: %s" % (ingest_dir_in, eumetcast_filter))
 
                 if source.type == 'INTERNET':
                     # Implement file name filtering for INTERNET data source.
@@ -99,6 +100,7 @@ def loop_ingestion(dry_run=False):
                         # TODO-M.C.: check the most performing options in real-cases
                         #files = [f for f in os.listdir(ingest_dir_in) if re.match(temp_internet_filter, f)]
                         files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(temp_internet_filter, os.path.basename(f))]
+                        logger.info("Internet Source: looking for files in %s - named like: %s" % (ingest_dir_in, temp_internet_filter))
 
                 logger.info("Number of files found for product [%s] is: %s" % (active_product_ingest[0], len(files)))
 
@@ -715,13 +717,14 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files):
     interm_files_list = []
     # Definitions
 
-    file_mcd14dl = es_constants.es2globals['ingest_dir'] + 'Global_MCD14DL_2015042.txt'
+    file_mcd14dl = input_files[0]
+    logger.debug('Pre-processing file: %s' % file_mcd14dl)
     pix_size = '0.008928571428571'
-    file_vrt = tmpdir+"firms_file.vrt"
-    file_csv = tmpdir+"firms_file.csv"
-    file_tif = tmpdir+"firms_file.tif"
+    file_vrt = tmpdir+os.path.sep+"firms_file.vrt"
+    file_csv = tmpdir+os.path.sep+"firms_file.csv"
+    file_tif = tmpdir+os.path.sep+"firms_file.tif"
     out_layer= "firms_file"
-    file_shp = tmpdir+out_layer+".shp"
+    file_shp = tmpdir+os.path.sep+out_layer+".shp"
 
     # Write the 'vrt' file
     with open(file_vrt,'w') as outFile:
