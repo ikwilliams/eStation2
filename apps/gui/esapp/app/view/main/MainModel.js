@@ -4,11 +4,7 @@
 Ext.define('esapp.view.main.MainModel', {
     extend: 'Ext.app.ViewModel',
 
-    alias: 'viewmodel.main',
-
-    data: {
-        name: 'esapp'
-    }
+    alias: 'viewmodel.main'
 
     //TODO - add data, formulas and/or methods to support your view
 });

@@ -38,7 +38,6 @@ logger = log.my_logger(__name__)
 ingest_dir_in = es_constants.ingest_dir
 data_dir_out = es_constants.processing_dir
 
-
 def loop_ingestion(dry_run=False):
 
 #    Driver of the ingestion process
@@ -89,6 +88,7 @@ def loop_ingestion(dry_run=False):
                         # TODO-M.C.: check the most performing options in real-cases
                        #files = [f for f in os.listdir(ingest_dir_in) if re.match(str(eumetcast_filter), f)]
                         files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(eumetcast_filter, os.path.basename(f))]
+                        logger.info("Internet Source: looking for files in %s - named like: %s" % (ingest_dir_in, eumetcast_filter))
 
                 if source.type == 'INTERNET':
                     # Implement file name filtering for INTERNET data source.
@@ -100,6 +100,7 @@ def loop_ingestion(dry_run=False):
                         # TODO-M.C.: check the most performing options in real-cases
                         #files = [f for f in os.listdir(ingest_dir_in) if re.match(temp_internet_filter, f)]
                         files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(temp_internet_filter, os.path.basename(f))]
+                        logger.info("Internet Source: looking for files in %s - named like: %s" % (ingest_dir_in, temp_internet_filter))
 
                 logger.info("Number of files found for product [%s] is: %s" % (active_product_ingest[0], len(files)))
 
@@ -705,6 +706,72 @@ def pre_process_hdf5_zip(subproducts, tmpdir, input_files):
     return interm_files_list
 
 
+def pre_process_nasa_firms(subproducts, tmpdir, input_files):
+# -------------------------------------------------------------------------------------------------------
+#   Pre-process the Global_MCD14DL product retrieved from ftp://nrt1.modaps.eosdis.nasa.gov/FIRMS/Global
+#   The columns are already there, namely: latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,
+#                                          confidence,version,bright_t31,frp
+#
+
+    # prepare the output as an empty list
+    interm_files_list = []
+    # Definitions
+
+    file_mcd14dl = input_files[0]
+    logger.debug('Pre-processing file: %s' % file_mcd14dl)
+    pix_size = '0.008928571428571'
+    file_vrt = tmpdir+os.path.sep+"firms_file.vrt"
+    file_csv = tmpdir+os.path.sep+"firms_file.csv"
+    file_tif = tmpdir+os.path.sep+"firms_file.tif"
+    out_layer= "firms_file"
+    file_shp = tmpdir+os.path.sep+out_layer+".shp"
+
+    # Write the 'vrt' file
+    with open(file_vrt,'w') as outFile:
+        outFile.write('<OGRVRTDataSource>\n')
+        outFile.write('    <OGRVRTLayer name="firms_file">\n')
+        outFile.write('        <SrcDataSource>'+file_csv+'</SrcDataSource>\n')
+        outFile.write('        <OGRVRTLayer name="firms_file" />\n')
+        outFile.write('        <GeometryType>wkbPoint</GeometryType>\n')
+        outFile.write('        <LayerSRS>WGS84</LayerSRS>\n')
+        outFile.write('        <GeometryField encoding="PointFromColumns" x="longitude" y="latitude" />\n')
+        outFile.write('    </OGRVRTLayer>\n')
+        outFile.write('</OGRVRTDataSource>\n')
+
+
+    # Generate the csv file with header
+    with open(file_csv,'w') as outFile:
+        #outFile.write('latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp')
+        with open(file_mcd14dl, 'r') as input_file:
+            outFile.write(input_file.read())
+
+    # Execute the ogr2ogr command
+    command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
+    logger.debug('Command is: '+command)
+    try:
+        os.system(command)
+    except:
+        logger.error('Error in executing ogr2ogr')
+        return 1
+
+    # Convert from shapefile to rasterfile
+    command = 'gdal_rasterize  -l ' + out_layer + ' -burn 1 '\
+            + ' -tr ' + str(pix_size) + ' ' + str(pix_size) \
+            + ' -co "compress=LZW" -of GTiff -ot Byte '     \
+            +file_shp+' '+file_tif
+
+    logger.debug('Command is: '+command)
+    try:
+        os.system(command)
+    except:
+        logger.error('Error in executing ogr2ogr')
+        return 1
+
+    interm_files_list.append(file_tif)
+
+    return interm_files_list
+
+
 def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process one or more input files by:
@@ -728,6 +795,7 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 #           BZIP2: .bz2 zipped files (containing 1 file only).
 #           GEOREF: only georeference, by assigning native mapset
 #           HDF5_UNZIP: zipped files containing HDF5 (see g2_BIOPAR)
+#           NASA_FIRMS: convert from csv to GTiff
 #
 #       native_mapset_code: id code of the native mapset (from datasource_descr)
 #       subproducts: list of subproducts to be extracted from the file. Contains dictionaries such as:
@@ -776,6 +844,9 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 
         elif preproc_type == 'HDF5_ZIP':
             interm_files = pre_process_hdf5_zip (subproducts, tmpdir, input_files)
+
+        elif preproc_type == 'NASA_FIRMS':
+            interm_files = pre_process_nasa_firms (subproducts, tmpdir, input_files)
 
         else:
             logger.error('Preproc_type not recognized:[%s] Check in DB table. Exit' % preproc_type)

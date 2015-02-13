@@ -7,6 +7,7 @@ Ext.define("esapp.view.widgets.ServiceMenuButton",{
     xtype: "servicemenubutton",
 
     requires: [
+        'esapp.view.widgets.ServiceMenuButtonModel',
         'esapp.view.widgets.ServiceMenuButtonController',
 
         'Ext.menu.Menu'
