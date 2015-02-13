@@ -17,10 +17,12 @@ from ..exceptions import (WrongDateType, NoProductFound)
 
 from lib.python import functions
 from database import querydb
+from database import connectdb
 import json
 
 class TestDatasets(unittest.TestCase):
     def setUp(self):
+        setattr(querydb, 'db', connectdb.ConnectDB(use_sqlite=True).db)
         self.kwargs = {'product_code':"fewsnet_rfe", 'sub_product_code': "rfe", 'mapset': 'FEWSNET_Africa_8km'}
         self.files_dekad = [
                 "20140101_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif",

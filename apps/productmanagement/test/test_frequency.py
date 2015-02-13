@@ -75,5 +75,5 @@ class TestFrequency(unittest.TestCase):
         from_date = datetime.date(2014, 1, 1)
         to_date = datetime.date(2014, 12, 31)
         dates = frequency.get_dates(from_date, to_date)
-        templates = frequency.get_internet_dates(dates, "pippo%Y-%m-%d")
-        self.assertEqual(templates[0], 'pippo2014-01-01')
+        templates = frequency.get_internet_dates(dates, "/Modis_%Y%m/mcd14dl.%Y-%m-%d.tif")
+        self.assertEqual(templates[0], '/Modis_201401/mcd14dl.2014-01-01.tif')
