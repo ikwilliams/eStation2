@@ -1,6 +1,5 @@
 Ext.define('esapp.model.Ingestion', {
     extend : 'esapp.model.Base',
-//    extend: 'Ext.data.Model',
 
     // idProperty : 'productID',
     fields: [
@@ -25,7 +24,6 @@ Ext.define('esapp.model.Ingestion', {
 
 Ext.define('esapp.model.Completeness', {
     extend : 'esapp.model.Base',
-//    extend: 'Ext.data.Model',
 
     fields: [
        {name: 'id', mapping:'productID'},
@@ -41,7 +39,6 @@ Ext.define('esapp.model.Completeness', {
 
 Ext.define('esapp.model.Intervals', {
     extend : 'esapp.model.Base',
-//    extend: 'Ext.data.Model',
 
     fields: [
        {name: 'fromdate'},

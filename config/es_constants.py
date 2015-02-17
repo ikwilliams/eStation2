@@ -21,14 +21,19 @@ from osgeo import gdalconst
 
 thisfiledir = os.path.dirname(os.path.abspath(__file__))
 config_factorysettings = ConfigParser.ConfigParser()
-config_factorysettings.read(['factory_settings.ini', thisfiledir+'/factory_settings.ini'])
+config_factorysettings.read([os.path.join(thisfiledir, 'factory_settings.ini')])
+
+usersettingsfile = '/eStation2/settings/user_settings.ini'
+if not os.path.isfile(usersettingsfile):
+    usersettingsfile = os.path.join(thisfiledir, 'user_settings.ini')
+    # ToDo: copy user_settings.ini from config dir to /eStation2/settings/ ???
 
 config_usersettings = ConfigParser.ConfigParser()
-config_usersettings.read(['user_settings.ini', '/eStation2/settings/user_settings.ini'])
+config_usersettings.read([usersettingsfile])
 
 usersettings = config_usersettings.items('USER_SETTINGS')
 for setting, value in usersettings:
-    if not value is None and value != "":
+    if value is not None and value != "":
         config_factorysettings.set('FACTORY_SETTINGS', setting, value)
     else:
         config_factorysettings.set('FACTORY_SETTINGS',

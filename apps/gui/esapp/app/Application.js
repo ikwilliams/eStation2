@@ -24,26 +24,27 @@ Ext.define('esapp.Application', {
         'dashboard.Dashboard',
 
         'acquisition.Acquisition',
-        'acquisition.DataAcquisition',
-        'acquisition.Ingestion',
-
-        'acquisition.product.editProduct',
-        'acquisition.product.selectProduct',
+        //'acquisition.DataAcquisition',
+        //'acquisition.Ingestion',
+        //'acquisition.product.editProduct',
+        //'acquisition.product.selectProduct',
 
         'processing.Processing',
-        'processing.ProductMapSet',
-        'processing.MapSetFinalOutputSubProduct',
+        //'processing.ProductMapSet',
+        //'processing.MapSetFinalOutputSubProduct',
 
         'datamanagement.DataManagement',
-        'datamanagement.ProductMapSet',
-        'datamanagement.MapSetDataSet',
+        //'datamanagement.ProductMapSet',
+        //'datamanagement.MapSetDataSet',
+
+        'analysis.analysisMain',
 
         'system.systemsettings',
 
         'widgets.datasetCompletenessChart',
-        'widgets.ServiceMenuButton',
+        'widgets.ServiceMenuButton'
 
-        'analysis.analysisMain'
+
     ],
 
     controllers: [
@@ -59,6 +60,7 @@ Ext.define('esapp.Application', {
         ,'DataSetsStore'
         ,'ProcessingStore'
         ,'SystemSettingsStore'
+        ,'ProductNavigatorStore'
     ],
 
 //    onBeforeLaunch: function () {

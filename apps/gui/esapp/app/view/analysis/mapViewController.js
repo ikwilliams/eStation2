@@ -19,7 +19,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
     ,openProductNavigator: function(btn, event) {
         var productNavigatorWin = new esapp.view.analysis.ProductNavigator();
-        productNavigatorWin.down().getStore().load();
+        //productNavigatorWin.down().getStore().load();
         productNavigatorWin.show();
     }
 

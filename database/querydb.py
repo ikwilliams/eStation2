@@ -230,22 +230,26 @@ def get_dataacquisitions(echo=False):
 
 
 ######################################################################################
-#   get_products(echo=False)
+#   get_products(echo=False, activated=None, masked=None)
 #   Purpose: Query the database to get the (Native) product list with their product category.
 #            Mainly used in the GUI Acquisition tab.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/07/08
 #   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
+#          activated        - If not given the result with contain all Native products
+#                             (used for acquisition, ingestion and processing)
+#          masked           - If given, the result with contain all Native products which are not masked!
+#                             (used by the Analysis tool in the Product Navigator)
 #
 #   Output: Return the (Native) product list with their product category
 #           ordered by product category order_index and productcode.
-
+#
 #   SELECT p.productcode, p.version, p.activated, pc.category_id, pc.descriptive_name, pc.order_index
 #   FROM products.product p inner join products.product_category pc on p.category_id = pc.category_id
 #   WHERE p.product_type = 'Native'
 #   ORDER BY pc.order_index, productcode
 #
-def get_products(echo=False, activated=None):
+def get_products(echo=False, activated=None, masked=None):
     try:
         pc = db.product_category._table
         p = db.product._table
@@ -259,6 +263,7 @@ def get_products(echo=False, activated=None):
                     p.c.product_type,
                     p.c.descriptive_name.label('prod_descriptive_name'),
                     p.c.description,
+                    p.c.masked,
                     pc.c.category_id,
                     pc.c.descriptive_name.label('cat_descr_name'),
                     pc.c.order_index]).select_from(p.outerjoin(pc, p.c.category_id == pc.c.category_id))
@@ -266,12 +271,18 @@ def get_products(echo=False, activated=None):
         s = s.alias('pl')
         pl = db.map(s, primary_key=[s.c.productID])
 
-        if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
-            where = and_(pl.c.product_type == 'Native', pl.c.activated)
-        elif activated is False or activated in ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
-            where = and_(pl.c.product_type == 'Native', pl.c.activated != 't')
+        if masked is None:
+            if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+                where = and_(pl.c.product_type == 'Native', pl.c.activated)
+            elif activated is False or activated in ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
+                where = and_(pl.c.product_type == 'Native', pl.c.activated != 't')
+            else:
+                where = and_(pl.c.product_type == 'Native')
         else:
-            where = and_(pl.c.product_type == 'Native')
+            if not masked:
+                where = and_(pl.c.product_type == 'Native', pl.c.masked == 'f')
+            else:
+                where = and_(pl.c.product_type == 'Native', pl.c.masked == 't')
 
         productslist = pl.filter(where).order_by(asc(pl.c.order_index), asc(pl.c.productcode)).all()
 
