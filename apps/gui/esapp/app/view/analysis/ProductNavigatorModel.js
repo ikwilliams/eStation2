@@ -1,26 +1,38 @@
 Ext.define('esapp.view.analysis.ProductNavigatorModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.analysis-productnavigator',
+    alias: 'viewmodel.analysis-productnavigator'
 
-    //data : {
-    //    ProductNavigator : {},
-    //    ProductNavigatorMapSet : {},
-    //    ProductNavigatorMapSetDataSet : {}
+    //,data : {}
+
+    //,links: {
+    //    products: {
+    //        reference: 'esapp.model.ProductNavigator'
+    //        ,create: true
+    //        //,id: 1
+    //    }
     //}
 
-    stores: {
+    ,stores: {
         products: {
-            //model: 'ProductNavigator'
-            source: 'ProductNavigatorStore'
-            //,autoload: true
-            //,grouper:{
-            //         // property: 'cat_descr_name',
-            //         groupFn : function (item) {
-            //             return "<span style='display: none;'>" + item.get('order_index') + "</span>" + item.get('cat_descr_name')
-            //             //return item.get('cat_descr_name')
-            //         },
-            //         sortProperty: 'order_index'
-            //}
+            //source: 'ProductNavigatorStore'
+            model: 'esapp.model.ProductNavigator'
+            ,session: true
+
+            ,sorters: {property: 'order_index', direction: 'DESC'}
+
+            ,grouper:{
+                     // property: 'cat_descr_name',
+                     groupFn : function (item) {
+                         return "<span style='display: none;'>" + item.get('order_index') + "</span>" + item.get('cat_descr_name')
+                         //return item.get('cat_descr_name')
+                     },
+                     sortProperty: 'order_index'
+            }
+            ,listeners: {
+                write: function(store, operation){
+                    Ext.toast({ html: operation.getResultSet().message, title: operation.action, width: 300, align: 't' });
+                }
+            }
         }
     }
 

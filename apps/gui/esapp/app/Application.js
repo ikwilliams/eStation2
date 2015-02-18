@@ -60,8 +60,10 @@ Ext.define('esapp.Application', {
         ,'DataSetsStore'
         ,'ProcessingStore'
         ,'SystemSettingsStore'
-        ,'ProductNavigatorStore'
+        //,'ProductNavigatorStore'
     ],
+
+    models: ['ProductNavigator', 'ProductNavigatorMapSet', 'ProductNavigatorMapSetDataSet'],
 
 //    onBeforeLaunch: function () {
 //

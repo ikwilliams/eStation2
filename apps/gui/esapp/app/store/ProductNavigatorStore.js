@@ -15,6 +15,7 @@ Ext.define('esapp.store.ProductNavigatorStore', {
     ,autoSync: false
     ,remoteSort: false
     ,remoteGroup: false
+    ,loadMask: true
 
     ,sorters: {property: 'order_index', direction: 'DESC'}
 
@@ -22,6 +23,12 @@ Ext.define('esapp.store.ProductNavigatorStore', {
         type: 'rest',
         // url: '',
         appendId: false,
+        actionMethods: {
+            create: 'POST',
+            read: 'GET',
+            update: 'POST',
+            destroy: 'POST'
+        },
         api: {
             read: 'analysis/productnavigator',
             create: 'analysis/productnavigator/create',
