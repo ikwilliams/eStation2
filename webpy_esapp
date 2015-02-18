@@ -49,7 +49,6 @@ urls = (
 
     "/getlogfile", "GetLogFile",
 
-
     "/dataacquisition", "DataAcquisition",
     "/dataacquisition/update", "UpdateDataAcquisition",
 
@@ -62,9 +61,9 @@ urls = (
 
     "/datasets", "DataSets",
 
-    "/getlayer", "GetLayer",
+    "/analysis/getproductlayer", "GetProductLayer",
+    "/analysis/productnavigator", "ProductNavigatorDataSets",
 
-    "/template", "TemplatePage",
     #"/(.+)/(.+)", "EsApp",
     #"/(.+)/", "EsApp",
     "/", "EsApp")
@@ -82,6 +81,68 @@ class EsApp:
         #return web.ctx
         render = web.template.render(es_constants.es2globals['base_dir']+'/apps/gui/esapp')
         return render.index()
+
+
+class ProductNavigatorDataSets:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self):
+        db_products = querydb.get_products(echo=False, activated=None, masked=False)
+
+        if db_products.__len__() > 0:
+            products_dict_all = []
+            # loop the products list
+            for row in db_products:
+                prod_dict = functions.row2dict(row)
+                productcode = prod_dict['productcode']
+                version = prod_dict['version']
+
+                p = Product(product_code=productcode, version=version)
+
+                # does the product have mapsets AND subproducts?
+                all_prod_mapsets = p.mapsets
+                all_prod_subproducts = p.subproducts
+                if all_prod_mapsets.__len__() > 0 and all_prod_subproducts.__len__() > 0:
+                    prod_dict['productmapsets'] = []
+                    for mapset in all_prod_mapsets:
+                        mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
+                        mapset_dict = functions.row2dict(mapset_info)
+                        mapset_dict['mapsetdatasets'] = []
+                        all_mapset_datasets = p.get_subproducts(mapset=mapset)
+                        for subproductcode in all_mapset_datasets:
+                            dataset_info = querydb.get_subproduct(productcode=productcode,
+                                                                  version=version,
+                                                                  subproductcode=subproductcode,
+                                                                  echo=False)
+                            # dataset_info = querydb.db.product.get(productcode, version, subproductcode)
+                            # dataset_dict = {}
+                            # if dataset_info:
+                            dataset_dict = functions.row2dict(dataset_info)
+                            # dataset_dict = dataset_info.__dict__
+                            # del dataset_dict['_labels']
+                            dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                            completeness = dataset.get_dataset_normalized_info()
+                            dataset_dict['datasetcompleteness'] = completeness
+
+                            mapset_dict['mapsetdatasets'].append(dataset_dict)
+                        prod_dict['productmapsets'].append(mapset_dict)
+                products_dict_all.append(prod_dict)
+
+            prod_json = json.dumps(products_dict_all,
+                                   ensure_ascii=False,
+                                   sort_keys=True,
+                                   indent=4,
+                                   separators=(', ', ': '))
+
+            datamanagement_json = '{"success":true, "total":'\
+                                  + str(db_products.__len__())\
+                                  + ',"products":'+prod_json+'}'
+
+        else:
+            datamanagement_json = '{"success":false, "error":"No data sets defined!"}'
+
+        return datamanagement_json
 
 
 class GetLogFile:
@@ -132,6 +193,7 @@ class ResetSystemSettings:
         # Writing our configuration file to 'example.cfg' - COMMENTS ARE NOT PRESERVED!
         with open(usersettingsinifile, 'wb') as configfile:
             config.write(configfile)
+            configfile.close()
         # ToDo: After changing the settings restart apache to apply the new settings
 
         updatestatus = '{"success":true, "message":"System settings reset to factory settings!"}'
@@ -165,6 +227,7 @@ class UpdateSystemSettings:
         # Writing our configuration file to 'example.cfg' - COMMENTS ARE NOT PRESERVED!
         with open(usersettingsfilepath, 'wb') as configfile:
             config_usersettings.write(configfile)
+            configfile.close()
         # ToDo: After changing the settings restart apache to apply the new settings
 
         updatestatus = '{"success":true, "message":"System settings updated!"}'
@@ -189,7 +252,7 @@ class SystemSettings:
         systemsettings = {}
         usersettings = config_usersettings.items('USER_SETTINGS')
         for setting, value in usersettings:
-            if not value is None and value != "":
+            if value is not None and value != "":
                 systemsettings[setting] = value
             else:
                 systemsettings[setting] = config_factorysettings.get('FACTORY_SETTINGS', setting, 0)
@@ -221,7 +284,7 @@ class SystemSettings:
         return systemsettings_json
 
 
-class GetLayer:
+class GetProductLayer:
     def __init__(self):
         self.lang = "en"
 
@@ -559,14 +622,14 @@ class ExecuteServiceTask:
         dryrun = False
         getparams = web.input()
 
-        logger.info(getparams.service)
-        logger.info(getparams.task)
-
         if getparams.service == 'eumetcast':
             # Define pid file and create daemon
             pid_file = es_constants.get_eumetcast_pid_filename
             eumetcast_daemon = acquisition.GetEumetcastDaemon(pid_file, dry_run=dryrun)
             status = eumetcast_daemon.status()
+
+            logger.info(getparams.service)
+            logger.info('status: ' + str(status))
 
             if getparams.task == 'run':
                 if not status:
@@ -579,14 +642,18 @@ class ExecuteServiceTask:
                     message = 'eumetcast service allready started'
 
             if getparams.task == 'stop':
+                logger.info(getparams.task)
                 if status:
+                    logger.info("stopping eumetcast deamon")
                     eumetcast_daemon.stop()
+                    logger.info("eumetcast deamon stopped")
                     if not eumetcast_daemon.status():
                         message = 'eumetcast service stopped'
                     else:
                         logger.error("failure stopping eumetcast service")
                 else:
                     message = 'eumetcast service allready stopped'
+            logger.info(message)
 
             if getparams.task == 'restart':
                 if status:

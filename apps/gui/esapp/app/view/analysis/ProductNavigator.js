@@ -11,10 +11,16 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
         'esapp.view.analysis.ProductNavigatorModel',
         'esapp.view.analysis.ProductNavigatorController',
 
+        'esapp.model.ProductNavigator',
+        'esapp.model.ProductNavigatorMapSet',
+        'esapp.model.ProductNavigatorMapSetDataSet',
+
         'Ext.layout.container.Center',
         'Ext.grid.plugin.RowExpander',
         'Ext.XTemplate'
     ],
+
+    //bind: '{products}',
 
     title: 'Product Navigator',
     header: {
@@ -34,6 +40,19 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
     },
     autoScroll: false,
     productselected:false,
+    tools: [
+    {
+        type: 'refresh',
+        tooltip: 'Refresh product list',
+        callback: function (productnavwin) {
+            console.info(productnavwin);
+            var productnavigatorstore  = Ext.data.StoreManager.lookup('ProductNavigatorStore');
+
+            if (productnavigatorstore.isStore) {
+                productnavigatorstore.load();
+            }
+        }
+    }],
 
     initComponent: function () {
         var me = this
@@ -42,14 +61,15 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
 
         Ext.apply(cfg, {
             listeners: {
-                close:me.onClose
+                close: me.onClose
             },
 
             items : [{
                 xtype : 'grid',
                 region: 'center',
                 width: 485,
-                store: 'ProductsActiveStore',
+                store: 'ProductNavigatorStore',
+                //bind: '{products}',
                 session:true,
 
                 viewConfig: {
@@ -124,6 +144,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                             text: "Product",
                             width: 485,
                             dataIndex: 'prod_descriptive_name',
+                            //bind: '{products.prod_descriptive_name}',
                             renderer : function(val) {
                                 return '<b>' + val + '</b>';
                             }
@@ -151,11 +172,30 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         this.up().setWidth(575);
                     }
                 },
-                items: [
-                    {
-                        xtype:''
-                    }
-                ]
+                items: [{
+                        //xtype:'container',
+                        //items: new Ext.DataView({
+                        //    //store: this.store,
+                        //    bind: {
+                        //        boxLabel: '{foo}'
+                        //    },
+                        //    tpl: new Ext.XTemplate(
+                        //        '<tpl for=".">',
+                        //            '<div class="thumb-wrap" style="width:210px; float: left;">',
+                        //                '<label >',
+                        //                    '<tpl>',
+                        //                        '<input type=radioField value={fieldId} >',
+                        //                    '</tpl>',
+                        //                    '{dataViewFieldName}',
+                        //                '</label>',
+                        //            '</div>',
+                        //        '</tpl>', {
+                        //    }),
+                        //    overClass: 'x-view-over',
+                        //    itemSelector: 'div.thumb-wrap',
+                        //    autoScroll: true
+                        //})
+                }]
             }]
         });
 
@@ -168,3 +208,4 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
         //}
     }
 });
+

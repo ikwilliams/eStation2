@@ -138,6 +138,11 @@ class TestQuerydb(TestCase):
         for row in product:
             print row
 
+        product = querydb.get_products(masked=False)
+        logger.info("Not masked products: %s", product)
+        for row in product:
+            print row
+
         self.assertEqual(1, 1)
 
     def Test_get_subproduct(self):

@@ -1,4 +1,4 @@
-Ext.define('esapp.model.DataSet', {
+Ext.define('esapp.model.ProductNavigator', {
     extend : 'esapp.model.Base',
 
 //    idProperty : 'productID',
@@ -16,22 +16,14 @@ Ext.define('esapp.model.DataSet', {
        {name: 'cat_descr_name', mapping: 'cat_descr_name'},
        {name: 'order_index', mapping: 'order_index'}
     ]
-//    ,associations:[
-//        {
-//            type: 'hasMany',
-////            model: 'esapp.model.ProductMapset',
-//            model: 'ProductMapset',
-//            name: 'productmapsets'
-//        }
-//    ]
 });
 
 
-Ext.define('esapp.model.ProductMapSet', {
+Ext.define('esapp.model.ProductNavigatorMapSet', {
     extend : 'esapp.model.Base',
 
     fields: [
-        {name: 'productID', reference:'DataSet', type: 'string'},
+        {name: 'productID', reference:'ProductNavigator', type: 'string'},
         {name: 'mapsetcode'},
         {name: 'defined_by'},
         {name: 'descriptive_name'},
@@ -47,22 +39,14 @@ Ext.define('esapp.model.ProductMapSet', {
         {name: 'pixel_size_y'},
         {name: 'footprint_image'}
     ]
-//    ,associations:[
-//        {
-//            type: 'hasMany',
-//            model: 'MapSetDataSet',
-////            model: 'esapp.model.MapSetDataSet',
-//            name: 'mapsetdatasets'
-//        }
-//    ]
 });
 
 
-Ext.define('esapp.model.MapSetDataSet', {
+Ext.define('esapp.model.ProductNavigatorMapSetDataSet', {
     extend : 'esapp.model.Base',
 
     fields: [
-       {name: 'mapsetcode', reference:'ProductMapSet'},
+       {name: 'mapsetcode', reference:'ProductNavigatorMapSet'},
        {name: 'datasetID'},
        {name: 'productcode'},
        {name: 'subproductcode'},
@@ -77,13 +61,13 @@ Ext.define('esapp.model.MapSetDataSet', {
     ,associations:[
         {
             type: 'hasOne',
-            model: 'DataSetCompleteness',
-            name : 'datasetcompleteness'
+            model: 'ProductNavigatorDataSetCompleteness',
+            name : 'productnavigatordatasetcompleteness'
         }
     ]
 });
 
-Ext.define('esapp.model.DataSetCompleteness', {
+Ext.define('esapp.model.ProductNavigatorDataSetCompleteness', {
     extend : 'esapp.model.Base',
 
     fields: [
@@ -96,13 +80,13 @@ Ext.define('esapp.model.DataSetCompleteness', {
     ,associations:[
         {
             type: 'hasMany',
-            model: 'DataSetIntervals',
-            name: 'datasetintervals'
+            model: 'ProductNavigatorDataSetIntervals',
+            name: 'productnavigatordatasetintervals'
         }
     ]
 });
 
-Ext.define('esapp.model.DataSetIntervals', {
+Ext.define('esapp.model.ProductNavigatorDataSetIntervals', {
     extend : 'esapp.model.Base',
 
     fields: [

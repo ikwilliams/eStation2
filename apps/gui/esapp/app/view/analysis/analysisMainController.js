@@ -8,7 +8,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
             layers: [
                 new ol.layer.Image({
                     source: new ol.source.ImageWMS({
-                        url: 'getlayer',
+                        url: 'analysis/getproductlayer',
                         crossOrigin: 'anonymous',
                         attributions: [new ol.Attribution({
                             html: '&copy; ' +

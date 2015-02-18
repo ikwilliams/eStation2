@@ -230,22 +230,26 @@ def get_dataacquisitions(echo=False):
 
 
 ######################################################################################
-#   get_products(echo=False)
+#   get_products(echo=False, activated=None, masked=None)
 #   Purpose: Query the database to get the (Native) product list with their product category.
 #            Mainly used in the GUI Acquisition tab.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/07/08
 #   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
+#          activated        - If not given the result with contain all Native products
+#                             (used for acquisition, ingestion and processing)
+#          masked           - If given, the result with contain all Native products which are not masked!
+#                             (used by the Analysis tool in the Product Navigator)
 #
 #   Output: Return the (Native) product list with their product category
 #           ordered by product category order_index and productcode.
-
+#
 #   SELECT p.productcode, p.version, p.activated, pc.category_id, pc.descriptive_name, pc.order_index
 #   FROM products.product p inner join products.product_category pc on p.category_id = pc.category_id
 #   WHERE p.product_type = 'Native'
 #   ORDER BY pc.order_index, productcode
 #
-def get_products(echo=False, activated=None):
+def get_products(echo=False, activated=None, masked=None):
     try:
         pc = db.product_category._table
         p = db.product._table
@@ -259,6 +263,7 @@ def get_products(echo=False, activated=None):
                     p.c.product_type,
                     p.c.descriptive_name.label('prod_descriptive_name'),
                     p.c.description,
+                    p.c.masked,
                     pc.c.category_id,
                     pc.c.descriptive_name.label('cat_descr_name'),
                     pc.c.order_index]).select_from(p.outerjoin(pc, p.c.category_id == pc.c.category_id))
@@ -266,12 +271,18 @@ def get_products(echo=False, activated=None):
         s = s.alias('pl')
         pl = db.map(s, primary_key=[s.c.productID])
 
-        if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
-            where = and_(pl.c.product_type == 'Native', pl.c.activated)
-        elif activated is False or activated in ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
-            where = and_(pl.c.product_type == 'Native', pl.c.activated != 't')
+        if masked is None:
+            if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+                where = and_(pl.c.product_type == 'Native', pl.c.activated)
+            elif activated is False or activated in ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
+                where = and_(pl.c.product_type == 'Native', pl.c.activated != 't')
+            else:
+                where = and_(pl.c.product_type == 'Native')
         else:
-            where = and_(pl.c.product_type == 'Native')
+            if not masked:
+                where = and_(pl.c.product_type == 'Native', pl.c.masked == 'f')
+            else:
+                where = and_(pl.c.product_type == 'Native', pl.c.masked == 't')
 
         productslist = pl.filter(where).order_by(asc(pl.c.order_index), asc(pl.c.productcode)).all()
 
@@ -819,23 +830,33 @@ def get_active_internet_sources(echo=False):
     try:
         session = db.session
 
-        es = session.query(db.internet_source).subquery()
+        intsrc = session.query(db.internet_source).subquery()
         pads = aliased(db.product_acquisition_data_source)
-        # The columns on the subquery "es" are accessible through an attribute called "c"
-        # e.g. es.c.filter_expression_jrc
+        # The columns on the subquery "intsrc" are accessible through an attribute called "c"
+        # e.g. intsrc.c.filter_expression_jrc
 
-        args = tuple(x for x in (pads, es.c.internet_id, es.c.defined_by,
-                                 es.c.descriptive_name, es.c.description,
-                                 es.c.modified_by, es.c.update_datetime,
-                                 es.c.url, es.c.user_name, es.c.password,
-                                 es.c.list, es.c.period, es.c.scope,
-                                 es.c.include_files_expression,
-                                 es.c.exclude_files_expression,
-                                 es.c.status, es.c.pull_frequency,
-                                 es.c.datasource_descr_id)
-                     if x != es.c.update_datetime)
+        args = tuple(x for x in (pads,
+                                 intsrc.c.internet_id,
+                                 intsrc.c.defined_by,
+                                 intsrc.c.descriptive_name,
+                                 intsrc.c.description,
+                                 intsrc.c.modified_by,
+                                 intsrc.c.update_datetime,
+                                 intsrc.c.url,
+                                 intsrc.c.user_name,
+                                 intsrc.c.password,
+                                 intsrc.c.type,
+                                 intsrc.c.frequency_id,
+                                 intsrc.c.start_date,
+                                 intsrc.c.end_date,
+                                 intsrc.c.include_files_expression,
+                                 intsrc.c.exclude_files_expression,
+                                 intsrc.c.status,
+                                 intsrc.c.pull_frequency,
+                                 intsrc.c.datasource_descr_id)
+                     if x != intsrc.c.update_datetime)
 
-        internet_sources = session.query(*args).outerjoin(es, pads.data_source_id == es.c.internet_id).\
+        internet_sources = session.query(*args).outerjoin(intsrc, pads.data_source_id == intsrc.c.internet_id).\
             filter(and_(pads.type == 'INTERNET', pads.activated)).all()
 
         if echo:
