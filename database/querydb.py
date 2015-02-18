@@ -830,23 +830,33 @@ def get_active_internet_sources(echo=False):
     try:
         session = db.session
 
-        es = session.query(db.internet_source).subquery()
+        intsrc = session.query(db.internet_source).subquery()
         pads = aliased(db.product_acquisition_data_source)
-        # The columns on the subquery "es" are accessible through an attribute called "c"
-        # e.g. es.c.filter_expression_jrc
+        # The columns on the subquery "intsrc" are accessible through an attribute called "c"
+        # e.g. intsrc.c.filter_expression_jrc
 
-        args = tuple(x for x in (pads, es.c.internet_id, es.c.defined_by,
-                                 es.c.descriptive_name, es.c.description,
-                                 es.c.modified_by, es.c.update_datetime,
-                                 es.c.url, es.c.user_name, es.c.password,
-                                 es.c.list, es.c.period, es.c.scope,
-                                 es.c.include_files_expression,
-                                 es.c.exclude_files_expression,
-                                 es.c.status, es.c.pull_frequency,
-                                 es.c.datasource_descr_id)
-                     if x != es.c.update_datetime)
+        args = tuple(x for x in (pads,
+                                 intsrc.c.internet_id,
+                                 intsrc.c.defined_by,
+                                 intsrc.c.descriptive_name,
+                                 intsrc.c.description,
+                                 intsrc.c.modified_by,
+                                 intsrc.c.update_datetime,
+                                 intsrc.c.url,
+                                 intsrc.c.user_name,
+                                 intsrc.c.password,
+                                 intsrc.c.type,
+                                 intsrc.c.frequency_id,
+                                 intsrc.c.start_date,
+                                 intsrc.c.end_date,
+                                 intsrc.c.include_files_expression,
+                                 intsrc.c.exclude_files_expression,
+                                 intsrc.c.status,
+                                 intsrc.c.pull_frequency,
+                                 intsrc.c.datasource_descr_id)
+                     if x != intsrc.c.update_datetime)
 
-        internet_sources = session.query(*args).outerjoin(es, pads.data_source_id == es.c.internet_id).\
+        internet_sources = session.query(*args).outerjoin(intsrc, pads.data_source_id == intsrc.c.internet_id).\
             filter(and_(pads.type == 'INTERNET', pads.activated)).all()
 
         if echo:
