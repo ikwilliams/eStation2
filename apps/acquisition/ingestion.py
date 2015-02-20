@@ -20,6 +20,7 @@ import ntpath
 import os
 import numpy as N
 import time
+import shutil
 
 # import eStation2 modules
 from database import querydb
@@ -64,7 +65,7 @@ def loop_ingestion(dry_run=False):
             # For the current active product ingestion: get all
             product = {"productcode": productcode,
                        "version": productversion}
-            logger.debug("Processing product: %s" % productcode)
+            logger.debug("Processing product: %s - version %s" % (productcode,  productversion))
 
             # Get the list of acquisition sources that are defined for this ingestion 'trigger'
             # (i.e. prod/version)
@@ -88,7 +89,7 @@ def loop_ingestion(dry_run=False):
                         # TODO-M.C.: check the most performing options in real-cases
                        #files = [f for f in os.listdir(ingest_dir_in) if re.match(str(eumetcast_filter), f)]
                         files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(eumetcast_filter, os.path.basename(f))]
-                        logger.info("Internet Source: looking for files in %s - named like: %s" % (ingest_dir_in, eumetcast_filter))
+                        logger.info("Eumetcast Source: looking for files in %s - named like: %s" % (ingest_dir_in, eumetcast_filter))
 
                 if source.type == 'INTERNET':
                     # Implement file name filtering for INTERNET data source.
@@ -186,18 +187,32 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, echo
 
     do_preprocess = 0
 
+    # Create temp output dir
+    try:
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_files[0]),
+                                  dir=es_constants.base_tmp_dir)
+    except IOError:
+        logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
+        return 1
     if preproc_type != 'None':
         do_preprocess = 1
 
     if do_preprocess == 1:
         logger.debug("Calling routine %s" % 'preprocess_files')
-        composed_file_list = pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files)
+        composed_file_list = pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir)
     else:
         composed_file_list = input_files
 
     ingest_file(composed_file_list, in_date, product, subproducts, datasource_descr, in_files=input_files,
                 echo_query=echo_query)
 
+    # -------------------------------------------------------------------------
+    # Remove the Temp working directory
+    # -------------------------------------------------------------------------
+    try:
+        shutil.rmtree(tmpdir)
+    except:
+        logger.error('Error in removing temporary directory. Continue')
 
 def pre_process_msg_mpe (subproducts, tmpdir , input_files):
 # -------------------------------------------------------------------------------------------------------
@@ -510,8 +525,6 @@ def pre_process_unzip(subproducts, tmpdir , input_files):
 
 
         # TODO-M.C.:Check all datasets have been found (len(intermFile) ==len(subprods)))
-        # Remove tempDir -> not here: tmpfile still to be used
-        # shutil.rmtree(tmp_dir)
 
     return out_tmp_gtiff_file
 
@@ -688,20 +701,27 @@ def pre_process_hdf5_zip(subproducts, tmpdir, input_files):
         # Test the hdf file and read list of datasets
         hdf = gdal.Open(my_unzip_file)
         sdsdict = hdf.GetMetadata('SUBDATASETS')
-        sdslist = [sdsdict[k] for k in sdsdict.keys() if '_NAME' in k]
 
-        # Loop over datasets and extract the one in the list
-        for output_sds in sds_to_process:
-            for subdataset in sdslist:
-                id_subdataset = subdataset.split(':')[-1]
-                id_subdataset = id_subdataset.replace('/', '')
-                if id_subdataset == output_sds:
-                    outputfile = tmpdir + os.path.sep + filename + "_" + id_subdataset + '.tif'
-                    sds_tmp = gdal.Open(subdataset)
-                    write_ds_to_geotiff(sds_tmp, outputfile)
-                    sds_tmp = None
+        # Manage the case of only 1 dataset (and no METADATA defined - e.g. PROBA-V NDVI v 2.x)
+        if (len(sdsdict) > 0):
+            sdslist = [sdsdict[k] for k in sdsdict.keys() if '_NAME' in k]
+            # Loop over datasets and extract the one in the list
+            for output_sds in sds_to_process:
+                for subdataset in sdslist:
+                    id_subdataset = subdataset.split(':')[-1]
+                    id_subdataset = id_subdataset.replace('/', '')
+                    if id_subdataset == output_sds:
+                        outputfile = tmpdir + os.path.sep + filename + "_" + id_subdataset + '.tif'
+                        sds_tmp = gdal.Open(subdataset)
+                        write_ds_to_geotiff(sds_tmp, outputfile)
+                        sds_tmp = None
 
-                    interm_files_list.append(outputfile)
+                        interm_files_list.append(outputfile)
+        else:
+            outputfile = tmpdir + os.path.sep + filename + '.tif'
+            write_ds_to_geotiff(hdf, outputfile)
+            sds_tmp = None
+            interm_files_list.append(outputfile)
 
     return interm_files_list
 
@@ -711,6 +731,9 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files):
 #   Pre-process the Global_MCD14DL product retrieved from ftp://nrt1.modaps.eosdis.nasa.gov/FIRMS/Global
 #   The columns are already there, namely: latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,
 #                                          confidence,version,bright_t31,frp
+#   NOTE: being the 'rasterization' a two-step process (here, w/o knowing the target-mapset, and in ingest-file)
+#         during the tests a 'shift has been seen (due to the re-projection in ingest_file). We therefore ensure here
+#         the global raster to be 'aligned' with the WGS84_Africa_1km (i.e. the SPOT-VGT grid)
 #
 
     # prepare the output as an empty list
@@ -738,7 +761,6 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files):
         outFile.write('    </OGRVRTLayer>\n')
         outFile.write('</OGRVRTDataSource>\n')
 
-
     # Generate the csv file with header
     with open(file_csv,'w') as outFile:
         #outFile.write('latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp')
@@ -758,6 +780,7 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files):
     command = 'gdal_rasterize  -l ' + out_layer + ' -burn 1 '\
             + ' -tr ' + str(pix_size) + ' ' + str(pix_size) \
             + ' -co "compress=LZW" -of GTiff -ot Byte '     \
+            + ' -te -179.995535714286 -89.995535714286 179.995535714286 89.995535714286 ' \
             +file_shp+' '+file_tif
 
     logger.debug('Command is: '+command)
@@ -771,8 +794,7 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files):
 
     return interm_files_list
 
-
-def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files):
+def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process one or more input files by:
 #   1. Unzipping (optionally extracting one out of many layers - SDSs)
@@ -805,14 +827,6 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 #       output_file: temporary created output file[s]
 
     logger.info("Input files pre-processing by using method: %s" % preproc_type)
-
-    # Create temp output dir
-    try:
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_files[0]),
-                                  dir=es_constants.base_tmp_dir)
-    except IOError:
-        logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
-        return 1
 
     georef_already_done = False
 
@@ -854,7 +868,6 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
         logger.error('Error in pre-processing routine. Exit')
         return 1
 
-
     # Make sure it is a list (if only a string is returned, it loops over chars)
     if isinstance(interm_files, list):
         list_interm_files = interm_files
@@ -894,7 +907,6 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
             orig_ds.SetGeoTransform(native_mapset.geo_transform)
             orig_ds.SetProjection(native_mapset.spatial_ref.ExportToWkt())
 
-
     return list_interm_files
 
 
@@ -921,7 +933,6 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 #         'target_mapset": comes from table 'ingestion' ('mapsetcode')
 #                          MUST be specified.
 
-    # TODO-M.C.: manage version
     version_undef = 'undefined'
     logger.info("Entering routine %s for product %s - date %s" % ('ingest_file', product['productcode'], in_date))
 
@@ -1035,8 +1046,8 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         output_directory = data_dir_out + functions.set_path_sub_directory(product['productcode'],
                                                                            subproducts[ii]['subproduct'],
                                                                            'Ingest',
-                                                                           version_undef,
-                                                                           mapset_id)
+                                                                           product['version'],
+                                                                           mapset_id,)
         logger.debug('Output Directory is: %s' % output_directory)
         try:
             if not os.path.exists(output_directory):
@@ -1050,6 +1061,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
                                                                          product['productcode'],
                                                                          subproducts[ii]['subproduct'],
                                                                          mapset_id,
+                                                                         product['version'],
                                                                          '.tif')
 
         # -------------------------------------------------------------------------
@@ -1411,7 +1423,6 @@ def rescale_data(in_data,
 
     return trg_data
 
-
 #
 #   Converts the string data type to numpy types
 #   type: data type in wkt-estation format (inherited from 1.X)
@@ -1436,7 +1447,6 @@ def conv_data_type_to_numpy(type):
         return 'complex64'
     else:
         return 'int16'
-
 
 #
 #   Converts the string data type to GDAL types
