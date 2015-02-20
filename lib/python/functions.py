@@ -517,14 +517,13 @@ def extract_from_date(str_date):
 #   General rules:
 #       dir is always
 #                       ['data_dir']+<product_code>+<mapset>+[derived/tif]+<sub_product_code>
-#       e.g.            /data/processing/FEWSNET_RFE/FEWSNET_Africa_8km/derived/10davg
+#       e.g.            /data/processing/vgt-ndvi/spot-v1/vgt/derived/10davg
 #
 #       filename is always
-#                       <datefield>'_'<product_code>['_'<version>]'_'<sub_product_code>'_'<mapset>'_'<ext>
-#       e.g.            0611_FEWSNET_RFE_10davg_FEWSNET_Africa_8km.tif
+#                       <product-code>_'<sub-product-code>'_'<datefield>'_'<mapset>'_'<version>'.'<ext>
+#       e.g.            vgt-ndvi_ndv_20150101_WGS84-Africa-1km_spot-v1.tif
 #
-#   Conventions: product_code :  1+ '_" separators
-#                sub_product_code : 0+ '_" separators
+#   Conventions: product_code and sub_product_code should not contains '_' !!!
 #
 ######################################################################################
 #   set_path_filename_nodate
@@ -536,11 +535,12 @@ def extract_from_date(str_date):
 #   Description: creates filename WITHOUT date field (for ruffus formatters)
 #
 #
-def set_path_filename_no_date(product_code, sub_product_code, mapset_id, extension):
+def set_path_filename_no_date(product_code, sub_product_code, mapset_id, version, extension):
 
     filename_nodate =     "_" + str(product_code) + '_' \
                               + str(sub_product_code) + "_" \
-                              + mapset_id + extension
+                              + mapset_id +  "_" \
+                              + version + extension
 
     return filename_nodate
 
@@ -554,9 +554,9 @@ def set_path_filename_no_date(product_code, sub_product_code, mapset_id, extensi
 #   Description: creates filename
 #
 #
-def set_path_filename(date_str, product_code, sub_product_code, mapset_id, extension):
+def set_path_filename(date_str, product_code, sub_product_code, mapset_id, version,  extension):
 
-    filename = date_str + set_path_filename_no_date(product_code, sub_product_code, mapset_id, extension)
+    filename = date_str + set_path_filename_no_date(product_code, sub_product_code, mapset_id, version, extension)
     return filename
 
 ######################################################################################
@@ -565,7 +565,7 @@ def set_path_filename(date_str, product_code, sub_product_code, mapset_id, exten
 #   Author: Marco Clerici, JRC, European Commission
 #   Date: 2014/06/22
 #   Inputs: product_code, sub_product_code, product_type, version
-#   Output: subdir, e.g. FEWSNET_RFE/FEWSNET_Africa_8km/tif/RFE/
+#   Output: subdir, e.g. vgt-ndvi/spot-v1/vgt/derived/10davg/
 #   Description: creates filename
 #
 #
@@ -574,6 +574,7 @@ def set_path_sub_directory(product_code, sub_product_code, product_type, version
     type_subdir = dict_subprod_type_2_dir[product_type]
 
     sub_directory = str(product_code) + os.path.sep + \
+                    str(version) + os.path.sep + \
                     mapset + os.path.sep +\
                     type_subdir + os.path.sep +\
                     str(sub_product_code) + os.path.sep
@@ -591,21 +592,18 @@ def set_path_sub_directory(product_code, sub_product_code, product_type, version
 #   Description: returns information form the directory
 #
 #
-#   NOTE:
 
 def get_from_path_dir(dir_name):
 
     # Make sure there is a leading separator at the end of 'dir'
     mydir=dir_name+os.path.sep
 
-    [head, sub_product_code] = os.path.split(os.path.split(mydir)[0])
+    tokens = [token for token in mydir.split(os.sep) if token]
+    sub_product_code = tokens[-1]
+    mapset = tokens[-3]
+    version =  tokens[-4]
+    product_code =  tokens[-5]
 
-    [head1, mapset] = os.path.split(os.path.split(head)[0])
-
-    [head, product_code] = os.path.split(head1)
-
-    # TODO-M.C.: implement version management
-    version = 'undefined'
 
     return [product_code, sub_product_code, version, mapset]
 
@@ -620,13 +618,8 @@ def get_from_path_dir(dir_name):
 #
 #
 
-def get_date_from_path_filename(filename, extension=None):
+def get_date_from_path_filename(filename):
 
-    if extension is None:
-        extension = '.tif'
-
-
-    # Get the date string
     str_date = filename.split('_')[0]
 
     return str_date
@@ -648,7 +641,7 @@ def get_date_from_path_full(full_path):
     dir, filename = os.path.split(full_path)
 
     # Get the date string
-    str_date = filename.split('_')[0]
+    str_date = get_date_from_path_filename(filename)
 
     return str_date
 
@@ -667,7 +660,7 @@ def get_subdir_from_path_full(full_path):
 
     # Remove the directory
     subdirs =  full_path.split(os.path.sep)
-    str_subdir = subdirs[-5]+os.path.sep+subdirs[-4]+os.path.sep+subdirs[-3]+os.path.sep+subdirs[-2]+os.path.sep
+    str_subdir = subdirs[-6]+os.path.sep+subdirs[-5]+os.path.sep+subdirs[-4]+os.path.sep+subdirs[-3]+os.path.sep+subdirs[-2]+os.path.sep
 
     return str_subdir
 
