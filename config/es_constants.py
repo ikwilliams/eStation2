@@ -19,6 +19,9 @@ import os
 import ConfigParser
 from osgeo import gdalconst
 
+# Set the mask for log files
+os.umask(0000)
+
 thisfiledir = os.path.dirname(os.path.abspath(__file__))
 config_factorysettings = ConfigParser.ConfigParser()
 config_factorysettings.read([os.path.join(thisfiledir, 'factory_settings.ini')])
