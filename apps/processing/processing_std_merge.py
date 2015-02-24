@@ -1,8 +1,8 @@
 #
-#	purpose: Define the processing chain for 'ndvi-like' processing chains
+#	purpose: Define the processing chain for merging several inputs
 #	author:  M.Clerici & Jurriaan van't Klooster
 #	date:	 05.01.2015
-#   descr:	 Generate additional Derived products /implements processing chains
+#   descr:	 Generate a new 'merged-version' from 'pieces' of existing 'versions'
 #	history: 1.0
 #
 
@@ -38,85 +38,6 @@ ext=es_constants.ES2_OUTFILE_EXTENSION
 #
 #   A list of 'final' (i.e. User selected) output products are defined (now hard-coded)
 #   According to the dependencies, if set, they force the various groups
-
-# switch for 'final' products (e.g. products to be controlled by the User)
-final_ndvi_linearx2=0
-final_diff_linearx2=0
-final_linearx2diff_linearx2=0
-final_vci=0
-final_icn=0
-final_vci_linearx2=0
-final_icn_linearx2=0
-
-#   switch wrt to groups
-group_no_filter_stats = 1                  # 1.a
-group_no_filter_anomalies = 1              # 1.b    -> To be done
-
-group_filtered_prods = 1                   # 2.a
-group_filtered_stats = 1                   # 2.b
-group_filtered_masks = 1                   # 2.c
-group_filtered_anomalies = 1               # 2.d
-
-group_monthly_prods = 1                    # 3.a
-group_monthly_stats = 1                    # 3.b
-group_monthly_masks = 1                    # 3.c    -> To be Done
-group_monthly_anomalies = 1                # 3.d    -> To be done
-
-#   for Group 1.a (ndvi_no_filter_stats)
-activate_10davg_no_filter = 1
-activate_10dmin_no_filter = 1
-activate_10dmax_no_filter = 1
-activate_10dmed_no_filter = 1
-activate_10dstd_no_filter = 0              # TBDone
-
-#   for Group 1.b (ndvi_no_filter_anom)
-
-#   for Group 2.a (filtered_prods)
-activate_ndvi_linearx1 = 1
-activate_ndvi_linearx2 = 1
-
-#   for Group 2.b  (filtered_stats)
-activate_10davg_linearx2 = 1
-activate_10dmin_linearx2 = 1
-activate_10dmax_linearx2 = 1
-activate_10dmed_linearx2 = 1
-activate_10dstd_linearx2 = 0                # To be done
-
-activate_year_min_linearx2 = 1
-activate_year_max_linearx2 = 1
-
-activate_absol_min_linearx2 = 1
-activate_absol_max_linearx2 = 1
-
-#   for Group 2.c  (filtered_masks)
-activate_baresoil_linearx2 = 1
-
-#   for Group 2.d  (filtered_anomalies)
-activate_diff_linearx2 = 1
-activate_linearx2_diff_linearx2 = 1
-activate_stddiff_linearx2 = 0               # To be done
-activate_icn = 1
-activate_vci = 1
-activate_icn_linearx2 = 1
-activate_vci_linearx2 = 1
-
-#   for Group 3.a (monthly_prods)
-activate_monndvi = 0
-
-#   for Group 3.b (monthly_masks)
-activate_monthly_baresoil = 0
-
-#   for Group 3.c  (monthly_stats)
-activate_1monavg = 1
-activate_1monmax = 1
-activate_1monmin = 1
-activate_1monstd = 1
-
-#   for Group 3.d  (monthly_anomalies) -> TB Done
-activate_1monsndvi = 1
-activate_1monandvi = 1
-activate_1monvci = 1
-activate_1monicn = 1
 
 def create_pipeline(prod, starting_sprod, mapset, version):
 
