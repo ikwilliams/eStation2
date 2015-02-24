@@ -36,8 +36,7 @@ logger = log.my_logger(__name__)
 #   General definitions for this processing chain
 ext=es_constants.ES2_OUTFILE_EXTENSION
 
-def create_pipeline(prod, starting_sprod, mapset, version, list_subprods=None):
-
+def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, list_subprods=None):
 
     #   ---------------------------------------------------------------------
     #   Create lists
@@ -86,7 +85,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, list_subprods=None):
                 functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
 
     logger.debug('Input data directory is: %s' % input_dir)
-    starting_files = input_dir+"*"+in_prod_ident
+
+    if starting_dates is not None:
+        starting_files = []
+        for my_date in starting_dates:
+            starting_files.append(input_dir+my_date+in_prod_ident)
+    else:
+        starting_files=input_dir+"*"+in_prod_ident
+
     logger.debug('Starting files wild card is: %s' % starting_files)
 
     #   ---------------------------------------------------------------------
