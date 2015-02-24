@@ -36,8 +36,7 @@ logger = log.my_logger(__name__)
 #   General definitions for this processing chain
 ext=es_constants.ES2_OUTFILE_EXTENSION
 
-def create_pipeline(prod, starting_sprod, mapset, version, list_subprods=None):
-
+def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, list_subprods=None):
 
     #   ---------------------------------------------------------------------
     #   Create lists
@@ -55,10 +54,10 @@ def create_pipeline(prod, starting_sprod, mapset, version, list_subprods=None):
 
     #   switch wrt groups
     activate_10dstats_comput=1          # 1.
-    activate_10danomalies_comput=1      # 2.
-    activate_monthly_comput=1           # 3.a
-    activate_monstats_comput=1          # 3.b
-    activate_monanomalies_comput=1      # 3.c
+    activate_10danomalies_comput=0      # 2.
+    activate_monthly_comput=0           # 3.a
+    activate_monstats_comput=0          # 3.b
+    activate_monanomalies_comput=0      # 3.c
 
     activate_10davg_comput=1
     activate_10dmin_comput=1
@@ -75,29 +74,36 @@ def create_pipeline(prod, starting_sprod, mapset, version, list_subprods=None):
     activate_1monperc_comput=1
     activate_1monnp_comput=1
 
-    es2_data_dir = es_constants.es2globals['data_dir']
+    es2_data_dir = es_constants.es2globals['processing_dir']+os.path.sep
 
     #   ---------------------------------------------------------------------
     #   Define input files
-    in_prod_ident = functions.set_path_filename_no_date(prod, starting_sprod, mapset, ext)
+    in_prod_ident = functions.set_path_filename_no_date(prod, starting_sprod, mapset, version, ext)
 
     logger.debug('Base data directory is: %s' % es2_data_dir)
     input_dir = es2_data_dir+ \
                 functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
 
     logger.debug('Input data directory is: %s' % input_dir)
-    starting_files = input_dir+"*"+in_prod_ident
+
+    if starting_dates is not None:
+        starting_files = []
+        for my_date in starting_dates:
+            starting_files.append(input_dir+my_date+in_prod_ident)
+    else:
+        starting_files=input_dir+"*"+in_prod_ident
+
     logger.debug('Starting files wild card is: %s' % starting_files)
 
     #   ---------------------------------------------------------------------
     #   Average
     output_sprod_group=proc_lists.proc_add_subprod_group("10dstats")
     output_sprod=proc_lists.proc_add_subprod("10davg", "10dstats", False, True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
     @active_if(activate_10dstats_comput, activate_10davg_comput)
     @collate(starting_files, formatter(formatter_in),formatter_out)
@@ -111,11 +117,11 @@ def create_pipeline(prod, starting_sprod, mapset, version, list_subprods=None):
     #   ---------------------------------------------------------------------
     #   Minimum
     output_sprod=proc_lists.proc_add_subprod("10dmin", "10dstats", False, True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
     @active_if(activate_10dstats_comput, activate_10dmin_comput)
     @collate(starting_files, formatter(formatter_in),formatter_out)
@@ -129,11 +135,11 @@ def create_pipeline(prod, starting_sprod, mapset, version, list_subprods=None):
     #   ---------------------------------------------------------------------
     #   Maximum
     output_sprod=proc_lists.proc_add_subprod("10dmax", "10dstats", False, True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
     @active_if(activate_10dstats_comput, activate_10dmax_comput)
     @collate(starting_files, formatter(formatter_in),formatter_out)
@@ -148,17 +154,17 @@ def create_pipeline(prod, starting_sprod, mapset, version, list_subprods=None):
     #   10dDiff
     output_sprod_group=proc_lists.proc_add_subprod_group("10anomalies")
     output_sprod=proc_lists.proc_add_subprod("10ddiff", "10anomalies", False, True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     #   Starting files + avg
     formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
 
     ancillary_sprod = "10davg"
-    ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
+    ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, version, ext)
     ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived',version, mapset)
-    ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
+    ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
     @follows(std_precip_10davg)
     @active_if(activate_10danomalies_comput, activate_10ddiff_comput)
@@ -173,17 +179,17 @@ def create_pipeline(prod, starting_sprod, mapset, version, list_subprods=None):
     #   ---------------------------------------------------------------------
     #   10dperc
     output_sprod=proc_lists.proc_add_subprod("10dperc", "10anomalies", False, True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     #   Starting files + avg
     formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
 
     ancillary_sprod = "10davg"
-    ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
+    ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, version, ext)
     ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived', version, mapset)
-    ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
+    ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
     @follows(std_precip_10davg)
     @active_if(activate_10danomalies_comput, activate_10dperc_comput)
@@ -198,22 +204,22 @@ def create_pipeline(prod, starting_sprod, mapset, version, list_subprods=None):
     #   ---------------------------------------------------------------------
     #   10dnp
     output_sprod=proc_lists.proc_add_subprod("10dnp", "10anomalies", False, True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     #   Starting files + min + max
     formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
 
     ancillary_sprod_1 = "10dmin"
-    ancillary_sprod_ident_1 = functions.set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
+    ancillary_sprod_ident_1 = functions.set_path_filename_no_date(prod, ancillary_sprod_1, mapset, version, ext)
     ancillary_subdir_1      = functions.set_path_sub_directory(prod, ancillary_sprod_1, 'Derived',version, mapset)
-    ancillary_input_1="{subpath[0][4]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
+    ancillary_input_1="{subpath[0][5]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
 
     ancillary_sprod_2 = "10dmax"
-    ancillary_sprod_ident_2 = functions.set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
+    ancillary_sprod_ident_2 = functions.set_path_filename_no_date(prod, ancillary_sprod_2, mapset, version, ext)
     ancillary_subdir_2      = functions.set_path_sub_directory(prod, ancillary_sprod_2, 'Derived',version, mapset)
-    ancillary_input_2="{subpath[0][4]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
+    ancillary_input_2="{subpath[0][5]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
 
     @follows(std_precip_10dmin, std_precip_10dmax)
     @active_if(activate_10danomalies_comput, activate_10dnp_comput)
@@ -229,12 +235,12 @@ def create_pipeline(prod, starting_sprod, mapset, version, list_subprods=None):
     #   1moncum
     output_sprod_group=proc_lists.proc_add_subprod_group("monthly")
     output_sprod=proc_lists.proc_add_subprod("1moncum", "monthly", False, True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     # inputs: files from same months
     formatter_in="(?P<YYYYMM>[0-9]{6})(?P<DD>[0-9]{2})"+in_prod_ident
-    formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYYMM[0]}"+'01'+out_prod_ident
+    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYYMM[0]}"+'01'+out_prod_ident
 
     # @follows(std_precip_10davg)
     @active_if(activate_monthly_comput, activate_1moncum_comput)
@@ -249,14 +255,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, list_subprods=None):
     #   ---------------------------------------------------------------------
     #   Monthly Average
     new_input_subprod='1moncum'
-    in_prod_ident= functions.set_path_filename_no_date(prod, new_input_subprod, mapset, ext)
+    in_prod_ident= functions.set_path_filename_no_date(prod, new_input_subprod, mapset, version, ext)
     output_sprod_group=proc_lists.proc_add_subprod_group("monstat")
     output_sprod=proc_lists.proc_add_subprod("1monavg", "monstat", False, True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
     @follows(std_precip_1moncum)
     @active_if(activate_monstats_comput, activate_1monavg_comput)
@@ -271,11 +277,11 @@ def create_pipeline(prod, starting_sprod, mapset, version, list_subprods=None):
     #   ---------------------------------------------------------------------
     #   Monthly Minimum
     output_sprod=proc_lists.proc_add_subprod("1monmin", "monstat", False, True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
     @follows(std_precip_1moncum)
     @active_if(activate_monstats_comput, activate_1monmin_comput)
@@ -290,13 +296,13 @@ def create_pipeline(prod, starting_sprod, mapset, version, list_subprods=None):
     #   ---------------------------------------------------------------------
     #   Monthly Maximum
     output_sprod=proc_lists.proc_add_subprod("1monmax", "monstat", False, True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     reg_ex_in="[0-9]{4}([0-9]{4})"+in_prod_ident
 
     formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out=["{subpath[0][4]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
     @follows(std_precip_1moncum)
     @active_if(activate_monstats_comput, activate_1monmax_comput)
@@ -312,18 +318,18 @@ def create_pipeline(prod, starting_sprod, mapset, version, list_subprods=None):
     #   1monDiff
     output_sprod_group=proc_lists.proc_add_subprod_group("monanomalies")
     output_sprod=proc_lists.proc_add_subprod("1mondiff", "monanomalies", False, True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     # inputs
     #   Starting files + avg
     formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
 
     ancillary_sprod = "1monavg"
-    ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
+    ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, version, ext)
     ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived', version, mapset)
-    ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
+    ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
     @follows(std_precip_1monavg)
     @active_if(activate_monanomalies_comput, activate_1mondiff_comput)
@@ -338,18 +344,18 @@ def create_pipeline(prod, starting_sprod, mapset, version, list_subprods=None):
     #   ---------------------------------------------------------------------
     #   1monperc
     output_sprod=proc_lists.proc_add_subprod("1monperc", "monanomalies", False, True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     # inputs
     #   Starting files + avg
     formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
 
     ancillary_sprod = "1monavg"
-    ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, ext)
+    ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, version, ext)
     ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived',version, mapset)
-    ancillary_input="{subpath[0][4]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
+    ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
     @follows(std_precip_1monavg)
     @active_if(activate_monanomalies_comput, activate_1monperc_comput)
@@ -364,22 +370,22 @@ def create_pipeline(prod, starting_sprod, mapset, version, list_subprods=None):
     #   ---------------------------------------------------------------------
     #   1monnp
     output_sprod=proc_lists.proc_add_subprod("1monnp", "monanomalies", False, True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, ext)
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     #   Starting files + min + max
     formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out="{subpath[0][4]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
 
     ancillary_sprod_1 = "1monmin"
-    ancillary_sprod_ident_1 = functions.set_path_filename_no_date(prod, ancillary_sprod_1, mapset, ext)
+    ancillary_sprod_ident_1 = functions.set_path_filename_no_date(prod, ancillary_sprod_1, mapset, version, ext)
     ancillary_subdir_1      = functions.set_path_sub_directory(prod, ancillary_sprod_1, 'Derived',version, mapset)
-    ancillary_input_1="{subpath[0][4]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
+    ancillary_input_1="{subpath[0][5]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
 
     ancillary_sprod_2 = "1monmax"
-    ancillary_sprod_ident_2 = functions.set_path_filename_no_date(prod, ancillary_sprod_2, mapset, ext)
+    ancillary_sprod_ident_2 = functions.set_path_filename_no_date(prod, ancillary_sprod_2, mapset, version, ext)
     ancillary_subdir_2      = functions.set_path_sub_directory(prod, ancillary_sprod_2, 'Derived',version, mapset)
-    ancillary_input_2="{subpath[0][4]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
+    ancillary_input_2="{subpath[0][5]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
 
     @follows(std_precip_1monmin, std_precip_1monmax)
     @active_if(activate_monanomalies_comput, activate_1monnp_comput)

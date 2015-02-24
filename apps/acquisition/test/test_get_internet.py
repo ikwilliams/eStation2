@@ -213,5 +213,28 @@ class TestGetInternet(unittest.TestCase):
         #results = re.search(r'(type="hidden" name="([0-9a-f]{32})")', html).group(2)
 
 
-        print results
-        self.assertTrue(file_to_check in results)
+        #print results
+        #self.assertTrue(file_to_check in results)
+
+    #   ---------------------------------------------------------------------------
+    #   Test download of MOD09 files from USGS http site (id:MOD09GA_Africa)
+    #   ---------------------------------------------------------------------------
+    def TestRemoteHttp_MOD09_GQ_005(self):
+
+        remote_url='http://e4ftl01.cr.usgs.gov/MOLT/MOD09GQ.005/2000.02.24/'
+        remote_url='http://earlywarning.usgs.gov/ftp2/raster/rf/a/2014/'
+        usr_pwd='anonymous:anonymous'
+        c=pycurl.Curl()
+        import StringIO
+        import cStringIO
+        buffer = StringIO.StringIO()
+
+        c.setopt(c.URL, remote_url)
+        c.setopt(c.WRITEFUNCTION, buffer.write)
+        c.perform()
+        html = buffer.getvalue()
+
+        file_to_check='2015/001/A2015001.L3m_DAY_SST_4.bz2'
+        #results = re.search(r'(type="hidden" name="([0-9a-f]{32})")', html).group(2)
+
+        #self.assertTrue(file_to_check in results)

@@ -57,17 +57,27 @@ def loop_processing(dry_run=False):
             sub_product_code = chain.subproductcode
             mapset = chain.output_mapsetcode
             algorithm = chain.algorithm
+            version = chain.version
 
             # Define an id from a combination of fields
-            processing_unique_id=functions.set_path_filename_no_date(product_code, sub_product_code, mapset, '.lock')
+            processing_unique_id=functions.set_path_filename_no_date(product_code, sub_product_code, mapset, version, '.lock')
             processing_unique_lock=es_constants.processing_tasks_dir+processing_unique_id
 
+            # Manage dry_run
+            if dry_run:
+                pipeline_run_level = 0
+                pipeline_printout_level = 3
+            else:
+                pipeline_run_level = 0
+                pipeline_printout_level = 3
+
             # Prepare arguments
-            args = {'pipeline_run_level':3, \
+            args = {'pipeline_run_level':pipeline_run_level, \
+                    'pipeline_printout_level':pipeline_printout_level,\
                     'starting_sprod': sub_product_code, \
                     'prod': product_code, \
                     'mapset':mapset,\
-                    'version':'undefined'}
+                    'version':version}
 
             if not os.path.isfile(processing_unique_lock):
                 logger.debug("Launching processing for ID: %s" % processing_unique_id)
