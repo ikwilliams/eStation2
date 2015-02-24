@@ -18,6 +18,9 @@
 import os
 import ConfigParser
 from osgeo import gdalconst
+from lib.python import es_logging as log
+
+logger = log.my_logger(__name__)
 
 thisfiledir = os.path.dirname(os.path.abspath(__file__))
 config_factorysettings = ConfigParser.ConfigParser()
@@ -45,6 +48,9 @@ factorysettings = config_factorysettings.items('FACTORY_SETTINGS')
 for setting, value in factorysettings:
     es2globals[setting] = value
     locals()[setting] = value
+
+for setting in es2globals:
+    logger.info(setting + ': ' + str(es2globals[setting]))
 
 # ---------------------------------------------------------------
 # Various definitions

@@ -17,23 +17,34 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
 
         'Ext.layout.container.Center',
         'Ext.grid.plugin.RowExpander',
-        'Ext.XTemplate'
+        'Ext.XTemplate',
+        'Ext.form.RadioGroup'
     ],
 
     //bind: '{products}',
     //session: true,
 
-    title: '<div class="panel-title-style">Product Navigator</div>',
+    title: '<div class="panel-title-style-16">Product Navigator</div>',
     header: {
         titlePosition: 0,
-        titleAlign: 'center'
+        titleAlign: 'center',
+        iconCls: 'africa'
     },
+
     modal: true,
     border:false,
     frame: false,
 
     closable: true,
-    closeAction: 'destroy', // 'hide',
+    closeAction: 'hide', // 'destroy',
+    tools: [
+    {
+        type: 'refresh',
+        align: 'c-c',
+        tooltip: 'Refresh product list',
+        callback: 'refreshProductsGrid'
+    }],
+
     maximizable: false,
     resizable: false,
     width: 575,
@@ -44,19 +55,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
     },
     autoScroll: false,
     productselected:false,
-    tools: [
-    {
-        type: 'refresh',
-        tooltip: 'Refresh product list',
-        callback: function (productnavwin) {
-            //console.info(productnavwin);
-            var productnavigatorstore  = Ext.data.StoreManager.lookup('ProductNavigatorStore');
-
-            if (productnavigatorstore.isStore) {
-                productnavigatorstore.load();
-            }
-        }
-    }],
+    mapviewid:null,
 
     initComponent: function () {
         var me = this
@@ -64,6 +63,8 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
         ;
 
         Ext.apply(cfg, {
+            id: me.mapviewid+'-productnavigator',
+
             listeners: {
                 close: me.onClose
             },
@@ -101,7 +102,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 border: false,
 
                 features: [{
-                    id: 'selectproductcategories',
+                    reference: 'selectproductcategories',
                     ftype: 'grouping',
                     groupHeaderTpl: Ext.create('Ext.XTemplate', '<div class="group-header-style">{name} ({children.length})</div>'),
                     hideGroupedHeader: true,
@@ -116,19 +117,14 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     layout:'fit',
                     rowBodyTpl : new Ext.XTemplate(
                         '<span class="smalltext">' +
-                        '<b style="color:darkgrey">{productcode}' +
-                            '<tpl if="version != \'undefined\'">',
-                                ' - {version}',
-                            '</tpl>',
-                        '</b>' +
                         '<p>{description}</p>' +
                         '</span>'
                     )
                 }],
 
                 listeners: {
-                    scope: 'controller',
-                    afterrender: 'productsGridAfterrender',
+                    //scope: 'controller',
+                    afterrender: 'refreshProductsGrid', // 'loadProductsStore',
                     rowclick: 'productsGridRowClick'
                 },
 
@@ -146,8 +142,16 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                             text: "Product",
                             xtype: 'templatecolumn',
                             width: 485,
+                            tpl:  new Ext.XTemplate(
+                                '<b>{prod_descriptive_name}' +
+                                '<tpl if="version != \'undefined\'">',
+                                    ' - {version}',
+                                '</tpl>',
+                                '</b></br><span class="smalltext">' +
+                                '<b style="color:darkgrey">{productcode}</b>' +
+                                '</span>'
+                            )
                             //dataIndex: 'prod_descriptive_name',
-                            tpl: '<b>{prod_descriptive_name}</b>'
                             //renderer : function(val) {
                             //    return '<b>' + val + '</b>';
                             //}
@@ -156,8 +160,14 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 }]
             }, {
                 region: 'east',
-                id: 'ProductDataSetsInfo',
-                title: '<div class="panel-title-style">Product Info</div>',
+                reference: 'product-datasets-info',
+                title: '<div class="panel-title-style-16">Product Info</div>',
+                header: {
+                    titlePosition: 0,
+                    titleAlign: 'left',
+                    height: 33
+                    //,style: {backgroundColor:'#ADD2ED'}
+                },
                 autoWidth:true,
                 split: true,
                 collapsible: true,
@@ -172,39 +182,62 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 listeners: {
                     expand: function(){
                         //this.up().down('grid').setWidth(460)
-                        this.setWidth(500);
-                        this.up().setWidth(1075);
+                        this.setWidth(550);
+                        this.up().setPosition(370,140);
+                        this.up().setWidth(1100);
                     },
                     collapse: function(){
                         //this.up().down('grid').setWidth(485)
                         this.setWidth(5);
+                        this.up().setPosition(670,140);
                         this.up().setWidth(575);
                     }
                 },
                 items: [{
                     xtype: 'fieldset',
                     title: '<div class="grid-header-style">Mapsets available</div>',
+                    reference: 'product-mapsets-dataview',
                     border: true,
-                    height: 170,
-                    width: 480,
-                    collapsible: true,
-                    defaults: {
-                        labelWidth: 89,
-                        anchor: '100%',
-                        layout: {
-                            type: 'hbox',
-                            defaultMargins: {top: 0, right: 5, bottom: 0, left: 0}
+                    height: 220,
+                    width: 530,
+                    collapsible: false,
+                    layout: 'fit',
+                    padding: {top: 5, right: 5, bottom: 0, left: 5},
+                    items: Ext.create('Ext.view.View', {
+                        bind: '{productmapsets}',
+                        //id: 'mapsets',
+                        //boxLabel: '{descriptive_name}',
+                        tpl: Ext.create('Ext.XTemplate',
+                            '<tpl for=".">',
+                                '<div class="mapset" id="{mapsetcode:stripTags}">',
+                                    '<img src="{footprint_image}" title="{descriptive_name:htmlEncode}">',
+                                    '<span><strong>{descriptive_name:htmlEncode}</strong></span>',
+                                '</div>',
+                            '</tpl>',
+                            '<div class="x-clear"></div>'
+                        ),
+                        multiSelect: false,
+                        height: 250,
+                        width: 140,
+                        trackOver: true,
+                        cls:'mapsets',
+                        overItemCls: 'mapset-hover',
+                        itemSelector: 'div.mapset',
+                        emptyText: 'No mapsets to display. Please select a product to view its mapsets',
+                        autoScroll: true,
+                        listeners: {
+                            itemclick: 'mapsetItemClick'
                         }
-                    },
-                    items: [{
-
-                    }]
+                    })
                 },{
                     xtype : 'grid',
+                    reference: 'mapset-dataset-grid',
                     region: 'center',
                     autoWidth: false,
+                    height: 300,
+                    hidden: true,
                     //store: 'ProductNavigatorStore',
-                    //bind: '{products}',
+                    bind: '{mapsetdatasets}',
                     //session:true,
 
                     viewConfig: {
@@ -256,41 +289,22 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     defaults: {
                         sortable: false,
                         hideable: false,
-                        variableRowHeight : true,
+                        variableRowHeight : false,
                         menuDisabled:true
                     },
                     columns : [{
-                        text: '<div class="grid-header-style">Data set</div>',
-                        width: 450,
-                        //dataIndex: 'prod_descriptive_name',
-                        bind: '{prod_descriptive_name}',
-                        renderer : function(val) {
-                            return '<b>' + val + '</b>';
-                        }
+                        text: '<div class="grid-header-style">Data sets</div>',
+                        xtype: 'templatecolumn',
+                        tpl: '<b>{descriptive_name}</b>',
+                        width: 455,
+                        sortable: false,
+                        menuDisabled:true
+                        //dataIndex: 'descriptive_name',
+                        //bind: '{descriptive_name}',
+                        //renderer : function(val) {
+                        //    return '<b>' + val + '</b>';
+                        //}
                     }]
-
-                    //xtype:'container',
-                    //items: new Ext.DataView({
-                    //    //store: this.store,
-                    //    bind: {
-                    //        boxLabel: '{productmapsets.descriptive_name}'
-                    //    },
-                    //    tpl: new Ext.XTemplate(
-                    //        '<tpl for=".">',
-                    //            '<div class="thumb-wrap" style="width:210px; float: left;">',
-                    //                '<label >',
-                    //                    '<tpl>',
-                    //                        '<input type=radioField value={productmapsets.mapsetcode} >',
-                    //                    '</tpl>',
-                    //                    '{productmapsets.descriptive_name}',
-                    //                '</label>',
-                    //            '</div>',
-                    //        '</tpl>', {
-                    //    }),
-                    //    overClass: 'x-view-over',
-                    //    itemSelector: 'div.thumb-wrap',
-                    //    autoScroll: true
-                    //})
                 }]
             }]
         });

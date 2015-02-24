@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<globals>
-    <!-- paths -->
-    <logfile_path>/opt/facilities/PS/log</logfile_path>
-
-    <reportfile_path>/opt/facilities/PS/log</reportfile_path>
-		
-</globals>

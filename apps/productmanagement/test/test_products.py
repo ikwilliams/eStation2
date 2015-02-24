@@ -96,7 +96,7 @@ class TestProducts(unittest.TestCase):
             prod_dict = row2dict(product)
             productcode = prod_dict['productcode']
             version = prod_dict['version']
-            p = Product(product_code=prod_dict['productcode'], version=version)
+            p = Product(product_code=productcode, version=version)
 
             # does the product have mapsets AND subproducts?
             all_prod_mapsets = p.mapsets

@@ -18,6 +18,7 @@ import datetime
 import json
 import re
 
+import config
 from config import es_constants
 #import locals
 from database import querydb
@@ -127,7 +128,7 @@ class ProductNavigatorDataSets:
 
                             mapset_dict['mapsetdatasets'].append(dataset_dict)
                         prod_dict['productmapsets'].append(mapset_dict)
-                products_dict_all.append(prod_dict)
+                    products_dict_all.append(prod_dict)
 
             prod_json = json.dumps(products_dict_all,
                                    ensure_ascii=False,
@@ -184,18 +185,22 @@ class ResetSystemSettings:
         usersettingsinifile = es_constants.es2globals['settings_dir']+'/user_settings.ini'
         # usersettingsinifile = '/eStation2/settings/user_settings.ini'
 
-        config = ConfigParser.ConfigParser()
-        config.read(['user_settings.ini', usersettingsinifile])
+        config_usersettings = ConfigParser.ConfigParser()
+        config_usersettings.read(['user_settings.ini', usersettingsinifile])
 
-        for option in config.options('USER_SETTINGS'):
-            config.set('USER_SETTINGS', option, '')
+        for option in config_usersettings.options('USER_SETTINGS'):
+            config_usersettings.set('USER_SETTINGS', option, '')
 
         # Writing our configuration file to 'example.cfg' - COMMENTS ARE NOT PRESERVED!
         with open(usersettingsinifile, 'wb') as configfile:
-            config.write(configfile)
+            config_usersettings.write(configfile)
             configfile.close()
-        # ToDo: After changing the settings restart apache to apply the new settings
 
+        # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
+        from lib.python import reloadmodules
+        reloadmodules.reloadallmodules()
+
+        # from config import es_constants as constantsreloaded
         updatestatus = '{"success":true, "message":"System settings reset to factory settings!"}'
 
         return updatestatus
@@ -228,7 +233,10 @@ class UpdateSystemSettings:
         with open(usersettingsfilepath, 'wb') as configfile:
             config_usersettings.write(configfile)
             configfile.close()
-        # ToDo: After changing the settings restart apache to apply the new settings
+
+        # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
+        from lib.python import reloadmodules
+        reloadmodules.reloadallmodules()
 
         updatestatus = '{"success":true, "message":"System settings updated!"}'
 

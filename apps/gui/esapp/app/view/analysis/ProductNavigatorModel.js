@@ -17,6 +17,8 @@ Ext.define('esapp.view.analysis.ProductNavigatorModel', {
             //source: 'ProductNavigatorStore'
             model: 'esapp.model.ProductNavigator'
             ,session: true
+            ,autoLoad:false
+            ,loadMask: true
 
             ,sorters: {property: 'order_index', direction: 'DESC'}
 
@@ -33,6 +35,14 @@ Ext.define('esapp.view.analysis.ProductNavigatorModel', {
                     Ext.toast({ html: operation.getResultSet().message, title: operation.action, width: 300, align: 't' });
                 }
             }
+        },
+        productmapsets: {
+            model: 'esapp.model.ProductNavigatorMapSet'
+            ,session: true
+        },
+        mapsetdatasets: {
+            model: 'esapp.model.ProductNavigatorMapSetDataSet'
+            ,session: true
         }
     }
 

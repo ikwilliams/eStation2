@@ -123,6 +123,7 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
                         var allperiods = '';
                         var arrayLength = item.series.getTitle().length;
                         var thisperiodindex = Ext.Array.indexOf(item.series.getYField(), item.field);
+
                         for (var i = 0; i < arrayLength; i++) {
                             if (i == thisperiodindex) {
                                 allperiods = allperiods + '<b>'+item.series.getTitle()[thisperiodindex] + '</b></br>';

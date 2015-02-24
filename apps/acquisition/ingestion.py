@@ -8,7 +8,7 @@
 #   TODO-LinkIT: for MCD45monthly aborts for out-of-memory in re-scaling data ! FTTB ingest only 2 windows
 
 # source eStation2 base definitions
-from config import es_constants
+# from config import es_constants
 
 # import standard modules
 import re

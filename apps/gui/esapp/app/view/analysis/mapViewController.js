@@ -18,9 +18,17 @@ Ext.define('esapp.view.analysis.mapViewController', {
     }
 
     ,openProductNavigator: function(btn, event) {
-        var productNavigatorWin = new esapp.view.analysis.ProductNavigator();
-        //productNavigatorWin.down().getStore().load();
+        var productNavigatorWin = Ext.getCmp(btn.up().up().getId()+'-productnavigator');
+        //var productNavigatorWin = btn.up().up().up('window[id='+btn.up().up().getId()+'-productnavigator]');
+        //if (Ext.isObject(productNavigatorWin)) {}
+        if (!productNavigatorWin){
+            productNavigatorWin = new esapp.view.analysis.ProductNavigator({mapviewid:btn.up().up().getId()});
+        }
         productNavigatorWin.show();
+        //var productsgridstore = productNavigatorWin.lookupReference('productsGrid').getStore('products');
+        //if (productsgridstore.isStore) {
+        //    productsgridstore.load({loadMask:true});
+        //}
     }
 
     ,addVectorLayer: function(btn){
