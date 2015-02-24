@@ -912,7 +912,9 @@ def get_processing_chains(echo=False):
                                                  processinput.c.subproductcode,
                                                  processinput.c.version,
                                                  processinput.c.mapsetcode,
-                                                 processinput.c.date_format).\
+                                                 processinput.c.date_format,
+                                                 processinput.c.start_date,
+                                                 processinput.c.end_date).\
             outerjoin(processinput, process.process_id == processinput.c.process_id).\
             filter(and_(processinput.c.type == 'INPUT', process.activated == True)).all()
 
@@ -972,6 +974,8 @@ def get_processingchains_input_products():
                                           processinput.c.version,
                                           processinput.c.mapsetcode,
                                           processinput.c.date_format,
+                                          processinput.c.start_date,
+                                          processinput.c.end_date,
 
                                           func.CONCAT(product.c.productcode, '_', product.c.version).label('productID'),
                                           #product.c.productcode,
@@ -1037,6 +1041,8 @@ def get_processingchain_output_products(process_id=None):
                                                              processfinaloutput.activated.label('subactivated'),
                                                              processfinaloutput.final,
                                                              processfinaloutput.date_format,
+                                                             processfinaloutput.c.start_date,
+                                                             processfinaloutput.c.end_date,
 
                                                              func.CONCAT(product.c.productcode, '_',
                                                                          product.c.subproductcode, '_',
