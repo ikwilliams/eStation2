@@ -48,9 +48,20 @@ class TestQuerydb(TestCase):
 
     def Test_get_product_sources(self):
 
-        product_sources = querydb.get_product_sources(productcode='fewsnet_rfe',
-                                                      subproductcode='fewsnet_rfe_native',
+        product_sources = querydb.get_product_sources(productcode='fewsnet-rfe',
+                                                      subproductcode='fewsnet-rfe_native',
                                                       version='undefined')
+        logger.info("Product sources are: %s", product_sources)
+        for row in product_sources:
+            print row
+
+        self.assertEqual(1, 1)
+
+    def Test_get_product_sources2(self):
+
+        product_sources = querydb.get_product_sources(productcode='vgt-ndvi',
+                                                      subproductcode='vgt-ndvi_native',
+                                                      version='spot-v1')
         logger.info("Product sources are: %s", product_sources)
         for row in product_sources:
             print row
@@ -107,10 +118,30 @@ class TestQuerydb(TestCase):
 
     def Test_get_product_in_info(self):
 
-        product_in = querydb.get_product_in_info(productcode='fewsnet_rfe',
-                                                 subproductcode='rfe',
+        product_in = querydb.get_product_in_info(productcode='fewsnet-rfe',
+                                                 subproductcode='10d',
                                                  version='undefined',
                                                  datasource_descr_id='USGS:EARLWRN:FEWSNET')
+        logger.info("Product IN info: %s", product_in)
+
+        self.assertEqual(1, 1)
+
+    def Test_get_product_in_info1(self):
+
+        product_in = querydb.get_product_in_info(productcode='vgt-ndvi',
+                                                 subproductcode='ndv',
+                                                 version='spot-v1',
+                                                 datasource_descr_id='EO:EUM:DAT:SPOT1:S10NDVI')
+        logger.info("Product IN info: %s", product_in)
+
+        self.assertEqual(1, 1)
+
+    def Test_get_product_in_info2(self):
+
+        product_in = querydb.get_product_in_info(productcode='modis-firms',
+                                                 subproductcode='1day',
+                                                 version='v5.0',
+                                                 datasource_descr_id='FIRMS:NASA')
         logger.info("Product IN info: %s", product_in)
 
         self.assertEqual(1, 1)

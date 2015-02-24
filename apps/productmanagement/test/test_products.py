@@ -18,6 +18,7 @@ from ..exceptions import (NoProductFound, MissingMapset)
 
 from config import es_constants
 from lib.python import functions
+from database import connectdb
 from database import querydb
 
 
@@ -27,6 +28,7 @@ def glob_monkey(path):
 
 class TestProducts(unittest.TestCase):
     def setUp(self):
+        setattr(querydb, 'db', connectdb.ConnectDB(use_sqlite=True).db)
         self.kwargs = {'product_code':"vgt_ndvi"}
         self.mapsets = ('WGS84_Africa_1km', 'WGS84_Sahel_1km')
         self.subproducts = ('sm', 'ndv')

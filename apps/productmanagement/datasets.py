@@ -237,22 +237,33 @@ class Dataset(object):
                                                       self._db_product.product_type,
                                                       version,
                                                       mapset)
-        # self.fullpath = os.path.join(es_constants.es2globals['data_dir'], self._path)
-        self.fullpath = os.path.join(es_constants.es2globals['processing_dir'], self._path)
-        # self._db_frequency = querydb.db.frequency.get(self._db_product.frequency_id)
-        self._db_frequency = querydb.get_frequency(self._db_product.frequency_id)
-        if self._db_frequency is None:
-            raise NoFrequencyFound(self._db_product)
-        self._frequency = Frequency(value=self._db_frequency.frequency,
-                                    unit=self._db_frequency.time_unit,
-                                    frequency_type=self._db_frequency.frequency_type,
-                                    dateformat=self._db_product.date_format)
+        self.fullpath = os.path.join(es_constants.es2globals['data_dir'], self._path)
+        #self._db_frequency = querydb.db.frequency.get(self._db_product.frequency_id)
+        #self._db_frequency = querydb.get_frequency(self._db_product.frequency_id)
+        #if self._db_frequency is None:
+        #    raise NoFrequencyFound(self._db_product)
+        #self._frequency = Frequency(value=self._db_frequency.frequency,
+        #                            unit=self._db_frequency.time_unit,
+        #                            frequency_type=self._db_frequency.frequency_type,
+        #                            dateformat=self._db_product.date_format)
+        self._frequency = Dataset.get_frequency(self._db_product.frequency_id, self._db_product.date_format)
         if not from_date and self.no_year():
             from_date = datetime.date(datetime.date.today().year, 1, 1)
         if not to_date and self.no_year():
             to_date = datetime.date(datetime.date.today().year, 12, 1)
         self.from_date = from_date or None
         self.to_date = to_date or self._frequency.today()
+
+    @staticmethod
+    def get_frequency(frequency_id, dateformat):
+        _db_frequency = querydb.get_frequency(frequency_id)
+        if _db_frequency is None:
+            raise NoFrequencyFound(frequency_id)
+        return  Frequency(value=_db_frequency.frequency,
+                                    unit=_db_frequency.time_unit,
+                                    frequency_type=_db_frequency.frequency_type,
+                                    dateformat=dateformat)
+
 
     def next_date(self, date):
         return self._frequency.next_date(date)

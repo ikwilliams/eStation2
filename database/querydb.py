@@ -602,7 +602,7 @@ def get_mapset(mapsetcode='', allrecs=False, echo=False):
 
 ######################################################################################
 #   get_ingestion_product(allrecs=False, echo=False, productcode_in='', version_in='')
-#   Purpose: Query the database to get the COUNT of all product ingestion definitions or one specific
+#   Purpose: Query the database to get all product ingestion (allrecs==True) definitions or one specific
 #            product ingestion definition at product level from the table ingestion.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/05/16

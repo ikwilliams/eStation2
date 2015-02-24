@@ -12,8 +12,13 @@ import unittest
 from ..mapsets import Mapset
 from ..exceptions import NoMapsetFound
 
+from database import querydb
+from database import connectdb
 
 class TestMapsets(unittest.TestCase):
+    def setUp(self):
+        setattr(querydb, 'db', connectdb.ConnectDB(use_sqlite=True).db)
+
     def test_mapset_not_existent(self):
         kwargs = {'mapset_code':"---prod---"}
         self.assertRaisesRegexp(NoMapsetFound, "(?i).*found.*mapset.*", Mapset, **kwargs)
