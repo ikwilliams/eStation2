@@ -30,6 +30,56 @@ dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
 #
 #   Output: Return legend steps of the given legendid, needed for mapserver mapfile LAYER CLASS settings.
 #
+#   SELECT pl.default_legend,
+#          pl.legend_id,
+#          l.legend_name,
+#          CASE WHEN pl.default_legend THEN 'x-grid3-radio-col-on' ELSE 'x-grid3-radio-col' END as "defaulticon"
+#   FROM analysis.product_legend  pl join analysis.legend l on pl.legend_id = l.legend_id
+#   WHERE productcode =  param_productcode
+#     AND version = param_version
+#     AND subproductcode = param_subproductcode
+#
+def get_product_legends(productcode=None, subproductcode=None, version=None, echo=False):
+    try:
+        session = db.session
+        legend = aliased(dbschema_analysis.legend)
+
+        product_legend = session.query(dbschema_analysis.product_legend).subquery()
+
+        productlegends = session.query(legend.legend_id,
+                                       legend.legend_name,
+                                       product_legend.c.default_legend).\
+            outerjoin(product_legend,
+                      legend.productcode == product_legend.c.productcode,
+                      legend.version == product_legend.c.version,
+                      legend.subproductcode == product_legend.c.subproductcode).all()
+
+        if echo:
+            for row in productlegends:
+                print row
+
+        return productlegends
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and log the error telling what happened.
+        logger.error("get_product_legends: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+######################################################################################
+#   get_legend_steps(legendid, echo=False)
+#   Purpose: Query the database to get the legend info needed for mapserver mapfile SCALE_BUCKETS setting.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2014/07/31
+#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
+#
+#   Output: Return legend steps of the given legendid, needed for mapserver mapfile LAYER CLASS settings.
+#
 #    SELECT ls.*
 #    FROM analysis.legend_step ls
 #    WHERE ls.legend_id = legendid
@@ -1041,8 +1091,8 @@ def get_processingchain_output_products(process_id=None):
                                                              processfinaloutput.activated.label('subactivated'),
                                                              processfinaloutput.final,
                                                              processfinaloutput.date_format,
-                                                             processfinaloutput.c.start_date,
-                                                             processfinaloutput.c.end_date,
+                                                             processfinaloutput.start_date,
+                                                             processfinaloutput.end_date,
 
                                                              func.CONCAT(product.c.productcode, '_',
                                                                          product.c.subproductcode, '_',

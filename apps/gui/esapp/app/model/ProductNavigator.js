@@ -98,6 +98,7 @@ Ext.define('esapp.model.ProductNavigatorMapSetDataSet', {
        {name: 'subproductcode'},
        {name: 'version'},
        {name: 'defined_by'},
+       {name: 'mapsetcode'},
        {name: 'activated', type: 'boolean'},
        {name: 'product_type'},
        {name: 'prod_descriptive_name'},
@@ -112,6 +113,7 @@ Ext.define('esapp.model.ProductNavigatorMapSetDataSet', {
         }
     ]
 });
+
 
 Ext.define('esapp.model.ProductNavigatorDataSetCompleteness', {
     extend : 'esapp.model.Base',
@@ -132,6 +134,7 @@ Ext.define('esapp.model.ProductNavigatorDataSetCompleteness', {
     ]
 });
 
+
 Ext.define('esapp.model.ProductNavigatorDataSetIntervals', {
     extend : 'esapp.model.Base',
 
@@ -141,4 +144,45 @@ Ext.define('esapp.model.ProductNavigatorDataSetIntervals', {
        {name: 'intervaltype'},
        {name: 'intervalpercentage', type:'int'}
     ]
+});
+
+
+Ext.define('esapp.model.ColorScheme', {
+    extend : 'esapp.model.Base',
+
+    fields: [
+        {name: 'defaultlegend', mapping: 'defaultlegend'},
+        {name: 'defaulticon', mapping: 'defaulticon'},
+        {name: 'legend_id', mapping: 'legend_id'},
+        {name: 'legendname', mapping: 'legendname'},
+        {name: 'colorscheme', mapping: 'colorscheme'},
+        {name: 'legendhtml', mapping: 'legendhtml'}
+    ],
+
+    proxy: {
+        type: 'ajax',
+        url: 'analysis/getcolorschemes',
+        //params: params,
+        //extraParams:{
+        //    activated:'True'
+        //},
+        reader: {
+            type: 'json',
+            rootProperty: 'colorscheme',
+            successProperty: 'success',
+            messageProperty: 'message'
+        },
+
+        listeners: {
+            exception: function(proxy, response, operation){
+                Ext.MessageBox.show({
+                    title: 'COLOR SCHEMES - REMOTE EXCEPTION',
+                    msg: operation.getError(),
+                    icon: Ext.MessageBox.ERROR,
+                    buttons: Ext.Msg.OK
+                });
+            }
+        }
+
+    }
 });

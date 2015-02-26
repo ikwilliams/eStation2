@@ -34,6 +34,41 @@ logger = log.my_logger(__name__)
 dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'derived'}
 
 
+# Second function, rgb2html converts its arguments (r, g, b) to hexadecimal html-color string #RRGGBB
+# Arguments are converted to integers and trimmed to 0..255 range. It is possible to call it with array argument
+# rgb2html(array_of_three_ints) or specifying each component value separetly rgb2html(r, g, b).
+
+def rgb2html(rgb):
+    # if is_array(rgb) && sizeof(r) == 3:
+    #     list(r, g, b) = r
+
+    r = int(rgb[0])
+    g = int(rgb[1])
+    b = int(rgb[2])
+
+    r = 0 if r < 0 else 255 if r > 255 else r
+    r = "%x" % r
+
+    g = 0 if g < 0 else 255 if g > 255 else g
+    g = "%x" % g
+
+    b = 0 if b < 0 else 255 if b > 255 else b
+    b = "%x" % b
+
+    color = '0' if len(r) < 2 else '' + r
+    color += '0' if len(g) < 2 else '' + g
+    color += '0' if len(b) < 2 else '' + b
+
+    # r = dechex(r<0?0:(r>255?255:r))
+    # g = dechex(g<0?0:(g>255?255:g))
+    # b = dechex(b<0?0:(b>255?255:b))
+
+    # color = len(r) < 2 ? '0' : '' + r
+    # color += len(g) < 2 ? '0' : '' + g
+    # color += len(b) < 2 ? '0' : '' + b
+    return '#'+color
+
+
 def row2dict(row):
     d = {}
     for column in row.c._all_cols:

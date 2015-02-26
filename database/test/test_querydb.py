@@ -222,6 +222,14 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
+    def Test_get_product_legends(self):
+
+        product_legends = querydb.get_product_legends(productcode='vgt_ndvi', subproductcode='ndv', version='undefined')
+        logger.info("Product Legends: %s", product_legends)
+        for row in product_legends:
+            print row
+
+        self.assertEqual(1, 1)
 
     def Test_get_processing_chains(self):
 
@@ -230,7 +238,6 @@ class TestQuerydb(TestCase):
         for row in processing_chains:
             print row.mapsetcode
             print row.output_mapsetcode
-
 
         self.assertEqual(1, 1)
 

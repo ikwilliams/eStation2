@@ -3,8 +3,7 @@ Ext.define('esapp.store.SystemSettingsStore', {
     ,alias: 'store.systemsettings'
 
     ,requires : [
-        'esapp.model.SystemSetting',
-        'Ext.data.proxy.Rest'
+        'esapp.model.SystemSetting'
     ]
     ,model: 'esapp.model.SystemSetting'
 

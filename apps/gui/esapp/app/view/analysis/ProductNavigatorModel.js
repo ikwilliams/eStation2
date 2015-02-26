@@ -1,18 +1,8 @@
 Ext.define('esapp.view.analysis.ProductNavigatorModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.analysis-productnavigator'
+    alias: 'viewmodel.analysis-productnavigator',
 
-    //,data : {}
-
-    //,links: {
-    //    products: {
-    //        reference: 'esapp.model.ProductNavigator'
-    //        ,create: true
-    //        //,id: 1
-    //    }
-    //}
-
-    ,stores: {
+    stores: {
         products: {
             //source: 'ProductNavigatorStore'
             model: 'esapp.model.ProductNavigator'
@@ -43,7 +33,19 @@ Ext.define('esapp.view.analysis.ProductNavigatorModel', {
         mapsetdatasets: {
             model: 'esapp.model.ProductNavigatorMapSetDataSet'
             ,session: true
+        },
+        colorschemes: {
+            model: 'esapp.model.ColorScheme'
+            ,session: true
         }
     }
+
+    //,links: {
+    //    products: {
+    //        reference: 'esapp.model.ProductNavigator'
+    //        ,create: true
+    //        //,id: 1
+    //    }
+    //}
 
 });

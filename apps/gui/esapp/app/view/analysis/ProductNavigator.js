@@ -143,13 +143,12 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                             xtype: 'templatecolumn',
                             width: 485,
                             tpl:  new Ext.XTemplate(
-                                '<b>{prod_descriptive_name}' +
+                                '<b>{prod_descriptive_name}</b>' +
                                 '<tpl if="version != \'undefined\'">',
-                                    ' - {version}',
+                                    '<b class="smalltext"> - {version}</b>',
                                 '</tpl>',
-                                '</b></br><span class="smalltext">' +
-                                '<b style="color:darkgrey">{productcode}</b>' +
-                                '</span>'
+                                '</br>' +
+                                '<b class="smalltext" style="color:darkgrey">{productcode}</b>'
                             )
                             //dataIndex: 'prod_descriptive_name',
                             //renderer : function(val) {
@@ -173,8 +172,9 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 collapsible: true,
                 collapsed: true,
                 floatable: false,
+                //padding: {top: 10, right: 10, bottom: 20, left: 10},
                 defaults: {
-                    margin: {top: 10, right: 10, bottom: 10, left: 10},
+                    margin: {top: 10, right: 10, bottom: 20, left: 10},
                     layout: {
                         type: 'vbox'
                     }
@@ -193,13 +193,25 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         this.up().setWidth(575);
                     }
                 },
+                bbar: Ext.create('Ext.toolbar.Toolbar', {
+                    items: ['->',{
+                        text: 'Add to Map',
+                        disabled: true,
+                        handler: function(btn) {
+
+                        }
+                    }]
+                }),
+
                 items: [{
                     xtype: 'fieldset',
                     title: '<div class="grid-header-style">Mapsets available</div>',
                     reference: 'product-mapsets-dataview',
                     border: true,
+                    autoWidth: true,
+                    //flex: 1,
                     height: 220,
-                    width: 530,
+                    //width: 530,
                     collapsible: false,
                     layout: 'fit',
                     padding: {top: 5, right: 5, bottom: 0, left: 5},
@@ -229,81 +241,134 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                             itemclick: 'mapsetItemClick'
                         }
                     })
-                },{
-                    xtype : 'grid',
+                }, {
+                    xtype: 'grid',
                     reference: 'mapset-dataset-grid',
-                    region: 'center',
-                    autoWidth: false,
-                    height: 300,
+                    autoWidth: true,
+                    //flex: 1,
+                    //width: 530,
+                    maxHeight: 250,
+                    autoScroll: true,
                     hidden: true,
-                    //store: 'ProductNavigatorStore',
                     bind: '{mapsetdatasets}',
-                    //session:true,
+                    layout: 'fit',
 
                     viewConfig: {
                         stripeRows: false,
                         enableTextSelection: true,
-                        draggable:false,
+                        draggable: false,
                         markDirty: false,
-                        resizable:false,
+                        resizable: false,
                         disableSelection: true,
-                        trackOver:true
+                        trackOver: true
                     },
 
-                    selModel : {
-                        allowDeselect : true
+                    selModel: {
+                        allowDeselect: true
                     },
 
                     collapsible: false,
-                    enableColumnMove:false,
-                    enableColumnResize:false,
+                    enableColumnMove: false,
+                    enableColumnResize: false,
                     multiColumnSort: false,
-                    columnLines: false,
+                    columnLines: true,
                     rowLines: true,
                     frame: false,
                     border: false,
 
                     plugins: [{
                         ptype: 'rowexpander',
-                        cellWrap:true,
-                        layout:'fit',
-                        rowBodyTpl : new Ext.XTemplate(
+                        cellWrap: true,
+                        layout: 'fit',
+                        rowBodyTpl: new Ext.XTemplate(
                             '<span class="smalltext">' +
-                            '<b style="color:darkgrey">{productcode}' +
-                                '<tpl if="version != \'undefined\'">',
-                                    ' - {version}',
-                                '</tpl>',
-                            ' - {subproductcode}',
-                            '</b>' +
                             '<p>{description}</p>' +
                             '</span>'
                         )
                     }],
 
                     listeners: {
-                        rowclick: function(gridview, record){
-                            console.info(record);
-                        }
+                        rowclick: 'mapsetDataSetGridRowClick'
+                        //,afterrender: function (grid) {
+                        //    var viewEl = grid.getView().getEl();
+                        //    if (viewEl.getStyle('overflowY') === 'hidden') {
+                        //        viewEl.on('mousewheel', function (e) {
+                        //            viewEl.setScrollTop(viewEl.getScrollTop() + e.browserEvent.deltaY);
+                        //        });
+                        //    }
+                        //}
                     },
-                    menuDisabled: true,
                     defaults: {
                         sortable: false,
                         hideable: false,
-                        variableRowHeight : false,
-                        menuDisabled:true
+                        variableRowHeight: false
                     },
-                    columns : [{
+                    columns: [{
                         text: '<div class="grid-header-style">Data sets</div>',
                         xtype: 'templatecolumn',
-                        tpl: '<b>{descriptive_name}</b>',
-                        width: 455,
+                        tpl: new Ext.XTemplate(
+                            '<b>{descriptive_name}</b>' +
+                            '<tpl if="version != \'undefined\'">',
+                            '<b class="smalltext"> - {version} </b>',
+                            '</tpl>',
+                            '</br>' +
+                            '<span class="smalltext"><b style="color:darkgrey">{subproductcode}</b>' +
+                            '</span>'
+                        ),
+                        width: 475,
                         sortable: false,
-                        menuDisabled:true
-                        //dataIndex: 'descriptive_name',
-                        //bind: '{descriptive_name}',
-                        //renderer : function(val) {
-                        //    return '<b>' + val + '</b>';
-                        //}
+                        menuDisabled: true
+                    }]
+                },{
+                    xtype: 'grid',
+                    reference: 'colorschemesGrid',
+                    autoWidth: true,
+                    //flex: 1,
+                    //width: 530,
+                    //height: 150,
+                    autoScroll: true,
+                    hidden: false,
+                    bind: '{colorschemes}',
+                    layout: 'fit',
+
+                    viewConfig: {
+                        stripeRows: false,
+                        enableTextSelection: true,
+                        draggable: false,
+                        markDirty: false,
+                        resizable: false,
+                        disableSelection: true,
+                        trackOver: true
+                    },
+
+                    selModel: {
+                        allowDeselect: true
+                    },
+
+                    collapsible: false,
+                    enableColumnMove: false,
+                    enableColumnResize: false,
+                    multiColumnSort: false,
+                    columnLines: false,
+                    rowLines: true,
+                    frame: false,
+                    border: false,
+
+                    listeners: {
+                        rowclick: function (gridview, record) {
+                            console.info(record);
+                        }
+                    },
+                    defaults: {
+                        sortable: false,
+                        hideable: false,
+                        variableRowHeight: false
+                    },
+                    columns: [{
+                        text: '<div class="grid-header-style">Color Schemes</div>',
+                        width: 475,
+                        sortable: false,
+                        menuDisabled: true
                     }]
                 }]
             }]

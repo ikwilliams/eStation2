@@ -331,14 +331,16 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                 xtype:'templatecolumn',
                 header: 'Product',
                 tpl: new Ext.XTemplate(
-                        '<b>{prod_descriptive_name}' +
+                        '<b>{prod_descriptive_name}</b>' +
                         '<tpl if="version != \'undefined\'">',
-                            ' - {version}',
+                            '<b class="smalltext"> - {version}</b>',
                         '</tpl>',
-                        '</b></br><span class="smalltext">' +
-                        '<b style="color:darkgrey">{productcode}</b>' +
+                        '</br>' +
+                        '<b class="smalltext" style="color:darkgrey">{productcode}</b>' +
                         // '<p>{description}</p>' +
-                        '</span></br>'
+                        '</br>'
+
+
                     ),
                 width: 375,
                 cellWrap:true

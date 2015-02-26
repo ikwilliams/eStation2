@@ -108,10 +108,10 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
 
                 listeners: {
                     rowclick: function(gridview, record){
-                        console.info(this);
-                        console.info(record);
-                        var productinfo = Ext.ComponentQuery.query('panel[id=productinfo]')[0];
-                        productinfo.expand(true);
+                        //console.info(this);
+                        //console.info(record);
+                        //var productinfo = Ext.ComponentQuery.query('panel[id=productinfo]')[0];
+                        //productinfo.expand(true);
                     }
                 },
 
@@ -137,15 +137,24 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                         xtype:'templatecolumn',
                         header: 'Product',
                         tpl: new Ext.XTemplate(
-                                '<b>{prod_descriptive_name}</b> <br> ' +
-                                '<span class="smalltext">' +
-                                '<b style="color:darkgrey">{productcode}' +
-                                    '<tpl if="version != \'undefined\'">',
-                                        ' - {version}',
-                                    '</tpl>',
-                                '</b>' +
+                                //'<b>{prod_descriptive_name}</b> <br> ' +
+                                //'<span class="smalltext">' +
+                                //'<b style="color:darkgrey">{productcode}' +
+                                //    '<tpl if="version != \'undefined\'">',
+                                //        ' - {version}',
+                                //    '</tpl>',
+                                //'</b>' +
+                                //'<p>{description}</p>' +
+                                //'</span>' +
+                                //
+                                '<b>{prod_descriptive_name}</b>' +
+                                '<tpl if="version != \'undefined\'">',
+                                    '<b class="smalltext"> - {version}</b>',
+                                '</tpl>',
+                                '</br><span class="smalltext">' +
+                                '<b style="color:darkgrey">{productcode}</b>' +
                                 '<p>{description}</p>' +
-                                '</span>'
+                                '</span></br>'
                             ),
                         width: 500,
                         cellWrap:true,

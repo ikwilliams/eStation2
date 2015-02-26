@@ -126,11 +126,11 @@ Ext.define("esapp.view.processing.Processing",{
                 xtype:'templatecolumn',
                 header: 'Product',
                 tpl: new Ext.XTemplate(
-                        '<b>{prod_descriptive_name}' +
+                        '<b>{prod_descriptive_name}</b>' +
                         '<tpl if="version != \'undefined\'">',
-                            ' - {version}',
+                            '<b class="smalltext"> - {version}</b>',
                         '</tpl>',
-                        '</b></br><span class="smalltext">' +
+                        '</br><span class="smalltext">' +
                         '<b style="color:darkgrey">{productcode}</b>' +
                         '<p>{description}</p>' +
                         '</span></br>'
