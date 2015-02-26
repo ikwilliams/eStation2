@@ -9,20 +9,17 @@
 #   TODO-M.C.: more checks on the IN/OUT
 #   TODO-M.C.test: Add a mechanism to extract/visualize the 'status' -> pipeline_printout(verbose=3)+grep-like function ?
 #   TODO-M.C.test: find a robust method to solve the tuple/string issue in filename (fttb: return_as_element_of_list() ?)
-#   TODO-M.C.: add management of 'version' !!
 #
 
-# Source my definitions
-# import locals
-#
+# Source generic modules
 import os, sys
 
 # Import eStation2 modules
 from lib.python import functions
-from lib.python import metadata
+#from lib.python import metadata
 from lib.python.image_proc import raster_image_math
-from lib.python.image_proc import recode
-from database import crud
+#from lib.python.image_proc import recode
+#from database import crud
 from lib.python import es_logging as log
 from config import es_constants
 
@@ -31,12 +28,10 @@ from ruffus import *
 
 logger = log.my_logger(__name__)
 
-# Delete a file for re-creating
-
 #   General definitions for this processing chain
 ext=es_constants.ES2_OUTFILE_EXTENSION
 
-def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, list_subprods=None):
+def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, list_subprods=None, update_stats=False):
 
     #   ---------------------------------------------------------------------
     #   Create lists
@@ -47,18 +42,21 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         list_subprods = proc_lists.list_subprods
         list_subprod_groups = proc_lists.list_subprod_groups
     
-    #   ---------------------------------------------------------------------
-    #   TODO-M.C.: Manage here the switches, considering User Defined+Dependencies
-    #
-    #
+    #   switch wrt groups - according to options
+    if not update_stats:
+        activate_10danomalies_comput=1      # 10d anomalies
+        activate_monthly_comput=1           # monthly cumulation
+        activate_monanomalies_comput=1      # monthly anomalies
+        activate_10dstats_comput=0          # 10d stats
+        activate_monstats_comput=0          # 1mon stats
+    else:
+        activate_10danomalies_comput=0      # 10d anomalies
+        activate_monthly_comput=0           # monthly cumulation
+        activate_monanomalies_comput=0      # monthly anomalies
+        activate_10dstats_comput=1          # 1.
+        activate_monstats_comput=1          # 3.b
 
-    #   switch wrt groups
-    activate_10dstats_comput=1          # 1.
-    activate_10danomalies_comput=0      # 2.
-    activate_monthly_comput=0           # 3.a
-    activate_monstats_comput=0          # 3.b
-    activate_monanomalies_comput=0      # 3.c
-
+    #   switch wrt single products: not to be changed !!
     activate_10davg_comput=1
     activate_10dmin_comput=1
     activate_10dmax_comput=1
@@ -450,13 +448,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
 
 def processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
-                          pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version=''):
+                          pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
+                          starting_dates=None, update_stats=False):
 
     global list_subprods, list_subprod_groups
 
     list_subprods = []
     list_subprod_groups = []
-    create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version)
+    create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
+                    starting_dates=starting_dates, update_stats=update_stats)
 
     logger.info("Entering routine %s" % 'processing_std_precip')
     logger.info("pipeline_run_level %i" % pipeline_run_level)
@@ -471,11 +471,23 @@ def processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0, pipeli
 
     return list_subprods, list_subprod_groups
 
+def processing_std_precip_stats(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
+                          pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
+                          starting_dates=None):
+
+    processing_std_precip(pipeline_run_level=pipeline_run_level,
+                          pipeline_run_touch_only=pipeline_run_touch_only,
+                          pipeline_printout_level=pipeline_printout_level,
+                          pipeline_printout_graph_level=pipeline_printout_graph_level,
+                          prod=prod,
+                          starting_sprod=starting_sprod,
+                          mapset=mapset,
+                          version=version,
+                          starting_dates=starting_dates,
+                          update_stats=True)
 
 def get_subprods_std_precip():
 
-    #list_subprods = []
-    #list_subprod_groups = {}
     pid = os.fork()
     if pid == 0:
         # Qui sono il figlio
