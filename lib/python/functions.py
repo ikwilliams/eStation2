@@ -421,7 +421,6 @@ def conv_yyyy_mm_dkx_2_yyyymmdd(yyyy_mm_dkx):
         date_yyyymmdd = year+month+day
     return date_yyyymmdd
 
-
 ######################################################################################
 #   conv_yymmk_2_yyyymmdd
 #   Purpose: Function returns a date (YYYYMMDD) with yymmk as input.
@@ -452,27 +451,31 @@ def conv_yymmk_2_yyyymmdd(yymmk):
     #date_tmp = datetime.datetime(year=year, month=month, day=day)
     date_yyyymmdd = str(year)+month+day
     return date_yyyymmdd
+
 ######################################################################################
-#   conv_yyyy_mm_k_2_yyyymmdd
-#   Purpose: Function returns a date (YYYYMMDD) with yymmk as input.
+#   conv_yyyydmmdk_2_yyyymmdd
+#   Purpose: Function returns a date (YYYYMMDD) with YYYYdMMdK as input.
 #            K = 1 is day 1
 #            K = 2 is day 11
 #            K = 3 is day 21
-#   Author: Jurriaan van 't Klooster
-#   Date: 2014/05/06
-#   Input: string of numbers in the format YYYY.MM.K
+#   Author: M. Clerici
+#   Date: 2015/02/25
+#   Input: string of numbers in the format YYYYdMMdK
 #   Output: date (YYYYMMDD), otherwise -1
-def conv_yyyy_mm_k_2_yyyymmdd(yyyymmk):
+def conv_yyyydmmdk_2_yyyymmdd(yymmk):
 
-    year = int(str(yyyymmk)[0:4])
-    month = str(yyyymmk)[5:7]
-    dekad = int(str(yyyymmk)[8:9])
+    year = int(str(yymmk)[0:4])
+    month = str(yymmk)[5:7]
+    dekad = int(str(yymmk)[8:9])
     if dekad == 1:
         day = '01'
-    if dekad == 2:
+    elif dekad == 2:
         day = '11'
-    if dekad == 3:
+    elif dekad == 3:
         day = '21'
+    else:
+        date_yyyymmdd = -1
+
     #date_tmp = datetime.datetime(year=year, month=month, day=day)
     date_yyyymmdd = str(year)+month+day
     return date_yyyymmdd
@@ -718,6 +721,39 @@ def check_output_dir(output_dir):
         logger.debug("Output directory %s already exists" % my_dir)
 
 ######################################################################################
+#   create_sym_link
+#   Purpose: Create a (new) symbolic link from src_file -> trg_file
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: output_dir, or list of dirs
+#   Output: none
+#
+
+def create_sym_link(src_file, trg_file, force=False):
+
+    # Does the source file already exist ?
+    if not os.path.isfile(src_file):
+        logger.warning('Source file does not exist. Exit')
+        return 1
+    # Does the target file already exist ?
+    if os.path.exists(trg_file):
+        if os.path.islink(trg_file):
+            if force:
+                logger.warning('Target file exists and FORCE=1. Overwrite')
+                os.remove(trg_file)
+            else:
+                logger.info('Target file exists and FORCE=0. Exit')
+                return 1
+        else:
+            logger.info('Target file exists as regular file. Exit')
+            return 1
+    # Create the symbolic link
+    try:
+        os.symlink(src_file,trg_file)
+    except:
+        logger.error('Error in creating symlink %s' % trg_file)
+
+######################################################################################
 #   ensure_sep_present
 #   Purpose: Check output directory exists, otherwise create it.
 #   Author: Marco Clerici, JRC, European Commission
@@ -797,7 +833,6 @@ def load_obj_from_pickle(filename):
         logger.warning("Dump file %s does not exist.", filename)
 
     return object
-
 
 ######################################################################################
 #   modis_latlon_to_hv_tile
@@ -914,7 +949,7 @@ def files_temp_ajacent(file_t0, step='dekad', extension='.tif'):
         # Compute/Check file before
         dekad_m = dekad_t0-1
         date_m = conv_dekad_2_date(dekad_m)
-        file_m = dir+os.path.sep+set_path_filename(str(date_m), product_code, sub_product_code, mapset, extension)
+        file_m = dir+os.path.sep+set_path_filename(str(date_m), product_code, sub_product_code, mapset, version, extension)
 
         if os.path.isfile(file_m):
             file_list.append(file_m)
@@ -925,7 +960,7 @@ def files_temp_ajacent(file_t0, step='dekad', extension='.tif'):
         dekad = conv_date_2_dekad(date_t0)
         dekad_p = dekad_t0+1
         date_p = conv_dekad_2_date(dekad_p)
-        file_p = dir+os.path.sep+set_path_filename(str(date_p), product_code, sub_product_code, mapset, extension)
+        file_p = dir+os.path.sep+set_path_filename(str(date_p), product_code, sub_product_code, mapset, version, extension)
 
         if os.path.isfile(file_p):
             file_list.append(file_p)
@@ -994,4 +1029,3 @@ class ProcSubprodGroup:
         self.group = group
         self.active_default=active_default
         self.active_user = True
-
