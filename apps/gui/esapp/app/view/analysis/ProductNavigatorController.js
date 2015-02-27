@@ -2,16 +2,25 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.analysis-productnavigator',
 
-    loadProductsStore: function() {
+    mapsetDataSetGridRowClick: function(gridview, record) {
+        console.info(gridview);
+        console.info(record);
+        var params = {
+               productcode:record.get('productcode'),
+               version:record.get('version'),
+               mapsetcode:record.get('mapsetcode'),
+               subproductcode:record.get('subproductcode')
+        };
 
-        var prodgrid = this.getView().lookupReference('productsGrid');
+        var colorschemesgrid = this.getView().lookupReference('colorschemesGrid');
         var myLoadMask = new Ext.LoadMask({
             msg    : 'Loading...',
-            target : prodgrid
+            target : colorschemesgrid
         });
         myLoadMask.show();
 
-        this.getStore('products').load({
+        this.getStore('colorschemes').load({
+            params:params,
             callback:function(){
                 myLoadMask.hide();
             }
@@ -82,7 +91,11 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
         //productinfopanel.down('fieldset').removeAll();
         //productinfopanel.down('fieldset').add(myGroup);
         var productinfopanel = this.lookupReference('product-datasets-info');
-        productinfopanel.setTitle('<div class="panel-title-style-16">' + record.get('prod_descriptive_name') + '</div>');
+        if (record.get('version') != 'undefined')
+            productinfopanel.setTitle('<div class="panel-title-style-16">' + record.get('prod_descriptive_name') + '<b class="smalltext"> ' + record.get('version') + '</b>' + '</div>');
+        else
+            productinfopanel.setTitle('<div class="panel-title-style-16">' + record.get('prod_descriptive_name') + '</div>');
+
         productinfopanel.expand(true);
     },
 
@@ -91,7 +104,7 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
         // here we do not use multiSelect so nodes is the record of the selected mapset!
         this.getStore('mapsetdatasets').setData(record.get('mapsetdatasets'));
         var mapsetdatasetgrid = this.lookupReference('mapset-dataset-grid');
-        mapsetdatasetgrid.columns[0].setText('<span class="grid-header-style">Data sets</span>' + ' for mapset ' + record.get('descriptive_name'));
+        mapsetdatasetgrid.columns[0].setText('<div class="grid-header-style">Data sets' + '<b class="smalltext"> for mapset ' + record.get('descriptive_name') + '</b></div>');
         mapsetdatasetgrid.doLayout();
         mapsetdatasetgrid.show();
     }

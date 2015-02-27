@@ -64,6 +64,7 @@ urls = (
 
     "/analysis/getproductlayer", "GetProductLayer",
     "/analysis/productnavigator", "ProductNavigatorDataSets",
+    "/analysis/getcolorschemes", "GetColorSchemes",
 
     #"/(.+)/(.+)", "EsApp",
     #"/(.+)/", "EsApp",
@@ -82,6 +83,74 @@ class EsApp:
         #return web.ctx
         render = web.template.render(es_constants.es2globals['base_dir']+'/apps/gui/esapp')
         return render.index()
+
+
+class GetColorSchemes:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self):
+        getparams = web.input()
+
+        product_legends = querydb.get_product_legends(productcode=getparams['productcode'],
+                                                      subproductcode=getparams['subproductcode'],
+                                                      version=getparams['version'])
+
+        if hasattr(product_legends, "__len__") and product_legends.__len__() > 0:
+            legends_dict_all = []
+            for legend in product_legends:
+                legend_dict = functions.row2dict(legend)
+                legend_id = legend_dict['legend_id']
+                legend_name = legend_dict['legend_name']
+                default_legend = legend_dict['default_legend']
+
+                if default_legend == 't':
+                    default_legend = 'true'
+                else:
+                    default_legend = 'false'
+
+                # if there is only 1 legend defined, this is the default legend (even if not defined as default legend).
+                if product_legends.__len__() == 1:
+                    default_legend = 'true'
+
+                if default_legend == 'true':
+                    defaulticon = 'x-grid3-radio-col-on'
+                else:
+                    defaulticon = 'x-grid3-radio-col'
+
+                # $legendHTML = generateLegendHTML($db, $legend_id, $Language);
+                # $legendHTML = str_replace('"', "'", $legendHTML);
+
+                legend_steps = querydb.get_legend_steps(legendid=legend_id)
+
+                colorschemeHTML = '<table cellspacing=0 cellpadding=0 width=100%><tr>'
+                for step in legend_steps:
+                    # convert step['color_rgb'] from RGB to html color
+                    color_rgb = step['color_rgb'].split(' ')
+                    color_html = functions.rgb2html(color_rgb)
+                    colorschemeHTML = colorschemeHTML + \
+                                      "<td height=10 style='padding:0; margin:0; background-color: " + \
+                                      color_html + ";'>&nbsp</td>"
+                colorschemeHTML = colorschemeHTML + '</tr></table>'
+
+                legend_dict['default_legend'] = default_legend
+                legend_dict['defaulticon'] = defaulticon
+                legend_dict['colorschemeHTML'] = colorschemeHTML
+                # legend_dict['legendHTML'] = legendHTML
+
+                legends_dict_all.append(legend_dict)
+
+            legends_json = json.dumps(legends_dict_all,
+                                      ensure_ascii=False,
+                                      sort_keys=True,
+                                      indent=4,
+                                      separators=(', ', ': '))
+
+            colorschemes = '{"success":true, "total":' + str(product_legends.__len__()) + ',"legends":'+legends_json+'}'
+        else:
+            colorschemes = '{"success":false, "message":"No legends defined for this product!"}'
+
+        return colorschemes
 
 
 class ProductNavigatorDataSets:
@@ -116,15 +185,13 @@ class ProductNavigatorDataSets:
                                                                   version=version,
                                                                   subproductcode=subproductcode,
                                                                   echo=False)
-                            # dataset_info = querydb.db.product.get(productcode, version, subproductcode)
-                            # dataset_dict = {}
-                            # if dataset_info:
+
                             dataset_dict = functions.row2dict(dataset_info)
-                            # dataset_dict = dataset_info.__dict__
-                            # del dataset_dict['_labels']
-                            dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
-                            completeness = dataset.get_dataset_normalized_info()
-                            dataset_dict['datasetcompleteness'] = completeness
+                            dataset_dict['mapsetcode'] = mapset
+
+                            # dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                            # completeness = dataset.get_dataset_normalized_info()
+                            # dataset_dict['datasetcompleteness'] = completeness
 
                             mapset_dict['mapsetdatasets'].append(dataset_dict)
                         prod_dict['productmapsets'].append(mapset_dict)
