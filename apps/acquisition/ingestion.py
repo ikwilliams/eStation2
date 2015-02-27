@@ -21,7 +21,7 @@ import os
 import numpy as N
 import time
 import shutil
-
+import gzip
 # import eStation2 modules
 from database import querydb
 from lib.python import functions
@@ -560,6 +560,36 @@ def pre_process_bzip2 (subproducts, tmpdir, input_files):
 
     return interm_files_list
 
+def pre_process_gzip (subproducts, tmpdir, input_files):
+# -------------------------------------------------------------------------------------------------------
+#   Pre-process gzip files
+#
+    interm_files_list = []
+
+    # Make sure it is a list (if only a string is returned, it loops over chars)
+    if isinstance(input_files, list):
+        list_input_files = input_files
+    else:
+        list_input_files=[]
+        list_input_files.append(input_files)
+
+    for input_file in list_input_files:
+        logger.info('Unzipping/processing: .gzip case')
+        gzipfile = gzip.open(input_file)                 # Create ZipFile object
+        data = gzipfile.read()                            # Get the list of its contents
+        filename = os.path.basename(input_file)
+        filename = filename.replace('.gz', '')
+        myfile_path = os.path.join(tmpdir, filename)
+        myfile = open(myfile_path, "wb")
+        myfile.write(data)
+        myfile.close()
+        gzipfile.close()
+
+    # Create a coherent intermediate file list
+    for subproduct in subproducts:
+        interm_files_list.append(myfile_path)
+
+    return interm_files_list
 
 def pre_process_bz2_hdf4(subproducts, tmpdir, input_files):
 # -------------------------------------------------------------------------------------------------------
@@ -862,6 +892,9 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
         elif preproc_type == 'NASA_FIRMS':
             interm_files = pre_process_nasa_firms (subproducts, tmpdir, input_files)
 
+        elif preproc_type == 'GZIP':
+            interm_files = pre_process_gzip (subproducts, tmpdir, input_files)
+
         else:
             logger.error('Preproc_type not recognized:[%s] Check in DB table. Exit' % preproc_type)
     except:
@@ -1023,6 +1056,9 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         if datasource_descr.date_type == 'YYMMK':
             output_date_str = functions.conv_yymmk_2_yyyymmdd(in_date)
+
+        if datasource_descr.date_type == 'YYYYdMMdK':
+            output_date_str = functions.conv_yyyydmmdk_2_yyyymmdd(in_date)
 
         if output_date_str == -1:
             output_date_str = in_date+'_DATE_ERROR_'
