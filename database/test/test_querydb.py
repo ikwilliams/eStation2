@@ -218,7 +218,8 @@ class TestQuerydb(TestCase):
         legend_steps = querydb.get_legend_steps(legendid=6)
         logger.info("Legend info: %s", legend_steps)
         for row in legend_steps:
-            print row
+            color_rgb = row['color_rgb']
+            print color_rgb.split(' ')
 
         self.assertEqual(1, 1)
 

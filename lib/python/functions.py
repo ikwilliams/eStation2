@@ -39,9 +39,6 @@ dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'der
 # rgb2html(array_of_three_ints) or specifying each component value separetly rgb2html(r, g, b).
 
 def rgb2html(rgb):
-    # if is_array(rgb) && sizeof(r) == 3:
-    #     list(r, g, b) = r
-
     r = int(rgb[0])
     g = int(rgb[1])
     b = int(rgb[2])
@@ -59,13 +56,6 @@ def rgb2html(rgb):
     color += '0' if len(g) < 2 else '' + g
     color += '0' if len(b) < 2 else '' + b
 
-    # r = dechex(r<0?0:(r>255?255:r))
-    # g = dechex(g<0?0:(g>255?255:g))
-    # b = dechex(b<0?0:(b>255?255:b))
-
-    # color = len(r) < 2 ? '0' : '' + r
-    # color += len(g) < 2 ? '0' : '' + g
-    # color += len(b) < 2 ? '0' : '' + b
     return '#'+color
 
 
@@ -96,8 +86,8 @@ def checkDateFormat(myString):
     return isDate
 
 
-import urllib2
 def internet_on():
+    import urllib2
     try:
         response = urllib2.urlopen('http://74.125.228.100', timeout=1)
         return True
@@ -105,20 +95,20 @@ def internet_on():
     return False
 
 
-import socket
-REMOTE_SERVER = "www.google.com"
 def is_connected():
-  try:
-    # see if we can resolve the host name -- tells us if there is
-    # a DNS listening
-    host = socket.gethostbyname(REMOTE_SERVER)
-    # connect to the host -- tells us if the host is actually
-    # reachable
-    s = socket.create_connection((host, 80), 2)
-    return True
-  except:
-     pass
-  return False
+    import socket
+    REMOTE_SERVER = "www.google.com"
+    try:
+        # see if we can resolve the host name -- tells us if there is
+        # a DNS listening
+        host = socket.gethostbyname(REMOTE_SERVER)
+        # connect to the host -- tells us if the host is actually
+        # reachable
+        s = socket.create_connection((host, 80), 2)
+        return True
+    except:
+        pass
+    return False
 
 
 ######################################################################################
