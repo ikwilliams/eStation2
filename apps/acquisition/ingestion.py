@@ -1021,6 +1021,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         out_scale_factor = product_info.scale_factor
         out_offset = product_info.scale_offset
         out_nodata = product_info.nodata
+        out_date_format = product_info.date_format
 
         # Translate data type for gdal and numpy
         out_data_type_gdal = conv_data_type_to_gdal(out_data_type)
@@ -1062,18 +1063,17 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         if output_date_str == -1:
             output_date_str = in_date+'_DATE_ERROR_'
-            year = None
-            month = None
-            day = None
-            hour = None
         else:
-            year = int(output_date_str[0:4])
-            month = int(output_date_str[4:6])
-            day = int(output_date_str[6:8])
-            if datasource_descr.date_type == 'YYYYMMDDHHMM':
-                hour = int(output_date_str[8:12])
-            else:
-                hour = None
+            if out_date_format == 'YYYYMMDDHHMM':
+                if functions.is_date_yyyymmddhhmm(output_date_str):
+                    out_date_str_final = output_date_str
+                elif  functions.is_date_yyyymmdd(output_date_str):
+                    out_date_str_final = output_date_str+'0000'
+            elif out_date_format == 'YYYYMMDD':
+                if functions.is_date_yyyymmdd(output_date_str):
+                    out_date_str_final = output_date_str
+                elif  functions.is_date_yyyymmddhhmm(output_date_str):
+                    out_date_str_final = output_date_str[0:8]
 
         # Get only the short_name for output file naming
         mapset_id = subproducts[ii]['mapsetcode']
@@ -1093,7 +1093,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             return 1
 
         # Define output filename
-        output_filename = output_directory + functions.set_path_filename(output_date_str,
+        output_filename = output_directory + functions.set_path_filename(out_date_str_final,
                                                                          product['productcode'],
                                                                          subproducts[ii]['subproduct'],
                                                                          mapset_id,
@@ -1213,7 +1213,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         sds_meta.assign_es2_version()
         sds_meta.assign_mapset(mapset_id)
         sds_meta.assign_from_product(product['productcode'], subproducts[ii]['subproduct'], product['version'])
-        sds_meta.assign_date(output_date_str)
+        sds_meta.assign_date(out_date_str_final)
         sds_meta.assign_subdir_from_fullpath(output_directory)
         sds_meta.assign_comput_time_now()
         sds_meta.assign_input_files(in_files)
