@@ -306,7 +306,7 @@ def get_products(echo=False, activated=None, masked=None):
         pc = db.product_category._table
         p = db.product._table
 
-        s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productID'),
+        s = select([func.CONCAT(p.c.productcode, p.c.version).label('productID'),
                     p.c.productcode,
                     p.c.subproductcode,
                     p.c.version,
@@ -1125,3 +1125,124 @@ def get_processingchain_output_products(process_id=None):
     finally:
         if db.session:
             db.session.close()
+
+
+######################################################################################
+#   get_active_processing_chains(echo=False)
+#   Purpose: Query the database to get all the active processing chains definitions or one specific
+#   Author: M. Clerici
+#   Date: 2015/02/26
+#   Input: echo   - If True echo the query result in the console for debugging purposes. Default=False
+#   Output: Return a list of all the processing chains definitions
+#
+#   SELECT p.*, pin.*
+#   FROM products.processing p
+#   INNER JOIN (SELECT * FROM products.process_product WHERE type = 'INPUT') pin
+#   ON p.process_id = pin.process_id
+#
+def get_active_processing_chains(echo=False):
+
+    active_processing_chains = []
+    try:
+        session = db.session
+        process = aliased(db.processing)
+
+        #processinput = session.query(db.process_product).subquery()
+
+        # The columns on the subquery "processinput" are accessible through an attribute called "c"
+        # e.g. es.c.productcode
+        active_processing_chains = session.query(process.process_id,
+                                                 process.defined_by,
+                                                 process.output_mapsetcode,
+                                                 process.derivation_method,
+                                                 process.algorithm,
+                                                 process.priority).\
+            filter(process.activated == True).all()
+
+        return active_processing_chains
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_processing_chains: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
+######################################################################################
+#   get_processing_chains_products(process_id,echo=False, type='')
+#   Purpose: Query the database to get all input products for a processing chains
+#   Author: M. Clerici
+#   Date: 2015/02/26
+#   Input: echo   - If True echo the query result in the console for debugging purposes. Default=False
+#   Output: Return a list of all the processing chains definitions and it's input product
+#
+#   SELECT p.*, pin.*
+#   FROM products.processing p
+#   INNER JOIN (SELECT * FROM products.process_product WHERE type = 'INPUT') pin
+#   ON p.process_id = pin.process_id
+#
+def get_processing_chain_products(process_id,echo=False, type='All'):
+
+    products = []
+    try:
+        session = db.session
+        process = aliased(db.processing)
+
+        processinput = session.query(db.process_product).subquery()
+
+        # The columns on the subquery "processinput" are accessible through an attribute called "c"
+        # e.g. es.c.productcode
+        if type == 'All':
+            products = session.query(process.process_id,
+                                                 processinput.c.productcode,
+                                                 processinput.c.subproductcode,
+                                                 processinput.c.version,
+                                                 processinput.c.mapsetcode,
+                                                 processinput.c.date_format,
+                                                 processinput.c.start_date,
+                                                 processinput.c.end_date).\
+                outerjoin(processinput, process.process_id == processinput.c.process_id)
+
+        elif type == 'input':
+            products = session.query(process.process_id,
+                                                 processinput.c.productcode,
+                                                 processinput.c.subproductcode,
+                                                 processinput.c.version,
+                                                 processinput.c.mapsetcode,
+                                                 processinput.c.date_format,
+                                                 processinput.c.start_date,
+                                                 processinput.c.end_date).\
+                outerjoin(processinput, process.process_id == processinput.c.process_id).\
+                filter(and_(processinput.c.type == 'INPUT',processinput.c.process_id == process_id)).all()
+
+        elif type == 'output':
+            products = session.query(process.process_id,
+                                                 processinput.c.productcode,
+                                                 processinput.c.subproductcode,
+                                                 processinput.c.version,
+                                                 processinput.c.mapsetcode,
+                                                 processinput.c.date_format,
+                                                 processinput.c.start_date,
+                                                 processinput.c.end_date).\
+                outerjoin(processinput, process.process_id == processinput.c.process_id).\
+                filter(and_(processinput.c.type == 'OUTPUT',processinput.c.process_id == process_id)).all()
+
+        else:
+            logger.error("get_processing_chain_products: type must be all/input/output")
+
+        return products
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_processing_chains: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+

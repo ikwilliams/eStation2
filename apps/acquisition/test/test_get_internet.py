@@ -79,6 +79,19 @@ class TestGetInternet(unittest.TestCase):
 
         list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
         self.assertTrue(file_to_check in list)
+   #   ---------------------------------------------------------------------------
+    #   Test iteration on ftp CHIRPS (id to )
+    #   ---------------------------------------------------------------------------
+    def TestRemoteFtp_CHIRPS_2_0(self):
+        # Retrieve a list of CHIRP
+        remote_url='//chg-ftpout.geog.ucsb.edu/pub/org/chg/products/CHIRPS-2.0/'
+        usr_pwd='anonymous:anonymous'
+        full_regex   ='chirps-v1.8.*.tif'
+        file_to_check='chirps-v1.8.2014.09.4.tif'
+
+        list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+        self.assertTrue(file_to_check in list)
+
 
      #   ---------------------------------------------------------------------------
     #   Test remote ftp NOAA GSOD (id: NOAA:GSOD)

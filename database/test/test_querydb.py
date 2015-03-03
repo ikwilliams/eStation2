@@ -268,3 +268,42 @@ class TestQuerydb(TestCase):
             print row.subproductcode
 
         self.assertEqual(1, 1)
+
+    def Test_get_active_processing_chains(self):
+
+        processing_chains = querydb.get_active_processing_chains()
+        logger.info("Active processing chains: %s", processing_chains)
+        for row in processing_chains:
+            print 'ID= '+str(row.process_id)
+            print 'Module:Method= '+row.algorithm + ':'+ row.derivation_method
+
+
+        self.assertEqual(1, 1)
+
+    def Test_get_processing_chain_inputs(self):
+
+        process_id = 4
+        input_products = querydb.get_processing_chain_products(process_id,type='input')
+        logger.info("Processing chains id:%s", process_id)
+        for row in input_products:
+            print 'Product Code     = '+str(row.productcode)
+            print 'Subproduct Code  = '+str(row.subproductcode)
+            print 'Version          = '+str(row.version)
+            print 'Mapset           = '+str(row.mapsetcode)
+
+
+        self.assertEqual(1, 1)
+
+    def Test_get_processing_chain_outputs(self):
+
+        process_id = 4
+        output_products = querydb.get_processing_chain_products(process_id, type='output')
+        logger.info("Processing chains id:%s", process_id)
+        for row in output_products:
+            print 'Product Code     = '+str(row.productcode)
+            print 'Subproduct Code  = '+str(row.subproductcode)
+            print 'Version          = '+str(row.version)
+            print 'Mapset           = '+str(row.mapsetcode)
+
+
+        self.assertEqual(1, 1)
