@@ -191,8 +191,9 @@ class ProductNavigatorDataSets:
                                                                   subproductcode=subproductcode,
                                                                   echo=False)
 
-                            dataset_dict = functions.row2dict(dataset_info)
-                            dataset_dict['mapsetcode'] = mapset
+                            if dataset_info is not None:
+                                dataset_dict = functions.row2dict(dataset_info)
+                                dataset_dict['mapsetcode'] = mapset
 
                             # dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
                             # completeness = dataset.get_dataset_normalized_info()
