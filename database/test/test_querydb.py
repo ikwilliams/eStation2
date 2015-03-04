@@ -178,9 +178,9 @@ class TestQuerydb(TestCase):
 
     def Test_get_subproduct(self):
 
-        subproduct = querydb.get_subproduct(productcode='fewsnet_rfe',
-                                            subproductcode='rfe',
-                                            version='undefined')
+        subproduct = querydb.get_subproduct(productcode='vgt-ndvi',
+                                            subproductcode='ndv',
+                                            version='spot-v1')
         logger.info("Subproduct: %s", subproduct)
 
         self.assertEqual(1, 1)

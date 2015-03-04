@@ -306,7 +306,7 @@ def get_products(echo=False, activated=None, masked=None):
         pc = db.product_category._table
         p = db.product._table
 
-        s = select([func.CONCAT(p.c.productcode, p.c.version).label('productID'),
+        s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productID'),
                     p.c.productcode,
                     p.c.subproductcode,
                     p.c.version,

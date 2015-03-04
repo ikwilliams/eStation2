@@ -12,9 +12,10 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
         'esapp.view.analysis.ProductNavigatorController',
 
         'esapp.model.ProductNavigator',
-        'esapp.model.ProductNavigatorMapSet',
-        'esapp.model.ProductNavigatorMapSetDataSet',
+        //'esapp.model.ProductNavigatorMapSet',
+        //'esapp.model.ProductNavigatorMapSetDataSet',
 
+        'Ext.layout.container.Form',
         'Ext.layout.container.Center',
         'Ext.grid.plugin.RowExpander',
         'Ext.XTemplate',

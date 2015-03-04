@@ -33,7 +33,7 @@ class Product(object):
         self._db_product = querydb.get_product_native(**kwargs)
         if self._db_product is None:
             raise NoProductFound(kwargs)
-        self._fullpath = os.path.join(es_constants.es2globals['processing_dir'], product_code)
+        self._fullpath = os.path.join(es_constants.es2globals['processing_dir'], product_code, version)
 
     @property
     def mapsets(self):

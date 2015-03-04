@@ -375,6 +375,7 @@ class GetProductLayer:
 
         p = Product(product_code=getparams['productcode'], version=getparams['productversion'])
         dataset = p.get_dataset(mapset=getparams['mapsetcode'], sub_product_code=getparams['subproductcode'])
+        print dataset.fullpath
         completeness = dataset.get_dataset_normalized_info()
         lastdate = completeness['lastdate'].replace("-", "")
         productfile = '/data/processing/' + getparams['productcode'] + '/' + getparams['mapsetcode'] + '/tif/' + \
@@ -637,21 +638,25 @@ class DataSets:
                         mapset_dict['mapsetdatasets'] = []
                         all_mapset_datasets = p.get_subproducts(mapset=mapset)
                         for subproductcode in all_mapset_datasets:
+                            # print 'productcode: ' + productcode
+                            # print 'version: ' + version
+                            # print 'subproductcode: ' + subproductcode
                             dataset_info = querydb.get_subproduct(productcode=productcode,
                                                                   version=version,
                                                                   subproductcode=subproductcode,
                                                                   echo=False)
+                            # print dataset_info
                             # dataset_info = querydb.db.product.get(productcode, version, subproductcode)
                             # dataset_dict = {}
-                            # if dataset_info:
-                            dataset_dict = functions.row2dict(dataset_info)
-                            # dataset_dict = dataset_info.__dict__
-                            # del dataset_dict['_labels']
-                            dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
-                            completeness = dataset.get_dataset_normalized_info()
-                            dataset_dict['datasetcompleteness'] = completeness
+                            if dataset_info is not None:
+                                dataset_dict = functions.row2dict(dataset_info)
+                                # dataset_dict = dataset_info.__dict__
+                                # del dataset_dict['_labels']
+                                dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                                completeness = dataset.get_dataset_normalized_info()
+                                dataset_dict['datasetcompleteness'] = completeness
 
-                            mapset_dict['mapsetdatasets'].append(dataset_dict)
+                                mapset_dict['mapsetdatasets'].append(dataset_dict)
                         prod_dict['productmapsets'].append(mapset_dict)
                 products_dict_all.append(prod_dict)
 
