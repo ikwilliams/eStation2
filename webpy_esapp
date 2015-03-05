@@ -195,11 +195,11 @@ class ProductNavigatorDataSets:
                                 dataset_dict = functions.row2dict(dataset_info)
                                 dataset_dict['mapsetcode'] = mapset
 
-                            # dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
-                            # completeness = dataset.get_dataset_normalized_info()
-                            # dataset_dict['datasetcompleteness'] = completeness
+                                # dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                                # completeness = dataset.get_dataset_normalized_info()
+                                # dataset_dict['datasetcompleteness'] = completeness
 
-                            mapset_dict['mapsetdatasets'].append(dataset_dict)
+                                mapset_dict['mapsetdatasets'].append(dataset_dict)
                         prod_dict['productmapsets'].append(mapset_dict)
                     products_dict_all.append(prod_dict)
 
@@ -376,18 +376,23 @@ class GetProductLayer:
 
         p = Product(product_code=getparams['productcode'], version=getparams['productversion'])
         dataset = p.get_dataset(mapset=getparams['mapsetcode'], sub_product_code=getparams['subproductcode'])
-        print dataset.fullpath
-        completeness = dataset.get_dataset_normalized_info()
-        lastdate = completeness['lastdate'].replace("-", "")
-        productfile = '/data/processing/' + getparams['productcode'] + '/' + getparams['mapsetcode'] + '/tif/' + \
-                      getparams['subproductcode'] + '/' + \
+        # print dataset.fullpath
+        dataset.get_filenames()
+        lastdate = dataset.get_dates()[-1].strftime("%Y%m%d")
+        # completeness = dataset.get_dataset_normalized_info()
+        # lastdate = lastdate.replace("-", "")
+        # mydate=lastdate.strftime("%Y%m%d")
+        # print mydate
+        # productfile = '/data/processing/' + getparams['productcode'] + '/' + getparams['mapsetcode'] + '/tif/' + \
+        #               getparams['subproductcode'] + '/' + \
+        productfile = dataset.fullpath + \
                       functions.set_path_filename(lastdate,
                                                   getparams['productcode'],
                                                   getparams['subproductcode'],
                                                   getparams['mapsetcode'],
                                                   getparams['productversion'],
                                                   '.tif')
-        print productfile
+        # print productfile
         # productfile = '/data/processing/vgt_ndvi/WGS84_Africa_1km/tif/ndv/20130701_vgt_ndvi_ndv_WGS84_Africa_1km.tif'
 
         #web.header('Content-type', 'image/png')

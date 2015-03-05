@@ -97,7 +97,8 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 },
 
                 selModel : {
-                    allowDeselect : true
+                    allowDeselect : false,
+                    mode:'SINGLE'
                 },
 
                 collapsible: false,

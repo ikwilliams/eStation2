@@ -57,7 +57,6 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
 
         productinfopanel.expand(true);
         this.getStore('productmapsets').setData(record.get('productmapsets'));
-        console.info(this.lookupReference('product-mapsets-dataview'));
 
         //var mapsets = record.data.productmapsets;
         //var itemsInGroup = [];
