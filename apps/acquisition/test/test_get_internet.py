@@ -109,6 +109,21 @@ class TestGetInternet(unittest.TestCase):
         self.assertTrue(file_to_check in list)
 
     #   ---------------------------------------------------------------------------
+    #   Test remote ftp JRC
+    #   ---------------------------------------------------------------------------
+    def TestRemoteFtp_JRC(self):
+
+        # Retrieve a list of MODIS burndate file .. check only one present
+        remote_url='ftp://h05-ftp.jrc.it/'
+        usr_pwd='narmauser:narma11'
+        full_regex   ='eumetcast/'
+        file_to_check='prod_descr_restore.txt'
+
+        list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+
+        self.assertTrue(file_to_check in list)
+
+    #   ---------------------------------------------------------------------------
     #   Test iteration on remote ftp (e.g. ARC2)
     #   ---------------------------------------------------------------------------
     # def TestRemoteFtp_ARC2(self):

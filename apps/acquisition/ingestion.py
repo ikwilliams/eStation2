@@ -1011,6 +1011,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         in_mask_min = product_in_info.mask_min
         in_mask_max = product_in_info.mask_max
         in_data_type = product_in_info.data_type_id
+        in_data_type_gdal = conv_data_type_to_gdal(in_data_type)
 
         # Get information from 'product' table
         args = {"productcode": product['productcode'], "subproductcode": subproducts[ii]['subproduct'], "version":product['version']}
@@ -1105,7 +1106,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # -------------------------------------------------------------------------
 
         native_mapset_code = datasource_descr.native_mapset
-        orig_ds = gdal.Open(intermFile, gdal.GA_ReadOnly)
+        orig_ds = gdal.Open(intermFile, gdal.GA_ReadOnly)           # Why in ROnly !??? it generates an error below
         
         if native_mapset_code != 'default':
             native_mapset = mapset.MapSet()
@@ -1162,9 +1163,14 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             mem_driver = gdal.GetDriverByName('MEM')
 
             # Assign mapset to dataset in memory
-            mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
+            mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, in_data_type_gdal)
             mem_ds.SetGeoTransform(trg_mapset.geo_transform)
             mem_ds.SetProjection(out_cs.ExportToWkt())
+
+            in_data = orig_ds.ReadAsArray()
+            my_idx = (in_data != 0)
+            if my_idx.any():
+                print '1'
 
             # Apply Reproject-Image to the memory-driver
             orig_wkt = orig_cs.ExportToWkt()
@@ -1175,6 +1181,9 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
             # Read from the dataset in memory
             out_data = mem_ds.ReadAsArray()
+            my_idx = (out_data != 0)
+            if my_idx.any():
+                print '1'
 
             # Apply rescale to data
             scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
@@ -1414,7 +1423,6 @@ def rescale_data(in_data,
         logger.error('Input argument must be a numpy array. Exit')
         return 1
 
-    #print mem_usage('Entering rescale')
     # Create output array
     trg_data = N.zeros(in_data.shape, dtype=out_data_type)
 

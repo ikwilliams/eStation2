@@ -31,7 +31,7 @@ logger = log.my_logger(__name__)
 #   General definitions for this processing chain
 ext=es_constants.ES2_OUTFILE_EXTENSION
 
-def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, list_subprods=None, update_stats=False):
+def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, list_subprods=None, update_stats=False, nrt_products=True):
 
     #   ---------------------------------------------------------------------
     #   Create lists
@@ -41,20 +41,23 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     if list_subprods is not None:
         list_subprods = proc_lists.list_subprods
         list_subprod_groups = proc_lists.list_subprod_groups
-    
+
+    # Set DEFAULTS: all off
+    activate_10danomalies_comput=0      # 10d anomalies
+    activate_monthly_comput=0           # monthly cumulation
+    activate_monanomalies_comput=0      # monthly anomalies
+    activate_10dstats_comput=0          # 10d stats
+    activate_monstats_comput=0          # 1mon stats
+
     #   switch wrt groups - according to options
-    if not update_stats:
+    if nrt_products:
         activate_10danomalies_comput=1      # 10d anomalies
         activate_monthly_comput=1           # monthly cumulation
         activate_monanomalies_comput=1      # monthly anomalies
-        activate_10dstats_comput=0          # 10d stats
-        activate_monstats_comput=0          # 1mon stats
-    else:
-        activate_10danomalies_comput=0      # 10d anomalies
-        activate_monthly_comput=0           # monthly cumulation
-        activate_monanomalies_comput=0      # monthly anomalies
-        activate_10dstats_comput=1          # 1.
-        activate_monstats_comput=1          # 3.b
+
+    if update_stats:
+        activate_10dstats_comput= 1         # 10d stats
+        activate_monstats_comput=1          # 1mon stats
 
     #   switch wrt single products: not to be changed !!
     activate_10davg_comput=1
@@ -449,14 +452,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
 def processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None, update_stats=False):
+                          starting_dates=None, update_stats=False, nrt_products=True):
 
     global list_subprods, list_subprod_groups
 
     list_subprods = []
     list_subprod_groups = []
     create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
-                    starting_dates=starting_dates, update_stats=update_stats)
+                    starting_dates=starting_dates, update_stats=update_stats, nrt_products=nrt_products)
 
     logger.info("Entering routine %s" % 'processing_std_precip')
     logger.info("pipeline_run_level %i" % pipeline_run_level)
@@ -471,11 +474,11 @@ def processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0, pipeli
 
     return list_subprods, list_subprod_groups
 
-def processing_std_precip_stats(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
+def processing_std_precip_stats_only(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None):
 
-    processing_std_precip(pipeline_run_level=pipeline_run_level,
+    [list_subprods, list_subprod_groups] = processing_std_precip(pipeline_run_level=pipeline_run_level,
                           pipeline_run_touch_only=pipeline_run_touch_only,
                           pipeline_printout_level=pipeline_printout_level,
                           pipeline_printout_graph_level=pipeline_printout_graph_level,
@@ -484,20 +487,43 @@ def processing_std_precip_stats(pipeline_run_level=0,pipeline_run_touch_only=0, 
                           mapset=mapset,
                           version=version,
                           starting_dates=starting_dates,
+                          nrt_products=False,
                           update_stats=True)
 
-def get_subprods_std_precip():
+    return list_subprods, list_subprod_groups
 
-    pid = os.fork()
-    if pid == 0:
-        # Qui sono il figlio
-        [list_subprods, list_subprod_groups]  = processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0,
-                          pipeline_printout_level=0, pipeline_printout_graph_level=0,
-                          prod='', starting_sprod='', mapset='', version='')
+def processing_std_precip_prods_only(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
+                          pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
+                          starting_dates=None):
 
-        return list_subprods, list_subprod_groups
-        sys.exit(0)
-    else:
-        # Qui sono il padre
-        os.wait()
+    [list_subprods, list_subprod_groups] = processing_std_precip(pipeline_run_level=pipeline_run_level,
+                          pipeline_run_touch_only=pipeline_run_touch_only,
+                          pipeline_printout_level=pipeline_printout_level,
+                          pipeline_printout_graph_level=pipeline_printout_graph_level,
+                          prod=prod,
+                          starting_sprod=starting_sprod,
+                          mapset=mapset,
+                          version=version,
+                          starting_dates=starting_dates,
+                          nrt_products=True,
+                          update_stats=False)
 
+    return list_subprods, list_subprod_groups
+
+def processing_std_precip_all(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
+                          pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
+                          starting_dates=None):
+
+    [list_subprods, list_subprod_groups] = processing_std_precip(pipeline_run_level=pipeline_run_level,
+                          pipeline_run_touch_only=pipeline_run_touch_only,
+                          pipeline_printout_level=pipeline_printout_level,
+                          pipeline_printout_graph_level=pipeline_printout_graph_level,
+                          prod=prod,
+                          starting_sprod=starting_sprod,
+                          mapset=mapset,
+                          version=version,
+                          starting_dates=starting_dates,
+                          nrt_products=True,
+                          update_stats=True)
+
+    return list_subprods, list_subprod_groups

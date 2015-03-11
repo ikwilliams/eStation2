@@ -863,7 +863,7 @@ def processing_std_ndvi(pipeline_run_level=0, pipeline_run_touch_only=0, pipelin
     list_subprods = []
     list_subprod_groups = []
     create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
-                    starting_dates=starting_dates, update_stats=update_stats)
+                    starting_dates=starting_dates, update_stats=update_stats, nrt_products=nrt_products)
 
     logger.info("Entering routine %s" % 'processing_std_ndvi')
     logger.info("pipeline_run_level %i" % pipeline_run_level)
