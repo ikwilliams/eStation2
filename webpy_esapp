@@ -94,17 +94,18 @@ class GetColorSchemes:
 
         product_legends = querydb.get_product_legends(productcode=getparams['productcode'],
                                                       subproductcode=getparams['subproductcode'],
-                                                      version=getparams['version'])
+                                                      version=getparams['productversion'])
 
         if hasattr(product_legends, "__len__") and product_legends.__len__() > 0:
             legends_dict_all = []
             for legend in product_legends:
-                legend_dict = functions.row2dict(legend)
+                # legend_dict = functions.row2dict(legend)
+                legend_dict = legend.__dict__
                 legend_id = legend_dict['legend_id']
                 legend_name = legend_dict['legend_name']
                 default_legend = legend_dict['default_legend']
 
-                if default_legend == 't':
+                if default_legend:
                     default_legend = 'true'
                 else:
                     default_legend = 'false'
@@ -126,8 +127,12 @@ class GetColorSchemes:
                 colorschemeHTML = '<table cellspacing=0 cellpadding=0 width=100%><tr>'
                 for step in legend_steps:
                     # convert step['color_rgb'] from RGB to html color
-                    color_rgb = step['color_rgb'].split(' ')
+                    color_rgb = step.color_rgb.split(' ')
                     color_html = functions.rgb2html(color_rgb)
+                    r = color_rgb[0]
+                    g = color_rgb[1]
+                    b = color_rgb[2]
+                    color_html = 'rgb('+r+','+g+','+b+')'
                     colorschemeHTML = colorschemeHTML + \
                                       "<td height=10 style='padding:0; margin:0; background-color: " + \
                                       color_html + ";'>&nbsp</td>"
@@ -148,7 +153,7 @@ class GetColorSchemes:
 
             colorschemes = '{"success":true, "total":' + str(product_legends.__len__()) + ',"legends":'+legends_json+'}'
         else:
-            colorschemes = '{"success":false, "message":"No legends defined for this product!"}'
+            colorschemes = '{"success":true, "message":"No legends defined for this product!"}'
 
         return colorschemes
 
@@ -186,14 +191,15 @@ class ProductNavigatorDataSets:
                                                                   subproductcode=subproductcode,
                                                                   echo=False)
 
-                            dataset_dict = functions.row2dict(dataset_info)
-                            dataset_dict['mapsetcode'] = mapset
+                            if dataset_info is not None:
+                                dataset_dict = functions.row2dict(dataset_info)
+                                dataset_dict['mapsetcode'] = mapset
 
-                            # dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
-                            # completeness = dataset.get_dataset_normalized_info()
-                            # dataset_dict['datasetcompleteness'] = completeness
+                                # dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                                # completeness = dataset.get_dataset_normalized_info()
+                                # dataset_dict['datasetcompleteness'] = completeness
 
-                            mapset_dict['mapsetdatasets'].append(dataset_dict)
+                                mapset_dict['mapsetdatasets'].append(dataset_dict)
                         prod_dict['productmapsets'].append(mapset_dict)
                     products_dict_all.append(prod_dict)
 
@@ -366,6 +372,28 @@ class GetProductLayer:
     def GET(self):
         #import StringIO
         import mapscript
+        getparams = web.input()
+
+        p = Product(product_code=getparams['productcode'], version=getparams['productversion'])
+        dataset = p.get_dataset(mapset=getparams['mapsetcode'], sub_product_code=getparams['subproductcode'])
+        # print dataset.fullpath
+        dataset.get_filenames()
+        lastdate = dataset.get_dates()[-1].strftime("%Y%m%d")
+        # completeness = dataset.get_dataset_normalized_info()
+        # lastdate = lastdate.replace("-", "")
+        # mydate=lastdate.strftime("%Y%m%d")
+        # print mydate
+        # productfile = '/data/processing/' + getparams['productcode'] + '/' + getparams['mapsetcode'] + '/tif/' + \
+        #               getparams['subproductcode'] + '/' + \
+        productfile = dataset.fullpath + \
+                      functions.set_path_filename(lastdate,
+                                                  getparams['productcode'],
+                                                  getparams['subproductcode'],
+                                                  getparams['mapsetcode'],
+                                                  getparams['productversion'],
+                                                  '.tif')
+        # print productfile
+        # productfile = '/data/processing/vgt_ndvi/WGS84_Africa_1km/tif/ndv/20130701_vgt_ndvi_ndv_WGS84_Africa_1km.tif'
 
         #web.header('Content-type', 'image/png')
         #web.header('Content-transfer-encoding', 'binary')
@@ -383,7 +411,7 @@ class GetProductLayer:
         projlib = "/usr/share/proj/"
         errorfile = es_constants.apps_dir+"/analysis/ms_tmp/ms_errors.log"
         imagepath = es_constants.apps_dir+"/analysis/ms_tmp/"
-        productfile = '/data/processing/vgt_ndvi/WGS84_Africa_1km/tif/ndv/20130701_vgt_ndvi_ndv_WGS84_Africa_1km.tif'
+
 
         owsrequest = mapscript.OWSRequest()
 
@@ -432,7 +460,7 @@ class GetProductLayer:
         productmap.setMetaData("WMS_ENABLE_REQUEST", "*")   # necessary!!
 
 
-        legend_info = querydb.get_legend_info(legendid=6)
+        legend_info = querydb.get_legend_info(legendid=inputparams.legendid)
         if legend_info.__len__() > 0:
             for row in legend_info:
                 minstep = row.minstep
@@ -479,7 +507,7 @@ class GetProductLayer:
             if processing_novalue != '':
                 layer.setProcessing(processing_novalue)
 
-            legend_steps = querydb.get_legend_steps(legendid=6)
+            legend_steps = querydb.get_legend_steps(legendid=inputparams.legendid)
             if legend_steps.__len__() > 0:
                 stepcount = 0
                 for step in legend_steps:
@@ -616,21 +644,25 @@ class DataSets:
                         mapset_dict['mapsetdatasets'] = []
                         all_mapset_datasets = p.get_subproducts(mapset=mapset)
                         for subproductcode in all_mapset_datasets:
+                            # print 'productcode: ' + productcode
+                            # print 'version: ' + version
+                            # print 'subproductcode: ' + subproductcode
                             dataset_info = querydb.get_subproduct(productcode=productcode,
                                                                   version=version,
                                                                   subproductcode=subproductcode,
                                                                   echo=False)
+                            # print dataset_info
                             # dataset_info = querydb.db.product.get(productcode, version, subproductcode)
                             # dataset_dict = {}
-                            # if dataset_info:
-                            dataset_dict = functions.row2dict(dataset_info)
-                            # dataset_dict = dataset_info.__dict__
-                            # del dataset_dict['_labels']
-                            dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
-                            completeness = dataset.get_dataset_normalized_info()
-                            dataset_dict['datasetcompleteness'] = completeness
+                            if dataset_info is not None:
+                                dataset_dict = functions.row2dict(dataset_info)
+                                # dataset_dict = dataset_info.__dict__
+                                # del dataset_dict['_labels']
+                                dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                                completeness = dataset.get_dataset_normalized_info()
+                                dataset_dict['datasetcompleteness'] = completeness
 
-                            mapset_dict['mapsetdatasets'].append(dataset_dict)
+                                mapset_dict['mapsetdatasets'].append(dataset_dict)
                         prod_dict['productmapsets'].append(mapset_dict)
                 products_dict_all.append(prod_dict)
 

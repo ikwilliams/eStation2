@@ -12,9 +12,10 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
         'esapp.view.analysis.ProductNavigatorController',
 
         'esapp.model.ProductNavigator',
-        'esapp.model.ProductNavigatorMapSet',
-        'esapp.model.ProductNavigatorMapSetDataSet',
+        //'esapp.model.ProductNavigatorMapSet',
+        //'esapp.model.ProductNavigatorMapSetDataSet',
 
+        'Ext.layout.container.Form',
         'Ext.layout.container.Center',
         'Ext.grid.plugin.RowExpander',
         'Ext.XTemplate',
@@ -42,7 +43,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
         type: 'refresh',
         align: 'c-c',
         tooltip: 'Refresh product list',
-        callback: 'refreshProductsGrid'
+        callback: 'loadProductsGrid'
     }],
 
     maximizable: false,
@@ -56,6 +57,13 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
     autoScroll: false,
     productselected:false,
     mapviewid:null,
+    selectedproduct:{
+        productcode: null,
+        productversion: null,
+        mapsetcode: null,
+        subproductcode: null,
+        legendid: null
+    },
 
     initComponent: function () {
         var me = this
@@ -89,7 +97,8 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 },
 
                 selModel : {
-                    allowDeselect : true
+                    allowDeselect : false,
+                    mode:'SINGLE'
                 },
 
                 collapsible: false,
@@ -124,7 +133,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
 
                 listeners: {
                     //scope: 'controller',
-                    afterrender: 'refreshProductsGrid', // 'loadProductsStore',
+                    afterrender: 'loadProductsGrid', // 'loadProductsStore',
                     rowclick: 'productsGridRowClick'
                 },
 
@@ -172,7 +181,6 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 collapsible: true,
                 collapsed: true,
                 floatable: false,
-                //padding: {top: 10, right: 10, bottom: 20, left: 10},
                 defaults: {
                     margin: {top: 10, right: 10, bottom: 20, left: 10},
                     layout: {
@@ -196,9 +204,21 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 bbar: Ext.create('Ext.toolbar.Toolbar', {
                     items: ['->',{
                         text: 'Add to Map',
+                        reference: 'addtomapbtn',
                         disabled: true,
                         handler: function(btn) {
+                            me.getViewModel().getStore('colorschemes').each(function(rec){
+                                if (rec.get('default_legend')){
+                                    me.selectedproduct.legendid = rec.get('legend_id');
+                                }
+                            },this);
 
+                            Ext.getCmp(me.mapviewid).getController().addProductLayer(me.selectedproduct.productcode,
+                                                                                     me.selectedproduct.productversion,
+                                                                                     me.selectedproduct.mapsetcode,
+                                                                                     me.selectedproduct.subproductcode,
+                                                                                     me.selectedproduct.legendid);
+                            me.close();
                         }
                     }]
                 }),
@@ -206,6 +226,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 items: [{
                     xtype: 'fieldset',
                     title: '<div class="grid-header-style">Mapsets available</div>',
+                    titleAlign: 'center',
                     reference: 'product-mapsets-dataview',
                     border: true,
                     autoWidth: true,
@@ -214,7 +235,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     //width: 530,
                     collapsible: false,
                     layout: 'fit',
-                    padding: {top: 5, right: 5, bottom: 0, left: 5},
+                    padding: {top: 5, right: 0, bottom: 0, left: 0},
                     items: Ext.create('Ext.view.View', {
                         bind: '{productmapsets}',
                         //id: 'mapsets',
@@ -327,7 +348,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     //width: 530,
                     //height: 150,
                     autoScroll: true,
-                    hidden: false,
+                    hidden: true,
                     bind: '{colorschemes}',
                     layout: 'fit',
 
@@ -354,21 +375,39 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     frame: false,
                     border: false,
 
-                    listeners: {
-                        rowclick: function (gridview, record) {
-                            console.info(record);
-                        }
-                    },
+                    //listeners: {
+                    //    rowclick: function (gridview, record) {
+                    //        console.info(record);
+                    //    }
+                    //},
                     defaults: {
                         sortable: false,
                         hideable: false,
                         variableRowHeight: false
                     },
                     columns: [{
+                        xtype: 'actioncolumn',
+                        width: 30,
+                        align: 'center',
+                        shrinkWrap: 0,
+                        items: [{
+                            tooltip: 'Select color scheme',
+                            getClass: function(v, meta, rec) {
+                                return rec.get('defaulticon');
+                            },
+                            handler: 'onRadioColumnAction'
+                        }]
+                    },{
+                        xtype:'templatecolumn',
                         text: '<div class="grid-header-style">Color Schemes</div>',
                         width: 475,
                         sortable: false,
-                        menuDisabled: true
+                        menuDisabled: true,
+                        shrinkWrap: 0,
+                        tpl: new Ext.XTemplate(
+                                '{colorschemeHTML}' +
+                                '<b>{legend_name}</b>'
+                        )
                     }]
                 }]
             }]

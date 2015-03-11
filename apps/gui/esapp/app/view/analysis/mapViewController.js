@@ -2,6 +2,30 @@ Ext.define('esapp.view.analysis.mapViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.analysis-mapview'
 
+    ,addProductLayer: function(productcode, productversion, mapsetcode, subproductcode, legendid) {
+        this.getView().productlayer = new ol.layer.Image({
+            source: new ol.source.ImageWMS({
+                url: 'analysis/getproductlayer',
+                crossOrigin: 'anonymous',
+                attributions: [new ol.Attribution({
+                    html: '&copy; ' +
+                        '<a href="https://ec.europa.eu/jrc/' +
+                        'eStation 2 </a>'
+                })],
+                params: {
+                    productcode:productcode,
+                    productversion:productversion,
+                    subproductcode:subproductcode,
+                    mapsetcode:mapsetcode,
+                    legendid:legendid,
+                    'FORMAT': 'image/png'
+                },
+                serverType: 'mapserver' /** @type {ol.source.wms.ServerType}  ('mapserver') */
+            })
+        });
+        this.getView().map.removeLayer(this.getView().map.getLayers().a[0])
+        this.getView().map.addLayer(this.getView().productlayer)
+    }
     ,toggleLink: function(btn, event) {
         var mapviewwin = btn.up().up();
 

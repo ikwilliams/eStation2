@@ -23,8 +23,8 @@ Ext.define("esapp.view.analysis.mapView",{
     },
     width:600,
     height:600,
-    minWidth:50,
-    minHeight:50,
+    minWidth:400,
+    minHeight:350,
     // glyph : 'xf080@FontAwesome',
     constrain: true,
     autoShow : false,
@@ -79,11 +79,11 @@ Ext.define("esapp.view.analysis.mapView",{
                 scale: 'medium',
                 handler: 'openProductNavigator'
             },{
-                text: 'Add Layer',
+                //text: 'Add Layer',
                 iconCls: 'layers',
                 scale: 'medium'
             },{
-                text: 'Unlink',
+                //text: 'Unlink',
                 enableToggle: true,
                 iconCls: 'unlink',
                 scale: 'medium',
@@ -91,8 +91,9 @@ Ext.define("esapp.view.analysis.mapView",{
             },
             {
                 xtype: 'box',
-                width: 200,
+                width: 120,
                 height: 20,
+                align:'left',
                 // alignTarget : this.getBody(),
                 // defaultAlign : 'tr-tr',
                 html: '<div id="mouse-position_' + me.id + '"></div>'
@@ -102,7 +103,7 @@ Ext.define("esapp.view.analysis.mapView",{
         me.mapView = new ol.View({
 //            projection:me.projection,
             center: ol.proj.transform([21, 4], 'EPSG:4326', 'EPSG:3857'),
-            zoom: 3
+            zoom: 2
         });
 
         me.name ='mapviewwindow_' + me.id;
@@ -114,16 +115,17 @@ Ext.define("esapp.view.analysis.mapView",{
             xtype: 'slider',
             // cls: 'custom-slider',
             id: 'opacityslider'+ me.id,
-            fieldLabel: ' ',
+            fieldLabel: '',
             labelStyle: { color:'lightgray'},
             labelSeparator: '',
             labelWidth: 40,
-            hideLabel: false,
-            border: true,
+            hideLabel: true,
+            hideEmptyLabel : true,
+            border: false,
             autoShow: true,
             floating:true,
             // alignTarget : me,
-            defaultAlign: 'tr-tr',
+            defaultAlign: 'tr-c?',
             alwaysOnTop: false,
             constrain: true,
             width: 220,
@@ -154,12 +156,13 @@ Ext.define("esapp.view.analysis.mapView",{
                   target:  document.getElementById('mouse-position_'+ me.id), // Ext.get('mouse-position_'+ me.id), //
                   undefinedHTML: '&nbsp;'
                 });
-
+                //console.info(me.getController());
+                //this.layers = me.getController().addProductLayer();
                 this.map = new ol.Map({
                     target: 'mapview_'+ this.id,
                     projection:me.projection,
                     displayProjection:"EPSG:4326",
-                    layers: this.layers,
+                    //layers: this.layers,
                     view: this.up().commonMapView,
                     controls: ol.control.defaults({
                         attribution:false,

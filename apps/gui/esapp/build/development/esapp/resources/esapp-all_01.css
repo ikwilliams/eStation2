@@ -23131,6 +23131,49 @@ div.x-border-layout-ct {
 }
 
 /**
+ * Creates a visual theme for a CheckboxGroup buttons.  Note this mixin only provides
+ * styling for the CheckboxGroup body and its {@link Ext.form.field.Checkbox#boxLabel}, The {@link #fieldLabel}
+ * and error icon/message are styled by {@link #extjs-label-ui}.
+ *
+ * @param {string} $ui
+ * The name of the UI being created. Can not included spaces or special punctuation
+ * (used in CSS class names).
+ *
+ * @param {number/list} [$ui-body-padding=$form-checkboxgroup-body-padding]
+ * The padding of the CheckboxGroup body element
+ *
+ * @param {color} [$ui-body-invalid-border-color=$form-checkboxgroup-body-invalid-border-color]
+ * The border color of the CheckboxGroup body element when in an invalid state.
+ *
+ * @param {string} [$ui-body-invalid-border-style=$form-checkboxgroup-body-invalid-border-style]
+ * The border style of the CheckboxGroup body element when in an invalid state.
+ *
+ * @param {number} [$ui-body-invalid-border-width=$form-checkboxgroup-body-invalid-border-width]
+ * The border width of the CheckboxGroup body element when in an invalid state.
+ *
+ * @param {string} [$ui-body-invalid-background-image=$form-checkboxgroup-body-invalid-background-image]
+ * The background image of the CheckboxGroup body element when in an invalid state.
+ *
+ * @param {string} [$form-checkboxgroup-body-invalid-background-repeat=$form-field-invalid-background-repeat]
+ * The background-repeat of the CheckboxGroup body element when in an invalid state.
+ *
+ * @param {string} [$ui-body-invalid-background-position=$form-checkboxgroup-body-invalid-background-position]
+ * The background-position of the CheckboxGroup body element when in an invalid state.
+ *
+ * @member Ext.form.CheckboxGroup
+ */
+/* line 44, ../../../../ext/packages/ext-theme-neutral/sass/src/form/CheckboxGroup.scss */
+.x-form-item-body-default.x-form-checkboxgroup-body {
+  padding: 0 4px;
+}
+/* line 47, ../../../../ext/packages/ext-theme-neutral/sass/src/form/CheckboxGroup.scss */
+.x-form-invalid .x-form-item-body-default.x-form-checkboxgroup-body {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #cf4c35;
+}
+
+/**
  * Creates a visual theme for text fields.  Note this mixin only provides styling
  * For the form field body, The label and error are styled by {@link #extjs-label}.
  *
@@ -24977,6 +25020,45 @@ a.x-color-picker-item:hover {
 .x-grid-item-selected .x-grid-row-checker,
 .x-grid-item-selected .x-grid-row-checker {
   background-position: 0 -15px;
+}
+
+/* line 1, ../../../../ext/packages/ext-theme-neutral/sass/src/window/Toast.scss */
+.x-toast-icon-information {
+  background-image: url(images/window/toast/icon16_info.png);
+}
+
+/* line 5, ../../../../ext/packages/ext-theme-neutral/sass/src/window/Toast.scss */
+.x-toast-icon-error {
+  background-image: url(images/window/toast/icon16_error.png);
+}
+
+/* Using standard theme */
+/* line 11, ../../../../ext/packages/ext-theme-neutral/sass/src/window/Toast.scss */
+.x-toast-window .x-window-body {
+  padding: 15px 5px 15px 5px;
+}
+
+/* Custom styling */
+/* line 17, ../../../../ext/packages/ext-theme-neutral/sass/src/window/Toast.scss */
+.x-toast-light .x-window-header {
+  background-color: #3892d3;
+}
+
+/* line 21, ../../../../ext/packages/ext-theme-neutral/sass/src/window/Toast.scss */
+.x-toast-light .x-tool-img {
+  background-color: #3892d3;
+}
+
+/* line 25, ../../../../ext/packages/ext-theme-neutral/sass/src/window/Toast.scss */
+.x-toast-light {
+  background-image: url(images/window/toast/fader.png);
+}
+
+/* line 29, ../../../../ext/packages/ext-theme-neutral/sass/src/window/Toast.scss */
+.x-toast-light .x-window-body {
+  padding: 15px 5px 20px 5px;
+  background-color: transparent;
+  border: 0px solid white;
 }
 
 /* including package ext-theme-neptune */
@@ -28261,88 +28343,4 @@ a.x-color-picker-item:hover {
 /* line 56, ../../../../ext/packages/ext-theme-neptune/sass/src/resizer/Resizer.scss */
 .x-resizable-pinned .x-resizable-handle-southwest {
   background-position: 2px -2px;
-}
-
-/* including package sencha-charts */
-/*
-  Copied from touch/resources/themes/stylesheets/sencha-touch/base/src/chart/_AbstractChart.scss
-*/
-/* line 8, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
-.x-android-3 .x-surface-wrap, .x-android-3 .x-surface-wrap > * {
-  -webkit-perspective: 1;
-}
-
-/* line 12, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
-.x-draw-container {
-  position: relative;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
-  -ms-user-select: none;
-  cursor: default;
-}
-/* line 17, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
-.x-draw-container .x-inner {
-  overflow: hidden;
-}
-
-/* line 22, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
-.x-surface-canvas {
-  position: absolute;
-}
-
-/* line 26, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
-.x-chart-watermark {
-  opacity: 0.5;
-  z-index: 9;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  padding: 4px 6px;
-  font-family: "Helvetica";
-  font-size: 12px;
-  position: absolute;
-  white-space: nowrap;
-  border-top-left-radius: 4px;
-  -webkit-border-top-left-radius: 4px;
-}
-
-/* line 42, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
-.x-chart-image {
-  width: 100%;
-  height: auto;
-}
-
-/* line 47, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
-.x-legend-container {
-  display: inline-block;
-  line-height: 0;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  -ms-border-radius: 5px;
-  -o-border-radius: 5px;
-  border-radius: 5px;
-  border: 1px solid #cccccc;
-  background: white;
-  -webkit-box-shadow: rgba(255, 255, 255, 0.6) 0 1px 1px;
-  -moz-box-shadow: rgba(255, 255, 255, 0.6) 0 1px 1px;
-  box-shadow: rgba(255, 255, 255, 0.6) 0 1px 1px;
-}
-
-/* line 61, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
-.x-legend-item {
-  padding: 0.8em 1em 0.8em 1.8em;
-  color: #333333;
-  background: rgba(255, 255, 255, 0);
-  max-width: 16em;
-  min-width: 0;
-  font-size: 13px;
-  font-family: helvetica, arial, verdana, sans-serif;
-  line-height: 13px;
-  font-weight: normal;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  position: relative;
 }

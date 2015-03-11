@@ -49,10 +49,12 @@ def get_product_legends(productcode=None, subproductcode=None, version=None, ech
         productlegends = session.query(legend.legend_id,
                                        legend.legend_name,
                                        product_legend.c.default_legend).\
-            outerjoin(product_legend,
-                      legend.productcode == product_legend.c.productcode,
-                      legend.version == product_legend.c.version,
-                      legend.subproductcode == product_legend.c.subproductcode).all()
+            outerjoin(product_legend, legend.legend_id == product_legend.c.legend_id)
+
+        where = and_(product_legend.c.productcode == productcode,
+                     product_legend.c.subproductcode == subproductcode,
+                     product_legend.c.version == version)
+        productlegends = productlegends.filter(where).all()
 
         if echo:
             for row in productlegends:
@@ -304,7 +306,7 @@ def get_products(echo=False, activated=None, masked=None):
         pc = db.product_category._table
         p = db.product._table
 
-        s = select([func.CONCAT(p.c.productcode, p.c.version).label('productID'),
+        s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productID'),
                     p.c.productcode,
                     p.c.subproductcode,
                     p.c.version,
