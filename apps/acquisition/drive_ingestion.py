@@ -10,7 +10,7 @@ logger = log.my_logger(__name__)
 # Manual Switch for START/STOP
 do_start = True
 dry_run  = False
-service  = False
+service  = True
 
 if service:
     # Make sure the pid dir exists
@@ -22,7 +22,7 @@ if service:
 
     # Define pid file and create daemon
     pid_file = es_constants.ingestion_pid_filename
-    daemon = acquisition.IngestDaemon(pid_file, dry_run=dry_run)
+    daemon = acquisition.IngestionDaemon(pid_file, dry_run=dry_run)
 
     if do_start:
         if daemon.status():
