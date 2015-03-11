@@ -179,12 +179,11 @@ class TestGetInternet(unittest.TestCase):
         to_date= datetime.date(2015,2,1)
         template='%Y/%j/A%Y%j.L3m_DAY_SST_4.bz2'
         usr_pwd='anonymous:anonymous'
-        frequency='day'
+        frequency='e1day'
 
         files_list = build_list_matching_for_http(template, from_date, to_date, frequency)
         file_to_check='2015/001/A2015001.L3m_DAY_SST_4.bz2'
 
-        print files_list
         self.assertTrue(file_to_check in files_list)
 
     #   ---------------------------------------------------------------------------
