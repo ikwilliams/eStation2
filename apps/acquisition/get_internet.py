@@ -223,14 +223,16 @@ def get_list_matching_files_subdir_local(list, local_dir, regex, level, max_leve
 #           to_date: end date for the dataset (datetime.datetime object)
 #           frequency: dataset 'frequency' (see DB 'frequency' table)
 #
-def build_list_matching_for_http(template, from_date, to_date, frequency_id):
+def build_list_matching_for_http(base_url, template, from_date, to_date, frequency_id):
 
     # Add a check on frequency
     frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
 
     dates = frequency.get_dates(from_date, to_date)
-    list_files = frequency.get_internet_dates(dates, template)
-
+    list_filenames = frequency.get_internet_dates(dates, template)
+    list_files = []
+    for name in list_filenames:
+        list_files.append(base_url+name)
     return list_files
 
 
@@ -373,15 +375,22 @@ def loop_get_internet(dry_run=False):
                 logger.debug("              usr/pwd is %s.", usr_pwd)
                 logger.debug("              regex   is %s.", internet_source.include_files_expression)
 
-                internet_type = 'ftp'
+                internet_type = internet_source.type
 
                 if internet_type == 'ftp':
                     # Note that the following list might contain sub-dirs (it reflects full_regex)
                     current_list = get_list_matching_files_dir_ftp(str(internet_source.url), str(usr_pwd), str(internet_source.include_files_expression))
 
-                elif internet_type == 'http':
-                    # Note that the following list might contain sub-dirs (it reflects template)
-                    current_list = get_list_matching_files_dir_ftp(str(internet_source.url), str(usr_pwd), str(internet_source.include_files_expression))
+                elif internet_type == 'http_tmpl':
+                    datetime_start=datetime.datetime.strptime(str(internet_source.start_date),'%Y%m%d')
+                    datetime_end=datetime.datetime.strptime(str(internet_source.end_date),'%Y%m%d')
+                    # Create the full filename from a 'template' which contains
+                    current_list = build_list_matching_for_http(str(internet_source.url),
+                                                                str(internet_source.include_files_expression),
+                                                                datetime_start,
+                                                                datetime_end,
+                                                                str(internet_source.frequency_id))
+
 
                 logger.debug("Number of files currently available for source %s is %i", internet_source.internet_id, len(current_list))
                 if len(current_list) > 0:
