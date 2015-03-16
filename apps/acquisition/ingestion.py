@@ -97,7 +97,7 @@ def loop_ingestion(dry_run=False):
                                                                                           source_type=source.type,
                                                                                           source_id=source.data_source_id):
                     # TODO-Jurvtk: complete/verified
-                        temp_internet_filter = internet_filter.include_files_expression
+                        temp_internet_filter = internet_filter.exclude_files_expression
                         # TODO-M.C.: check the most performing options in real-cases
                         #files = [f for f in os.listdir(ingest_dir_in) if re.match(temp_internet_filter, f)]
                         files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(temp_internet_filter, os.path.basename(f))]
@@ -304,7 +304,7 @@ def pre_process_modis_hdf4_tile (subproducts, tmpdir , input_files):
 
             file_to_merge = glob.glob(tmpdir + os.path.sep + id_subproduct + '*.tif')
             # Take gdal_merge.py from es2globals
-            command = es_constants.GDAL_merge + ' -init 9999 -co \"compress=lzw\" -o '
+            command = es_constants.gdal_merge + ' -init 9999 -co \"compress=lzw\" -o '
             command += out_tmp_file_gtiff
             for file_add in file_to_merge:
                 command += ' '
@@ -468,7 +468,7 @@ def pre_process_pml_netcdf(subproducts, tmpdir , input_files):
             out_tmp_file_gtiff = tmpdir + os.path.sep + id_subproduct + '_' + id_mapset + '.tif.merged'
 
             # Take gdal_merge.py from es2globals
-            command = es_constants.GDAL_merge + ' -init 9999 -co \"compress=lzw\" -o '
+            command = es_constants.gdal_merge + ' -init 9999 -co \"compress=lzw\" -o '
             command += out_tmp_file_gtiff
             for file_add in geotiff_files:
                 command += ' '
@@ -1198,7 +1198,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
             # Read from input file
             band = orig_ds.GetRasterBand(1)
-            logger.debug('Band Type='+gdal.GetDataTypeName(band.DataType))
+            #logger.debug('Band Type='+gdal.GetDataTypeName(band.DataType))
             out_data = band.ReadAsArray(0, 0, orig_size_x, orig_size_y)
 
             # No reprojection, only format-conversion
