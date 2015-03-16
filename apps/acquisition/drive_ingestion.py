@@ -10,7 +10,7 @@ logger = log.my_logger(__name__)
 # Manual Switch for START/STOP
 do_start = True
 dry_run  = False
-service  = True
+service  = False
 
 if service:
     # Make sure the pid dir exists
