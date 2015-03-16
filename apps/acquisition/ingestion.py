@@ -1520,3 +1520,4 @@ def conv_data_type_to_gdal(type):
     else:
         return gdal.GDT_Int16
 
+
