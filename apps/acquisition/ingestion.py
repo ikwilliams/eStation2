@@ -304,7 +304,8 @@ def pre_process_modis_hdf4_tile (subproducts, tmpdir , input_files):
 
             file_to_merge = glob.glob(tmpdir + os.path.sep + id_subproduct + '*.tif')
             # Take gdal_merge.py from es2globals
-            command = es_constants.GDAL_merge + ' -init 9999 -co \"compress=lzw\" -o '
+            dire=dir(es_constants)
+            command = es_constants.gdal_merge + ' -init 9999 -co \"compress=lzw\" -o '
             command += out_tmp_file_gtiff
             for file_add in file_to_merge:
                 command += ' '
@@ -468,7 +469,8 @@ def pre_process_pml_netcdf(subproducts, tmpdir , input_files):
             out_tmp_file_gtiff = tmpdir + os.path.sep + id_subproduct + '_' + id_mapset + '.tif.merged'
 
             # Take gdal_merge.py from es2globals
-            command = es_constants.GDAL_merge + ' -init 9999 -co \"compress=lzw\" -o '
+            dire=dir(es_constants)
+            command = es_constants.gdal_merge + ' -init 9999 -co \"compress=lzw\" -o '
             command += out_tmp_file_gtiff
             for file_add in geotiff_files:
                 command += ' '
