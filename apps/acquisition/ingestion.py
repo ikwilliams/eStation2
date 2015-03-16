@@ -295,6 +295,7 @@ def pre_process_modis_hdf4_tile (subproducts, tmpdir , input_files):
                 write_ds_to_geotiff(sds_tmp, outputfile)
                 # sds_tmp = None
 
+
     # Loop over the subproducts extracted and do the merging.
     for sprod in subproducts:
         if sprod != 0:
