@@ -457,8 +457,13 @@ def pre_process_pml_netcdf(subproducts, tmpdir , input_files):
                 write_ds_to_geotiff(sds_tmp, myfile_path)
                 sds_tmp = None
                 geotiff_files.append(myfile_path)
-
-        # Merge temporary geotiff to a single one
+        else:
+          # No subdatasets: e.g. SST -> read directly the .nc
+            filename = os.path.basename(input_file) + '.geotiff'
+            myfile_path = os.path.join(tmpdir, filename)
+            write_ds_to_geotiff(netcdf, myfile_path)
+            geotiff_files.append(myfile_path)
+        netcdf = None
 
     # Loop over the subproducts extracted and do the merging.
     for sprod in subproducts:
@@ -468,7 +473,7 @@ def pre_process_pml_netcdf(subproducts, tmpdir , input_files):
             out_tmp_file_gtiff = tmpdir + os.path.sep + id_subproduct + '_' + id_mapset + '.tif.merged'
 
             # Take gdal_merge.py from es2globals
-            command = es_constants.GDAL_merge + ' -init 9999 -co \"compress=lzw\" -o '
+            command = es_constants.gdal_merge + ' -init 9999 -co \"compress=lzw\" -ot Float32 -o '
             command += out_tmp_file_gtiff
             for file_add in geotiff_files:
                 command += ' '
