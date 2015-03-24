@@ -230,9 +230,9 @@ def build_list_matching_for_http(base_url, template, from_date, to_date, frequen
 
     dates = frequency.get_dates(from_date, to_date)
     list_filenames = frequency.get_internet_dates(dates, template)
-    list_files = []
-    for name in list_filenames:
-        list_files.append(base_url+name)
+    list_files = list_filenames
+    #for name in list_filenames:
+    #    list_files.append(base_url+name)
     return list_files
 
 
@@ -256,47 +256,24 @@ def get_file_from_url(remote_url_file, target_file=None, target_dir=None, userpw
         target_file='test_output_file'
 
     target_fullpath=tmpdir+os.sep+target_file
+    c = pycurl.Curl()
 
-    outputfile=open(target_fullpath, 'wb')
-    logger.debug('Output File: '+target_fullpath)
+    try:
+        outputfile=open(target_fullpath, 'wb')
+        logger.debug('Output File: '+target_fullpath)
 
-    c.setopt(c.URL,remote_url_file)
-    c.setopt(c.WRITEFUNCTION,outputfile.write)
-    if userpwd is not '':
-        c.setopt(c.USERPWD,userpwd)
-    c.perform()
-    outputfile.close()
-
-    return target_fullpath
-
-
-# #   Target dir is created as 'tmpdir' if not passed
-# #   Full pathname is returned (or positive number for error)
-# Obsolete ?? To be removed ??
-# def get_dir_contents_from_url(remote_url_dir, target_file=None, target_dir=None, userpwd=''):
-#
-#     if target_dir is None:
-#         tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.es2globals['base_tmp_dir'])
-#     else:
-#         tmpdir = target_dir
-#
-#     if target_file is None:
-#         target_file = 'test_output_file'
-#
-#     target_fullpath=tmpdir+os.sep+target_file
-#
-#     outputfile = open(target_fullpath, 'wb')
-#     logger.debug('Output File: '+target_fullpath)
-#
-#     c.setopt(c.URL, remote_url_dir)
-#     c.setopt(c.WRITEFUNCTION, outputfile.write)
-#     if userpwd is not '':
-#         c.setopt(c.USERPWD, userpwd)
-#     c.perform()
-#     outputfile.close()
-#
-#     return target_fullpath
-
+        c.setopt(c.URL,remote_url_file)
+        c.setopt(c.WRITEFUNCTION,outputfile.write)
+        if userpwd is not '':
+            c.setopt(c.USERPWD,userpwd)
+        c.perform()
+        outputfile.close()
+        return 0
+    except:
+        logger.warning('Output NOT downloaded: '+remote_url_file)
+        return 1
+    finally:
+        c = None
 
 ######################################################################################
 #   loop_get_internet
@@ -335,7 +312,7 @@ def loop_get_internet(dry_run=False):
                 logger.warning("Sleep time not defined. Setting to default=1min. Continue.")
                 time_sleep = 60
 
-    #        try:
+    #       try:
             logger.debug("Reading active INTERNET data sources from database")
             internet_sources_list = querydb.get_active_internet_sources(echo=echo_query)
 
@@ -390,8 +367,7 @@ def loop_get_internet(dry_run=False):
                                                                 datetime_start,
                                                                 datetime_end,
                                                                 str(internet_source.frequency_id))
-
-
+                    print current_list
                 logger.debug("Number of files currently available for source %s is %i", internet_source.internet_id, len(current_list))
                 if len(current_list) > 0:
                     logger.debug("Number of files already copied for trigger %s is %i", internet_source.internet_id, len(processed_list))
@@ -409,15 +385,14 @@ def loop_get_internet(dry_run=False):
                          logger.debug("Loop on the found files.")
                          if not dry_run:
                              for filename in list(listtoprocess):
-                                 logger.debug("Processing file: "+os.path.basename(filename))
-                                 #try:
-                                 target_file=filename
-                                 get_file_from_url(str(internet_source.url)+'/'+target_file, target_file=os.path.basename(target_file), target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
-                                 logger.info("File %s copied.", filename)
-                                 # processed_list.append(os.path.basename(filename))  -> save in .list subdirs as well !!
-                                 processed_list.append(filename)
-                                #except:
-                                #   logger.warning("Problem while copying file: %s.", filename)
+                                 logger.debug("Processing file: "+str(internet_source.url)+os.path.sep+filename)
+                                 try:
+                                    result = get_file_from_url(str(internet_source.url)+os.path.sep+filename, target_file=os.path.basename(filename), target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
+                                    if result:
+                                        logger.info("File %s copied.", filename)
+                                        processed_list.append(filename)
+                                 except:
+                                   logger.warning("Problem while copying file: %s.", filename)
                          else:
                              logger.info('Dry_run is set: do not get files')
 
