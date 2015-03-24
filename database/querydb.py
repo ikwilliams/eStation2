@@ -902,7 +902,7 @@ def get_active_internet_sources(echo=False):
                                  intsrc.c.start_date,
                                  intsrc.c.end_date,
                                  intsrc.c.include_files_expression,
-                                 intsrc.c.exclude_files_expression,
+                                 intsrc.c.files_filter_expression,
                                  intsrc.c.status,
                                  intsrc.c.pull_frequency,
                                  intsrc.c.datasource_descr_id)
