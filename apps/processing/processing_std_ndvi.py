@@ -80,14 +80,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         group_filtered_prods = 1                   # 2.a
         group_filtered_masks = 1                   # 2.c
         group_filtered_anomalies = 1               # 2.d
-        group_monthly_prods = 0                    # 3.a
-        group_monthly_masks = 0                    # 3.c
+        group_monthly_prods = 1                    # 3.a
+        group_monthly_masks = 1                    # 3.c
         group_monthly_anomalies = 0                # 3.d    # To be done
 
     if update_stats:
         group_no_filter_stats = 0                  # 1.a    -> no relevant - FTTB
         group_filtered_stats = 1                   # 2.b
-        group_monthly_stats = 0                    # 3.b
+        group_monthly_stats = 1                    # 3.b
 
     #   switch wrt single products: not to be changed !!
     #   for Group 1.a (ndvi_no_filter_stats)
@@ -129,10 +129,10 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     activate_vci_linearx2 = 1
 
     #   for Group 3.a (monthly_prods)
-    activate_monndvi = 0
+    activate_monndvi = 1
 
     #   for Group 3.b (monthly_masks)
-    activate_monthly_baresoil = 0
+    activate_monthly_baresoil = 1
 
     #   for Group 3.c  (monthly_stats)
     activate_1monavg = 1
@@ -863,7 +863,7 @@ def processing_std_ndvi(pipeline_run_level=0, pipeline_run_touch_only=0, pipelin
     list_subprods = []
     list_subprod_groups = []
     create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
-                    starting_dates=starting_dates, update_stats=update_stats)
+                    starting_dates=starting_dates, update_stats=update_stats, nrt_products=nrt_products)
 
     logger.info("Entering routine %s" % 'processing_std_ndvi')
     logger.info("pipeline_run_level %i" % pipeline_run_level)

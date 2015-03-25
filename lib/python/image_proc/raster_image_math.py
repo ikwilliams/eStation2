@@ -534,9 +534,16 @@ def do_oper_subtraction(input_file='', output_file='', input_nodata=None, output
     if output_nodata is None and input_nodata is not None:
         output_nodata = input_nodata
 
-    # manage out_type (take the input one as default)
+    # manage out_type (take the input one as default, but ensure a SIGNED type is used)
     if output_type is None:
-        outType=dataType
+	if dataType == GDT_Byte:
+	  outType = GDT_Int16
+	elif dataType == GDT_UInt16:
+	  outType = GDT_Int16
+	elif dataType == GDT_UInt32:
+	  outType = GDT_Int32
+	else:  
+	  outType = dataType
     else:
         outType=ParseType(output_type)
 
@@ -645,9 +652,9 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
                 wtc = (data0 != input_nodata) * (data1 != input_nodata) * (N.abs(data1) > epsilon)
 
             # TODO-M.C.: check this assignment is done for the other functions as well
-            dataout=N.zeros(ns,GDT_Float32)
+            dataout=N.zeros(ns,'Float32')
             if output_nodata is None:
-                dataout=N.zeros(ns,GDT_Float32) + output_nodata
+                dataout=N.zeros(ns,'Float32') + output_nodata
 
             if wtc.any():
                 dataout[wtc] = data0[wtc] / data1[wtc]

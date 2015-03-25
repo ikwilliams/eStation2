@@ -24,7 +24,8 @@ from .exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
                          WrongFrequencyType, WrongFrequencyDateFormat,
                          NoProductFound, NoFrequencyFound,
                          WrongDateType)
-from .helpers import add_years, add_months, add_dekads, add_pentads, add_days, find_gaps, cast_to_int, INTERVAL_TYPE
+from .helpers import (add_years, add_months, add_dekads, add_pentads, add_days, manage_date,
+                     find_gaps, cast_to_int, INTERVAL_TYPE)
 
 
 def _check_constant(class_, constant_name, value):
@@ -173,7 +174,9 @@ class Frequency(object):
         return dates[:-1]
 
     def get_internet_dates(self, dates, template):
-        return [date.strftime(template) for date in dates]
+        #%{dkm}
+        #%{+/-<Nt><strftime>} = +/- N delta days/hours/
+        return [manage_date(date, template) for date in dates]
 
     def next_filename(self, filename):
         date = self.next_date(self.extract_date(filename))
