@@ -1336,6 +1336,8 @@ def mosaic_lsasaf_msg(in_files, output_file, format):
 #       in_files: input filenames
 #       output_file: target output file
 #
+   # Note: noData==-1 for LSASAF Products (both ET and LST)
+    NO_DATA_LSASAF_PRODS = -1
 
     # definitions: Euro, NAfr, SAfr, Same -> MUST match with filenaming
     # as defined in SAF/LAND/MF/PUM_AL/1.4, version 1.4, date 15/12/2006
@@ -1376,7 +1378,7 @@ def mosaic_lsasaf_msg(in_files, output_file, format):
                 return 1
 
     # output matrix dimensions
-    dataOut = N.ones((out_ns, out_nl))          #TODO-M.C.: * nodata TO BE MANAGED
+    dataOut = N.zeros((out_ns, out_nl)) + NO_DATA_LSASAF_PRODS
 
     # total lines
     totallines = 0
