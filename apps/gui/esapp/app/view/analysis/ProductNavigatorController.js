@@ -100,10 +100,11 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
     mapsetDataSetGridRowClick: function(gridview, record) {
 
         this.getView().selectedproduct = {
-               productcode:record.get('productcode'),
-               productversion:record.get('version'),
-               mapsetcode:record.get('mapsetcode'),
-               subproductcode:record.get('subproductcode')
+            productcode:record.get('productcode'),
+            productversion:record.get('version'),
+            mapsetcode:record.get('mapsetcode'),
+            subproductcode:record.get('subproductcode'),
+            productname:record.get('descriptive_name')
         };
 
         //var params = {

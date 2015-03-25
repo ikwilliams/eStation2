@@ -10,6 +10,7 @@ Ext.define("esapp.view.analysis.mapView",{
     requires: [
         'esapp.view.analysis.mapViewModel',
         'esapp.view.analysis.mapViewController',
+        'esapp.view.widgets.TimeLine',
 
         'Ext.window.Window',
         'Ext.toolbar.Toolbar',
@@ -19,9 +20,9 @@ Ext.define("esapp.view.analysis.mapView",{
     //title: '<span class="panel-title-style">MAP title</span>',
     margin: '0 0 0 0',
     layout: {
-        type: 'fit'
+        type: 'border'
     },
-    width:600,
+    width:650,
     height:600,
     minWidth:400,
     minHeight:350,
@@ -32,8 +33,6 @@ Ext.define("esapp.view.analysis.mapView",{
     closeAction: 'destroy', // 'hide',
     maximizable: true,
     collapsible: true,
-    frame: false,
-    border: false,
 
     layers: [],
     projection: 'EPSG:4326',
@@ -63,15 +62,22 @@ Ext.define("esapp.view.analysis.mapView",{
     initComponent: function () {
         var me = this;
 
+        me.frame = false;
+        me.border= false;
+        me.bodyBorder = false;
+
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             dock: 'top',
             autoShow: true,
             alwaysOnTop: true,
+            floating: false,
             hidden: false,
             border: false,
             shadow: false,
+            //style: 'background: transparent',
+            bodyStyle: 'background: transparent;',
             style:{
-                'background-color':'transparent'
+                backgroundColor:'transparent'
             },
             items: [{
                 text: 'Product navigator',
@@ -100,6 +106,29 @@ Ext.define("esapp.view.analysis.mapView",{
             }]
         });
 
+        //me.bbar = {
+        //    dock: 'bottom',
+        //    autoShow: true,
+        //    autoWidth:true,
+        //    alwaysOnTop: true,
+        //    hidden: true,
+        //    hideMode : 'display',
+        //    border: false,
+        //    shadow: false,
+        //    style:{
+        //        backgroundColor:'transparent'
+        //    },
+        //    items: [{
+        //        xtype: 'box',
+        //        id: 'product-time-line_' + me.id,
+        //        align:'left',
+        //        autoWidth:true,
+        //        margin:0,
+        //        height: 115
+        //        //html: '<div id="product-time-line_' + me.id + '">Time line here</div>'
+        //    }]
+        //};
+
         me.mapView = new ol.View({
 //            projection:me.projection,
             center: ol.proj.transform([21, 4], 'EPSG:4326', 'EPSG:3857'),
@@ -109,40 +138,83 @@ Ext.define("esapp.view.analysis.mapView",{
         me.name ='mapviewwindow_' + me.id;
 
         me.items = [{
-            xtype:'container',
-            html: '<div id="mapview_' + me.id + '"></div>'
-        }, {
-            xtype: 'slider',
-            // cls: 'custom-slider',
-            id: 'opacityslider'+ me.id,
-            fieldLabel: '',
-            labelStyle: { color:'lightgray'},
-            labelSeparator: '',
-            labelWidth: 40,
-            hideLabel: true,
-            hideEmptyLabel : true,
-            border: false,
-            autoShow: true,
-            floating:true,
-            // alignTarget : me,
-            defaultAlign: 'tr-c?',
-            alwaysOnTop: false,
-            constrain: true,
-            width: 220,
-            value: 100,
-            increment: 10,
-            minValue: 0,
-            maxValue: 100,
-            tipText: function(thumb){
-                return Ext.String.format('<b>{0}%</b>', thumb.value);
-            },
-            listeners: {
-                change: function( slider, newValue, thumb, eOpts ){
-//                    console.info(me.map.getLayers());
-                    var _layers = me.map.getLayers();
-                    _layers.a[0].setOpacity(newValue/100)
+            region: 'center',
+            items: [{
+                xtype: 'container',
+                html: '<div id="mapview_' + me.id + '"></div>'
+            }, {
+                xtype: 'slider',
+                // cls: 'custom-slider',
+                id: 'opacityslider' + me.id,
+                fieldLabel: '',
+                labelStyle: {color: 'lightgray'},
+                labelSeparator: ' ',
+                labelWidth: 40,
+                hideLabel: false,
+                hideEmptyLabel: false,
+                border: false,
+                autoShow: true,
+                floating: true,
+                // alignTarget : me,
+                defaultAlign: 'tr-c?',
+                alwaysOnTop: false,
+                constrain: true,
+                width: 220,
+                value: 100,
+                increment: 10,
+                minValue: 0,
+                maxValue: 100,
+                tipText: function (thumb) {
+                    return Ext.String.format('<b>{0}%</b>', thumb.value);
+                },
+                listeners: {
+                    change: function (slider, newValue, thumb, eOpts) {
+                        //                    console.info(me.map.getLayers());
+                        var _layers = me.map.getLayers();
+                        _layers.a[0].setOpacity(newValue / 100)
+                    }
                 }
-            }
+            }]
+        },{
+            region: 'south',
+            //xtype: 'panel',
+            id: 'product-time-line_' + me.id,
+            reference: 'product-time-line_' + me.id,
+            //title: 'Time Line',
+            align:'left',
+            autoWidth:true,
+            margin:0,
+            height: 115,
+            maxHeight: 115,
+            hidden: true,
+            hideMode : 'display',
+            frame:  false,
+            border: false,
+            bodyBorder: false,
+            shadow: false,
+
+            header : false,
+            collapsible: true,
+            collapsed: true,
+            collapseFirst: true,
+            collapseDirection: 'top',
+            collapseMode : "mini",  // The Panel collapses without a visible header.
+            //headerPosition: 'left',
+            hideCollapseTool: true,
+            split: true,
+            splitterResize : false,
+            items: [{
+            //    xtype: 'container',
+            //    width: 15
+            //}, {
+                xtype: 'time-line-chart',
+                id: 'time-line-chart' + me.id,
+                reference: 'time-line-chart' + me.id,
+                layout: 'fit'
+            //},{
+            //    xtype: 'container',
+            //    width: 15
+            }]
         }];
 
         me.listeners = {
@@ -184,7 +256,18 @@ Ext.define("esapp.view.analysis.mapView",{
             ,resize: function () {
                 var size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight];
                 this.map.setSize(size);
+
+                this.getController().redrawTimeLine();
             }
+            ,expand: function () {
+                var size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight];
+                this.map.setSize(size);
+                this.getController().redrawTimeLine();
+            }
+            ,move: function () {
+                this.getController().redrawTimeLine();
+            }
+
         };
 
         me.callParent();
