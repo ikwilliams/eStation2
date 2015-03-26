@@ -87,8 +87,8 @@ def loop_ingestion(dry_run=False):
                                                                                            source_type=source.type,
                                                                                            source_id=source.data_source_id):
                         # TODO-M.C.: check the most performing options in real-cases
-                       #files = [f for f in os.listdir(ingest_dir_in) if re.match(str(eumetcast_filter), f)]
                         files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(eumetcast_filter, os.path.basename(f))]
+                        my_filter_expr = eumetcast_filter
                         logger.info("Eumetcast Source: looking for files in %s - named like: %s" % (ingest_dir_in, eumetcast_filter))
 
                 if source.type == 'INTERNET':
@@ -97,10 +97,11 @@ def loop_ingestion(dry_run=False):
                                                                                           source_type=source.type,
                                                                                           source_id=source.data_source_id):
                     # TODO-Jurvtk: complete/verified
-                        temp_internet_filter = internet_filter.include_files_expression
+                        temp_internet_filter = internet_filter.files_filter_expression
                         # TODO-M.C.: check the most performing options in real-cases
                         #files = [f for f in os.listdir(ingest_dir_in) if re.match(temp_internet_filter, f)]
                         files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(temp_internet_filter, os.path.basename(f))]
+                        my_filter_expr = temp_internet_filter
                         logger.info("Internet Source: looking for files in %s - named like: %s" % (ingest_dir_in, temp_internet_filter))
 
                 logger.info("Number of files found for product [%s] is: %s" % (active_product_ingest[0], len(files)))
@@ -135,7 +136,10 @@ def loop_ingestion(dry_run=False):
                     if datasource_descr.format_type == 'delimited':
                         # splitted_fn = re.split(r'[datasource_descr.delimiter\s]\s*', filename) ???? What is that for ?
                         splitted_fn = re.split(datasource_descr.delimiter, filename)
-                        dates_list.append(splitted_fn[date_position])
+                        date_string = splitted_fn[date_position]
+                        if len(date_string) > len(datasource_descr.date_type):
+                            date_string=date_string[0:len(datasource_descr.date_type)]
+                        dates_list.append(date_string)
                     else:
                         dates_list.append(filename[date_position:date_position + len(datasource_descr.date_type)])
 
@@ -144,19 +148,19 @@ def loop_ingestion(dry_run=False):
 
                 # Loop over dates and get list of files (considering mapset ?)
                 for in_date in dates_list:
+                    # Refresh the files list (some files have been deleted)
+                    files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(my_filter_expr, os.path.basename(f))]
                     logger.debug("     --> processing date, in native format: %s" % in_date)
                     # Get the list of existing files for that date
                     regex = re.compile(".*(" + in_date + ").*")
                     date_fileslist = [ingest_dir_in + m.group(0) for l in files for m in [regex.search(l)] if m]
-
                     # Pass list of files to ingestion routine
                     if (not dry_run):
-                        ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, echo_query=echo_query)
-                        # TODO-M.C.: add a switch in db.ingestion table to enable file deletion ?
-                        #            also add the management of temporary file and dirs
-                        for file_to_remove in date_fileslist:
-                            logger.debug("     --> now deleting input files: %s" % file_to_remove)
-                            os.remove(file_to_remove)
+                        result = ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, echo_query=echo_query)
+                        if not result:
+                            for file_to_remove in date_fileslist:
+                                logger.debug("     --> now deleting input files: %s" % file_to_remove)
+                                os.remove(file_to_remove)
                     else:
                         time.sleep(10)
 
@@ -200,6 +204,9 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, echo
     if do_preprocess == 1:
         logger.debug("Calling routine %s" % 'preprocess_files')
         composed_file_list = pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir)
+        if str(composed_file_list)=='1':
+            logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
+            return 1
     else:
         composed_file_list = input_files
 
@@ -213,6 +220,8 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, echo
         shutil.rmtree(tmpdir)
     except:
         logger.error('Error in removing temporary directory. Continue')
+
+    return 0
 
 def pre_process_msg_mpe (subproducts, tmpdir , input_files):
 # -------------------------------------------------------------------------------------------------------
@@ -444,19 +453,20 @@ def pre_process_pml_netcdf(subproducts, tmpdir , input_files):
         netcdf = gdal.Open(input_file)
         sdslist = netcdf.GetSubDatasets()
 
-        # Loop over datasets and extract the one from each unzipped
-        for subdataset in sdslist:
-            netcdf_subdataset = subdataset[0]
-            id_subdataset = netcdf_subdataset.split(':')[-1]
+        if len(sdslist) >= 1:
+            # Loop over datasets and extract the one from each unzipped
+            for subdataset in sdslist:
+                netcdf_subdataset = subdataset[0]
+                id_subdataset = netcdf_subdataset.split(':')[-1]
 
-            if id_subdataset in list_to_extr:
-                selected_sds = 'NETCDF:' + input_file + ':' + id_subdataset
-                sds_tmp = gdal.Open(selected_sds)
-                filename = os.path.basename(input_file) + '.geotiff'
-                myfile_path = os.path.join(tmpdir, filename)
-                write_ds_to_geotiff(sds_tmp, myfile_path)
-                sds_tmp = None
-                geotiff_files.append(myfile_path)
+                if id_subdataset in list_to_extr:
+                    selected_sds = 'NETCDF:' + input_file + ':' + id_subdataset
+                    sds_tmp = gdal.Open(selected_sds)
+                    filename = os.path.basename(input_file) + '.geotiff'
+                    myfile_path = os.path.join(tmpdir, filename)
+                    write_ds_to_geotiff(sds_tmp, myfile_path)
+                    sds_tmp = None
+                    geotiff_files.append(myfile_path)
         else:
           # No subdatasets: e.g. SST -> read directly the .nc
             filename = os.path.basename(input_file) + '.geotiff'
