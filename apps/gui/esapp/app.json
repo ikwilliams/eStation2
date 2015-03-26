@@ -120,6 +120,10 @@
         {
             "path": "/eStation2/lib/js/OL3/build/ol.js",
             "remote": true
+        },
+        {
+            "path": "/eStation2/lib/js/Highstock/js/highstock-all.js",
+            "remote": true
         }
     ],
 

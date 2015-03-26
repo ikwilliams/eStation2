@@ -646,15 +646,22 @@ def pre_process_bz2_hdf4(subproducts, tmpdir, input_files):
         sdslist = [sdsdict[k] for k in sdsdict.keys() if '_NAME' in k]
 
         # Loop over datasets and extract the one in the list
-        for output_to_extr in list_to_extr:
-            for subdataset in sdslist:
-                id_subdataset = subdataset.split(':')[-1]
-                if id_subdataset==output_to_extr:
-                    outputfile = tmpdir + os.path.sep + filename + "_" + id_subdataset + '_' + '.tif'
-                    sds_tmp = gdal.Open(subdataset)
-                    write_ds_to_geotiff(sds_tmp, outputfile)
-                    sds_tmp = None
-                    interm_files_list.append(outputfile)
+        if len(sdslist) >= 1:
+            for output_to_extr in list_to_extr:
+                for subdataset in sdslist:
+                    id_subdataset = subdataset.split(':')[-1]
+                    if id_subdataset==output_to_extr:
+                        outputfile = tmpdir + os.path.sep + filename + "_" + id_subdataset + '_' + '.tif'
+                        sds_tmp = gdal.Open(subdataset)
+                        write_ds_to_geotiff(sds_tmp, outputfile)
+                        sds_tmp = None
+                        interm_files_list.append(outputfile)
+        else:
+            # Manage case of 1 SDS only
+            filename_gtif = os.path.basename(input_file) + '.geotiff'
+            myfile_path = os.path.join(tmpdir, filename_gtif)
+            write_ds_to_geotiff(hdf, myfile_path)
+            interm_files_list.append(myfile_path)
 
     return interm_files_list
 
@@ -1329,6 +1336,8 @@ def mosaic_lsasaf_msg(in_files, output_file, format):
 #       in_files: input filenames
 #       output_file: target output file
 #
+   # Note: noData==-1 for LSASAF Products (both ET and LST)
+    NO_DATA_LSASAF_PRODS = -1
 
     # definitions: Euro, NAfr, SAfr, Same -> MUST match with filenaming
     # as defined in SAF/LAND/MF/PUM_AL/1.4, version 1.4, date 15/12/2006
@@ -1369,7 +1378,7 @@ def mosaic_lsasaf_msg(in_files, output_file, format):
                 return 1
 
     # output matrix dimensions
-    dataOut = N.ones((out_ns, out_nl))          #TODO-M.C.: * nodata TO BE MANAGED
+    dataOut = N.zeros((out_ns, out_nl)) + NO_DATA_LSASAF_PRODS
 
     # total lines
     totallines = 0
