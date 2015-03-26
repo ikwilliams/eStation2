@@ -41,6 +41,7 @@ from lib.python import functions
 from osgeo.gdalconst import *
 from osgeo import gdal
 import numpy as N
+import pickle
 
 logger = log.my_logger(__name__)
 
@@ -534,16 +535,9 @@ def do_oper_subtraction(input_file='', output_file='', input_nodata=None, output
     if output_nodata is None and input_nodata is not None:
         output_nodata = input_nodata
 
-    # manage out_type (take the input one as default, but ensure a SIGNED type is used)
+    # manage out_type (take the input one as default)
     if output_type is None:
-	if dataType == GDT_Byte:
-	  outType = GDT_Int16
-	elif dataType == GDT_UInt16:
-	  outType = GDT_Int16
-	elif dataType == GDT_UInt32:
-	  outType = GDT_Int32
-	else:  
-	  outType = dataType
+        outType=dataType
     else:
         outType=ParseType(output_type)
 
@@ -610,7 +604,7 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
     geoTransform = fid0.GetGeoTransform()
     projection = fid0.GetProjection()
     driver_type=fid0.GetDriver().ShortName
-
+    
     # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
     if output_nodata is None and input_nodata is not None:
         output_nodata = input_nodata
@@ -630,7 +624,7 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
     # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
     # TODO-M.C. Replace by calling ReturnNoData
     if input_nodata is None:
-        input_nodata = -32768
+        input_nodata = -32768.0
 
     if output_nodata is None and input_nodata is not None:
         output_nodata = input_nodata
@@ -649,16 +643,19 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
             if input_nodata is None:
                 wtc = (N.abs(data1) > epsilon)
             else:
-                wtc = (data0 != input_nodata) * (data1 != input_nodata) * (N.abs(data1) > epsilon)
+	      wtc = (data0 != input_nodata) * (data1 != input_nodata) * (N.abs(data1) > epsilon)
 
+	       
             # TODO-M.C.: check this assignment is done for the other functions as well
-            dataout=N.zeros(ns,'Float32')
+            dataout=N.zeros(ns).astype(float)
             if output_nodata is None:
-                dataout=N.zeros(ns,'Float32') + output_nodata
+		print('we are here')
+		dataout=N.zeros(ns).astype(float) + output_nodata
 
-            if wtc.any():
-                dataout[wtc] = data0[wtc] / data1[wtc]
-            
+	    if wtc.any():	      
+	      dataout[wtc] = data0[wtc]/data1[wtc]
+	      
+            dataout = dataout*100.00
             dataout = dataout.round()
             dataout.shape=(1,-1)
             outDS.GetRasterBand(ib+1).WriteArray(N.array(dataout), 0, il)
@@ -1051,7 +1048,6 @@ def do_cumulate(input_file='', output_file='', input_nodata=None, output_nodata=
         outType=dataType
     else:
         outType=ParseType(output_type)
-
     # manage out_format (take the input one as default)
     if output_format is None:
         outFormat=driver_type
@@ -1060,7 +1056,7 @@ def do_cumulate(input_file='', output_file='', input_nodata=None, output_nodata=
 
     # instantiate outputs
     outDrv=gdal.GetDriverByName(outFormat)
-    outDS=outDrv.Create(output_file, ns, nl, nb, ParseType(outType), options_list)
+    outDS=outDrv.Create(output_file, ns, nl, nb, outType, options_list)
     outDS.SetProjection(projection)
     outDS.SetGeoTransform(geoTransform)
 
