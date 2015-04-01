@@ -34,6 +34,17 @@ logger = log.my_logger(__name__)
 dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'derived'}
 
 
+def unix_time(dt):
+    epoch = datetime.datetime.utcfromtimestamp(0)
+    delta = dt - epoch
+    return delta.total_seconds()
+
+
+def unix_time_millis(d):
+    dt = datetime.datetime.combine(d, datetime.time.min)
+    return unix_time(dt) * 1000.0
+
+
 # Second function, rgb2html converts its arguments (r, g, b) to hexadecimal html-color string #RRGGBB
 # Arguments are converted to integers and trimmed to 0..255 range. It is possible to call it with array argument
 # rgb2html(array_of_three_ints) or specifying each component value separetly rgb2html(r, g, b).

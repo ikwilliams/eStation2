@@ -73,6 +73,10 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
         Ext.apply(cfg, {
             id: me.mapviewid+'-productnavigator',
 
+            border:false,
+            frame: false,
+            bodyBorder: false,
+
             listeners: {
                 close: me.onClose
             },
@@ -109,6 +113,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 rowLines: true,
                 frame: false,
                 border: false,
+                bodyBorder: false,
 
                 features: [{
                     reference: 'selectproductcategories',
@@ -181,6 +186,9 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 collapsible: true,
                 collapsed: true,
                 floatable: false,
+                frame: false,
+                border: false,
+                bodyBorder: false,
                 defaults: {
                     margin: {top: 10, right: 10, bottom: 20, left: 10},
                     layout: {
@@ -217,7 +225,9 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                                                                                      me.selectedproduct.productversion,
                                                                                      me.selectedproduct.mapsetcode,
                                                                                      me.selectedproduct.subproductcode,
-                                                                                     me.selectedproduct.legendid);
+                                                                                     me.selectedproduct.legendid,
+                                                                                     me.selectedproduct.productname
+                            );
                             me.close();
                         }
                     }]
@@ -296,6 +306,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     rowLines: true,
                     frame: false,
                     border: false,
+                    bodyBorder: false,
 
                     plugins: [{
                         ptype: 'rowexpander',
@@ -374,6 +385,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     rowLines: true,
                     frame: false,
                     border: false,
+                    bodyBorder: false,
 
                     //listeners: {
                     //    rowclick: function (gridview, record) {

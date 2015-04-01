@@ -2,15 +2,93 @@ Ext.define('esapp.view.analysis.mapViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.analysis-mapview'
 
-    ,addProductLayer: function(productcode, productversion, mapsetcode, subproductcode, legendid) {
+    ,addProductLayer: function(productcode, productversion, mapsetcode, subproductcode, legendid, productname) {
+        var me = this;
+        var params = {
+               productcode:productcode,
+               mapsetcode:mapsetcode,
+               productversion:productversion,
+               subproductcode:subproductcode
+        };
+        me.getView().productdate = '';
+
+        Ext.Ajax.request({
+            method: 'GET',
+            url:'analysis/gettimeline',
+            params: params,
+            loadMask:'Loading data...',
+            callback:function(callinfo,responseOK,response ){
+                var responseJSON = Ext.util.JSON.decode(response.responseText);
+                var dataLength = responseJSON.total,
+                    data = [],
+                    i = 0,
+                    color = '#ff0000';
+
+                for (i; i < dataLength; i += 1) {
+                    if (i == dataLength-1) {
+                        me.getView().productdate = responseJSON.timeline[i]['date'];
+                        console.info('assign proddate: ' + me.getView().productdate);
+                    }
+
+                    if (responseJSON.timeline[i]['present'] == "true") {
+                        color = '#08a355';
+                        data.push({
+                            x: responseJSON.timeline[i]['datetime'], // the date
+                            y: 1,
+                            color: color,
+                            date: responseJSON.timeline[i]['date'],
+                            events: {
+                                click: function () {
+                                    me.getView().getController().updateProductLayer(productcode,
+                                        productversion,
+                                        mapsetcode,
+                                        subproductcode,
+                                        legendid,
+                                        this.date);
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        color ='#ff0000';
+                        data.push({
+                            x: responseJSON.timeline[i]['datetime'], // the date
+                            y: 1,
+                            color: color,
+                            date: responseJSON.timeline[i]['date']
+                        });
+                    }
+                }
+                var mapview_timelinechart_container = me.lookupReference('time-line-chart' + me.getView().id);
+                mapview_timelinechart_container.timelinechart.series[0].setData(data, false);
+                me.getView().getController().redrawTimeLine();
+
+            },
+            success: function ( result, request ) {},
+            failure: function ( result, request) {}
+        });
+
+        var versiontitle = ''
+        if (productversion !== 'undefined'){
+            versiontitle = ' - <b class="smalltext">' + productversion + '</b>';
+        }
+        console.info('proddate: ' + me.getView().productdate);
+        var mapwvieTitle = productname + versiontitle + ' - <b class="smalltext">' + me.getView().productdate + '</b>';
+        this.getView().setTitle(mapwvieTitle);
+
+        //var mapviewtimeline = this.getView().getDockedItems('toolbar[dock="bottom"]')[0];
+        //var searchtimeline = 'container[id="product-time-line_' + this.getView().id + '"]'
+        //var mapviewtimeline = this.getView().down(searchtimeline);
+        var mapviewtimeline = this.lookupReference('product-time-line_' + this.getView().id);
+        mapviewtimeline.setHidden(false);
+        mapviewtimeline.expand();
+
         this.getView().productlayer = new ol.layer.Image({
             source: new ol.source.ImageWMS({
                 url: 'analysis/getproductlayer',
                 crossOrigin: 'anonymous',
                 attributions: [new ol.Attribution({
-                    html: '&copy; ' +
-                        '<a href="https://ec.europa.eu/jrc/' +
-                        'eStation 2 </a>'
+                    html: '&copy; <a href="https://ec.europa.eu/jrc/">eStation 2 </a>'
                 })],
                 params: {
                     productcode:productcode,
@@ -25,7 +103,44 @@ Ext.define('esapp.view.analysis.mapViewController', {
         });
         this.getView().map.removeLayer(this.getView().map.getLayers().a[0])
         this.getView().map.addLayer(this.getView().productlayer)
+
     }
+
+    ,updateProductLayer: function(productcode, productversion, mapsetcode, subproductcode, legendid, clickeddate) {
+        this.getView().productlayer = new ol.layer.Image({
+            source: new ol.source.ImageWMS({
+                url: 'analysis/getproductlayer',
+                crossOrigin: 'anonymous',
+                attributions: [new ol.Attribution({
+                    html: '&copy; <a href="https://ec.europa.eu/jrc/">eStation 2 </a>'
+                })],
+                params: {
+                    productcode:productcode,
+                    productversion:productversion,
+                    subproductcode:subproductcode,
+                    mapsetcode:mapsetcode,
+                    legendid:legendid,
+                    date:clickeddate,
+                    'FORMAT': 'image/png'
+                },
+                serverType: 'mapserver' /** @type {ol.source.wms.ServerType}  ('mapserver') */
+            })
+        });
+        this.getView().map.removeLayer(this.getView().map.getLayers().a[0])
+        this.getView().map.addLayer(this.getView().productlayer)
+
+    }
+
+    ,redrawTimeLine: function () {
+        var mapviewtimeline = this.lookupReference('product-time-line_' + this.getView().id);
+        var mapview_timelinechart_container = this.lookupReference('time-line-chart' + this.getView().id);
+        var timeline_container_size = mapviewtimeline.getSize();
+        mapview_timelinechart_container.timelinechart.container.width = timeline_container_size.width;
+        mapview_timelinechart_container.timelinechart.setSize(timeline_container_size.width-15, timeline_container_size.height, false);
+        mapview_timelinechart_container.timelinechart.reflow();
+        mapview_timelinechart_container.timelinechart.redraw();
+    }
+
     ,toggleLink: function(btn, event) {
         var mapviewwin = btn.up().up();
 

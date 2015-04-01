@@ -1246,3 +1246,4 @@ def get_processing_chain_products(process_id,echo=False, type='All'):
         if db.session:
             db.session.close()
 
+

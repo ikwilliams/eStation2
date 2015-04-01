@@ -150,34 +150,6 @@ Ext.define("esapp.view.analysis.analysisMain",{
             }
         };
 
-//        me.items = [{
-//            xtype: 'mapview-window',
-//            title: '<span class="panel-title-style">MAP 1</span>',
-//            x:30,
-//            y:50,
-//            autoShow : true,
-//            layers: [
-//                new ol.layer.Tile({
-//                    source: new ol.source.MapQuest({layer: 'sat'})
-////                    ,projection: 'EPSG:4326'
-//                })
-//            ],
-//            projection: 'EPSG:3857' //'EPSG:3857'
-//        },{
-//            xtype: 'mapview-window',
-//            title: '<span class="panel-title-style">MAP 2</span>',
-//            x:1000,
-//            y:50,
-//            autoShow : true,
-//            layers: [
-//                new ol.layer.Tile({
-//                    source: new ol.source.OSM()
-////                    ,projection: 'EPSG:4326'
-//                })
-//            ],
-//            projection: 'EPSG:3857' // 'EPSG:3857'
-//        }];
-
         me.callParent();
     }
 });
