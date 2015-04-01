@@ -367,7 +367,7 @@ def loop_get_internet(dry_run=False):
                                                                 datetime_start,
                                                                 datetime_end,
                                                                 str(internet_source.frequency_id))
-                    print current_list
+
                 logger.debug("Number of files currently available for source %s is %i", internet_source.internet_id, len(current_list))
                 if len(current_list) > 0:
                     logger.debug("Number of files already copied for trigger %s is %i", internet_source.internet_id, len(processed_list))

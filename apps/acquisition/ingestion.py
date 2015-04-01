@@ -1185,7 +1185,9 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             mem_driver = gdal.GetDriverByName('MEM')
 
             # Assign mapset to dataset in memory
-            mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, in_data_type_gdal)
+            #mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, in_data_type_gdal)
+            mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
+
             mem_ds.SetGeoTransform(trg_mapset.geo_transform)
             mem_ds.SetProjection(out_cs.ExportToWkt())
 
