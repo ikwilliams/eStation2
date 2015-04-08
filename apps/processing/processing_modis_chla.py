@@ -29,19 +29,16 @@ from ruffus import *
 logger = log.my_logger(__name__)
 
 #   General definitions for this processing chain
-prod="modis-sst"
+prod="modis-chla"
 mapset='MODIS-IOC-4km'
 ext='.tif'
 version='undefined'
 
-#   switch wrt temporal resolution
-activate_10d_comput=1
-
 #   specific switch for each subproduct
 # 1. 10d prod stats
-activate_monavg_comput=0
+activate_monavg_comput=1
 activate_monclim_comput=1
-activate_mondiff_comput=1
+activate_monanom_comput=1
 
 
 def create_pipeline(starting_sprod):
@@ -58,6 +55,8 @@ def create_pipeline(starting_sprod):
     product_info = functions.list_to_element(in_prod_info)
     in_nodata = product_info.nodata
     
+    print in_nodata
+    
    #   ---------------------------------------------------------------------
    #   Monthly Average for a given month
     output_sprod="monavg"
@@ -69,13 +68,20 @@ def create_pipeline(starting_sprod):
    
     @active_if(activate_monavg_comput)
     @collate(starting_files, formatter(formatter_in),formatter_out)
-    def modis_sst_monavg(input_file, output_file):
+    def modis_chla_monavg(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
+        out_filename=os.path.basename(output_file)
+        str_date=out_filename[0:6]
+        expected_ndays=functions.get_number_days_month(str_date)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', \
-        "options": "compress=lzw", "input_nodata": in_nodata}
-        raster_image_math.do_avg_image(**args)
+        current_ndays=len(input_file)
+        if expected_ndays != current_ndays:
+            logger.info('Missing days for period: %s. Skip' % str_date)
+        else:
+            args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', \
+            "options": "compress=lzw", "input_nodata": in_nodata}
+            raster_image_math.do_avg_image(**args)
  
     #   ---------------------------------------------------------------------
     #   Monthly Climatology for all years
@@ -95,7 +101,7 @@ def create_pipeline(starting_sprod):
 
     @active_if(activate_monclim_comput)
     @collate(new_starting_files, formatter(formatter_in),formatter_out)
-    def modis_sst_monclim(input_file, output_file):
+    def modis_chla_monclim(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
@@ -106,7 +112,7 @@ def create_pipeline(starting_sprod):
     
    #   ---------------------------------------------------------------------
    #   Monthly Anomaly for a given monthly    
-    output_sprod="mondiff"
+    output_sprod="monanom"
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset,version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)    
     
@@ -119,9 +125,9 @@ def create_pipeline(starting_sprod):
     ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived',version, mapset)
     ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MM[0]}"+ancillary_sprod_ident
 
-    @active_if(activate_mondiff_comput)
+    @active_if(activate_monanom_comput)
     @transform(new_starting_files, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
-    def modis_sst_mondiff(input_file, output_file):
+    def modis_chla_mondiff(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
@@ -131,10 +137,16 @@ def create_pipeline(starting_sprod):
 #   ---------------------------------------------------------------------
 #   Run the pipeline
 
-def processing_modis_sst(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
-                           pipeline_printout_graph_level=0):
+def processing_modis_chla(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
+                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
+                          starting_dates=None):
 
-    create_pipeline(starting_sprod='sst-day')
+    global list_subprods, list_subprod_groups
+
+    list_subprods = []
+    list_subprod_groups = []
+
+    create_pipeline(starting_sprod='chla-day')
 
     logger.info("Entering routine %s" % 'processing_modis')
     if pipeline_run_level > 0:
@@ -147,3 +159,5 @@ def processing_modis_sst(pipeline_run_level=0,pipeline_run_touch_only=0, pipelin
     
     if pipeline_printout_graph_level > 0:
         pipeline_printout_graph('flowchart.jpg')
+
+    return list_subprods, list_subprod_groups
