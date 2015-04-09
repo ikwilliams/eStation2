@@ -408,7 +408,7 @@ def loop_get_internet(dry_run=False):
                                  logger.debug("Processing file: "+str(internet_source.url)+os.path.sep+filename)
                                  try:
                                     result = get_file_from_url(str(internet_source.url)+os.path.sep+filename, target_file=os.path.basename(filename), target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
-                                    if result:
+                                    if not result:
                                         logger.info("File %s copied.", filename)
                                         processed_list.append(filename)
                                  except:
