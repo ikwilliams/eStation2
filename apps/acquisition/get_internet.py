@@ -226,14 +226,25 @@ def get_list_matching_files_subdir_local(list, local_dir, regex, level, max_leve
 def build_list_matching_for_http(base_url, template, from_date, to_date, frequency_id):
 
     # Add a check on frequency
-    frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
+    try:
+        frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
+    except Exception as inst:
+        logger.debug("Error in datasets.Dataset.get_frequency: %s" %inst.args[0])
+        raise
 
-    dates = frequency.get_dates(from_date, to_date)
-    list_filenames = frequency.get_internet_dates(dates, template)
-    list_files = list_filenames
-    #for name in list_filenames:
-    #    list_files.append(base_url+name)
-    return list_files
+    try:
+        dates = frequency.get_dates(from_date, to_date)
+    except Exception as inst:
+        logger.debug("Error in frequency.get_dates: %s" %inst.args[0])
+        raise
+
+    try:
+        list_filenames = frequency.get_internet_dates(dates, template)
+    except Exception as inst:
+        logger.debug("Error in frequency.get_internet_dates: %s" %inst.args[0])
+        raise
+
+    return list_filenames
 
 
 ######################################################################################
@@ -312,12 +323,12 @@ def loop_get_internet(dry_run=False):
                 logger.warning("Sleep time not defined. Setting to default=1min. Continue.")
                 time_sleep = 60
 
-    #       try:
             logger.debug("Reading active INTERNET data sources from database")
             internet_sources_list = querydb.get_active_internet_sources(echo=echo_query)
 
             # Loop over active triggers
-            for internet_source in internet_sources_list:
+            try:
+              for internet_source in internet_sources_list:
                 logger.debug("Processing internet source  %s.", internet_source.descriptive_name)
 
                 processed_list_filename = es_constants.get_internet_processed_list_prefix+str(internet_source.internet_id)+'.list'
@@ -359,14 +370,23 @@ def loop_get_internet(dry_run=False):
                     current_list = get_list_matching_files_dir_ftp(str(internet_source.url), str(usr_pwd), str(internet_source.include_files_expression))
 
                 elif internet_type == 'http_tmpl':
-                    datetime_start=datetime.datetime.strptime(str(internet_source.start_date),'%Y%m%d')
-                    datetime_end=datetime.datetime.strptime(str(internet_source.end_date),'%Y%m%d')
+                    if functions.is_date_yyyymmdd(str(internet_source.start_date)):
+                        datetime_start=datetime.datetime.strptime(str(internet_source.start_date),'%Y%m%d')
+                    if functions.is_date_yyyymmdd(str(internet_source.end_date)):
+                        datetime_end=datetime.datetime.strptime(str(internet_source.end_date),'%Y%m%d')
+                    else:
+                        if functions.is_date_yyyymmdd(str(internet_source.start_date)):
+                            datetime_end=datetime.datetime.today()
+
                     # Create the full filename from a 'template' which contains
-                    current_list = build_list_matching_for_http(str(internet_source.url),
-                                                                str(internet_source.include_files_expression),
-                                                                datetime_start,
-                                                                datetime_end,
-                                                                str(internet_source.frequency_id))
+                    try:
+                        current_list = build_list_matching_for_http(str(internet_source.url),
+                                                                    str(internet_source.include_files_expression),
+                                                                    datetime_start,
+                                                                    datetime_end,
+                                                                    str(internet_source.frequency_id))
+                    except:
+                         logger.error("Error in creating date lists. Continue")
 
                 logger.debug("Number of files currently available for source %s is %i", internet_source.internet_id, len(current_list))
                 if len(current_list) > 0:
@@ -400,10 +420,11 @@ def loop_get_internet(dry_run=False):
                     functions.dump_obj_to_pickle(processed_list, processed_list_filename)
                     functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
-            sleep(float(user_def_sleep))
+              sleep(float(user_def_sleep))
+            # Loop over sources
+            except Exception as inst:
+              logger.error("Error while processing source %s. Continue" % internet_source.descriptive_name)
+              sleep(float(user_def_sleep))
 
-#        except Exception, e:
-#            logger.fatal(str(e))
-#            exit(1)
     exit(0)
 
