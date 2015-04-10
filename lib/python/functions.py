@@ -139,7 +139,7 @@ def is_date_yyyymmdd(string_date, silent=False):
     # check the length of string_date
     if len(str(string_date)) != 8:
         if not silent:
-            logger.error('Invalid Date Format %s' % string_date)
+            logger.warning('Invalid Date Format %s' % string_date)
         return isdate_yyyymmdd
 
     # check the yyyymmdd format
@@ -158,7 +158,7 @@ def is_date_yyyymmdd(string_date, silent=False):
                     isdate_yyyymmdd = True
 
     if (not isdate_yyyymmdd) and (not silent):
-        logger.error('Invalid Date Format   %s' % string_date)
+        logger.warning('Invalid Date Format   %s' % string_date)
 
     return isdate_yyyymmdd
 
@@ -176,7 +176,7 @@ def is_date_mmdd(string_date, silent=False):
     # check the length of string_date
     if len(str(string_date)) != 4:
         if not silent:
-            logger.error('Invalid Date Format %s' % string_date)
+            logger.warning('Invalid Date Format %s' % string_date)
         return isdate_mmdd
 
     # check the mmdd format
@@ -191,7 +191,7 @@ def is_date_mmdd(string_date, silent=False):
                 isdate_mmdd = True
 
     if (not isdate_mmdd) and (not silent):
-        logger.error('Invalid Date Format   %s' % string_date)
+        logger.warning('Invalid Date Format   %s' % string_date)
 
     return isdate_mmdd
 
@@ -208,7 +208,7 @@ def is_date_yyyymmddhhmm(string_date, silent=False):
     # check the length of string_date
     if len(str(string_date)) != 12:
         if not silent:
-            logger.error('Invalid Date Format %s' % string_date)
+            logger.warning('Invalid Date Format %s' % string_date)
         return isdate_yyyymmddhhmm
 
     # check the yyyymmdd format
@@ -233,7 +233,7 @@ def is_date_yyyymmddhhmm(string_date, silent=False):
                             isdate_yyyymmddhhmm = True
 
     if (not isdate_yyyymmddhhmm) and (not silent):
-        logger.error('Invalid Date Format %s' % string_date)
+        logger.warning('Invalid Date Format %s' % string_date)
 
     return isdate_yyyymmddhhmm
 
@@ -250,7 +250,7 @@ def is_date_yyyydoy(string_date, silent=False):
     # check the length of string_date
     if 5 >= len(str(string_date)) <= 7:
         if not silent:
-            logger.error('Invalid Date Format %s' % string_date)
+            logger.warning('Invalid Date Format %s' % string_date)
         return isdate_yyyydoy
 
     # check the yyyymmdd format
@@ -266,7 +266,7 @@ def is_date_yyyydoy(string_date, silent=False):
                 isdate_yyyydoy = True
 
     if (not isdate_yyyydoy) and (not silent):
-        logger.error('Invalid Date Format   %s' % string_date)
+        logger.warning('Invalid Date Format   %s' % string_date)
 
     return isdate_yyyydoy
 
