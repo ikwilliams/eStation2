@@ -15,8 +15,19 @@
 .not-dirty .x-grid3-dirty-cell {background: transparent;}
 
 
+.x-menu-no-icon {background-image: none;}
+.x-menu-no-icon a.x-menu-item-link {padding-left: 3px;}
+.x-menu-no-icon .x-menu-item-icon {display: none;}
+
 p {
     margin:5px;
+}
+
+
+.ol-zoom{top:2em !important; left:.5em !important;}
+
+.layer-vector-add {
+    background-image:url(../img/layer-vector-add.png);
 }
 
 .layers {

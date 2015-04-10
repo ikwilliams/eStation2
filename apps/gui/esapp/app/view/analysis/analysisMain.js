@@ -20,20 +20,22 @@ Ext.define("esapp.view.analysis.analysisMain",{
     name: 'analysismain',
     reference: 'analysismain',
 
-    layout: {
-        type: 'fit'
-    },
     frame: false,
     border: false,
     bodyPadding: '0 0 0 0',
     //suspendLayout : true,
+
+    layout: {
+        type: 'border',
+        padding: 0
+    },
 
     initComponent: function () {
         var me = this;
 
         me.defaults = {
             titleAlign: 'center',
-            frame: true,
+            frame: false,
             border: false,
             bodyPadding: 0
         };
@@ -62,7 +64,53 @@ Ext.define("esapp.view.analysis.analysisMain",{
             }]
         });
 
-        me.html = '<div id="backgroundmap_' + me.id + '"></div>';
+        //me.html = '<div id="backgroundmap_' + me.id + '"></div>';
+
+        me.items = [{
+            region: 'east',
+            title: 'Time series',
+            width: 350,
+            split: true,
+            collapsible: true,
+            collapsed: true,
+            floatable: false,
+            //xtype: 'tabpanel',
+            items: [{
+                xtype: 'displayfield',
+                id: 'regionname',
+                reference: 'regionname',
+                fieldLabel: 'Region name',
+                labelAlign : 'top',
+                value: '<span style="color:green;">value</span>'
+            }, {
+                title: 'WKT of Polygon',
+                xtype: 'displayfield',
+                id: 'wkt_polygon',
+                reference: 'wkt_polygon',
+                fieldLabel: 'WKT of Polygon',
+                labelAlign : 'top',
+                value: 'WKT values selected polygon'
+            }]
+            , listeners: {
+                // The resize handle is necessary to set the map!
+                expand: function () {
+                    //var size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight];
+                    var size = [document.getElementById('backgroundmap_'+ me.id).offsetWidth, document.getElementById('backgroundmap_'+ me.id).offsetHeight];
+                    me.map.setSize(size);
+                },
+                collapse: function () {
+                    //var size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight];
+                    var size = [document.getElementById('backgroundmap_'+ me.id).offsetWidth, document.getElementById('backgroundmap_'+ me.id).offsetHeight];
+                    me.map.setSize(size);
+                }
+            }
+        }, {
+            region: 'center',
+            layout: {
+                type: 'fit'
+            },
+            html : '<div id="backgroundmap_' + me.id + '" style="width: 100%; height: 100%;"></div>'
+        }];
 
         me.commonMapView = new ol.View({
 //            projection:"EPSG:4326",
@@ -145,8 +193,9 @@ Ext.define("esapp.view.analysis.analysisMain",{
             }
             // The resize handle is necessary to set the map!
             ,resize: function () {
-                var size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight];
-                this.map.setSize(size);
+                //var size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight];
+                var size = [document.getElementById('backgroundmap_'+ me.id).offsetWidth, document.getElementById('backgroundmap_'+ me.id).offsetHeight];
+                me.map.setSize(size);
             }
         };
 
