@@ -119,7 +119,10 @@ Ext.define("esapp.view.acquisition.Ingestion",{
                 }
                 else {
                     completeness.intervals.forEach(function (interval) {
-                        dataObj["data" + i] = interval.intervalpercentage;
+                        if (interval.intervalpercentage<1.5)
+                            dataObj["data" + i] = 2;
+                        else
+                            dataObj["data" + i] = interval.intervalpercentage;
                         ++i;
 
                         var color = '';
@@ -138,7 +141,10 @@ Ext.define("esapp.view.acquisition.Ingestion",{
 
                     // Update the 4 sprites (these are not reachable through getSprites() on the chart)
                     widgetchart.surfaceMap.chart[0].getItems()[0].setText('Files: '+completeness.totfiles);
-                    widgetchart.surfaceMap.chart[0].getItems()[1].setText('Missing: '+completeness.missingfiles);
+                    var missingFilesText = '';
+                    if(completeness.missingfiles>0)
+                       missingFilesText = 'Missing: ' + completeness.missingfiles;
+                    widgetchart.surfaceMap.chart[0].getItems()[1].setText(missingFilesText);
                     widgetchart.surfaceMap.chart[0].getItems()[2].setText(completeness.firstdate);
                     widgetchart.surfaceMap.chart[0].getItems()[3].setText(completeness.lastdate);
                 }

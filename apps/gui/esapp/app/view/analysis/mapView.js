@@ -36,6 +36,12 @@ Ext.define("esapp.view.analysis.mapView",{
 
     layers: [],
     projection: 'EPSG:4326',
+    productdate: null,
+
+    header: {
+        titlePosition: 2,
+        titleAlign: "center"
+    },
 
     tools: [
     {
@@ -62,6 +68,7 @@ Ext.define("esapp.view.analysis.mapView",{
     initComponent: function () {
         var me = this;
 
+        me.layers = [];
         me.frame = false;
         me.border= false;
         me.bodyBorder = false;
@@ -75,62 +82,118 @@ Ext.define("esapp.view.analysis.mapView",{
             border: false,
             shadow: false,
             //style: 'background: transparent',
-            bodyStyle: 'background: transparent;',
-            style:{
-                backgroundColor:'transparent'
-            },
+            //bodyStyle: 'background: transparent;',
+            //style:{
+            //    backgroundColor:'transparent'
+            //},
             items: [{
                 text: 'Product navigator',
                 iconCls: 'africa',
                 scale: 'medium',
                 handler: 'openProductNavigator'
             },{
+                xtype: 'button',
                 //text: 'Add Layer',
-                iconCls: 'layers',
-                scale: 'medium'
-            },{
-                //text: 'Unlink',
-                enableToggle: true,
-                iconCls: 'unlink',
+                name:'vbtn-'+me.id,
+                iconCls: 'layer-vector-add', // 'layers'
                 scale: 'medium',
-                handler: 'toggleLink'
-            },
-            {
+                //width: 100,
+                //margin: '0 0 10 0',
+                floating: false,  // usually you want this set to True (default)
+                collapseDirection: 'left',
+                menu: {
+                    hideOnClick: true,
+                    defaults: {
+                        hideOnClick: true
+                    },
+                    items: [{
+                        xtype: 'checkbox',
+                        boxLabel: 'Administative level 0',
+                        //text: 'Administative level 0',
+                        name: 'admin0',
+                        checked: false,
+                        linecolor: '#319FD3',    // rgb(49, 159, 211)
+                        layerorderidx: 3,
+                        showSeparator: false,
+                        cls: "x-menu-no-icon",
+                        handler: 'addVectorLayer'
+                    }, {
+                        xtype: 'checkbox',
+                        boxLabel: 'Administative level 1',
+                        //text: 'Administative level 1',
+                        name: 'admin1',
+                        checked: false,
+                        linecolor: '#ffcc00',    // rgb(255, 204, 0)
+                        layerorderidx: 2,
+                        showSeparator: false,
+                        cls: "x-menu-no-icon",
+                        handler: 'addVectorLayer'
+                    }, {
+                        text: 'RICs',
+                        name: 'rics',
+                        cls: "x-menu-no-icon",
+                        //iconCls: 'layer-vector-add', // 'layers'
+                        scale: 'medium',
+                        floating: false,
+                        collapseDirection: 'left',
+                        menu: {
+                            hideOnClick: true,
+                            defaults: {
+                                hideOnClick: true
+                            },
+                            items: [{
+                                xtype: 'checkbox',
+                                boxLabel: 'ICPAC level 0',
+                                name: 'icpac0',
+                                checked: false,
+                                linecolor: '#319FD3',
+                                layerorderidx: 3,
+                                showSeparator: false,
+                                cls: "x-menu-no-icon",
+                                handler: 'addVectorLayer'
+                            }, {
+                                xtype: 'checkbox',
+                                boxLabel: 'MOI level 0',
+                                name: 'moi0',
+                                checked: false,
+                                linecolor: '#319FD3',
+                                layerorderidx: 3,
+                                showSeparator: false,
+                                cls: "x-menu-no-icon",
+                                handler: 'addVectorLayer'
+                            }, {
+                                xtype: 'checkbox',
+                                boxLabel: 'CICOS level 0',
+                                name: 'cicos0',
+                                checked: false,
+                                linecolor: '#319FD3',
+                                layerorderidx: 3,
+                                showSeparator: false,
+                                cls: "x-menu-no-icon",
+                                handler: 'addVectorLayer'
+                            }]
+                        }
+                    }]
+                }
+            },{
                 xtype: 'box',
-                width: 120,
+                width: 275,
                 height: 20,
                 align:'left',
                 // alignTarget : this.getBody(),
                 // defaultAlign : 'tr-tr',
                 html: '<div id="mouse-position_' + me.id + '"></div>'
+            },'->',{
+                //text: 'Unlink',
+                enableToggle: true,
+                iconCls: 'unlink',
+                scale: 'medium',
+                handler: 'toggleLink'
             }]
         });
 
-        //me.bbar = {
-        //    dock: 'bottom',
-        //    autoShow: true,
-        //    autoWidth:true,
-        //    alwaysOnTop: true,
-        //    hidden: true,
-        //    hideMode : 'display',
-        //    border: false,
-        //    shadow: false,
-        //    style:{
-        //        backgroundColor:'transparent'
-        //    },
-        //    items: [{
-        //        xtype: 'box',
-        //        id: 'product-time-line_' + me.id,
-        //        align:'left',
-        //        autoWidth:true,
-        //        margin:0,
-        //        height: 115
-        //        //html: '<div id="product-time-line_' + me.id + '">Time line here</div>'
-        //    }]
-        //};
-
         me.mapView = new ol.View({
-//            projection:me.projection,
+            //projection:me.projection,
             center: ol.proj.transform([21, 4], 'EPSG:4326', 'EPSG:3857'),
             zoom: 2
         });
@@ -141,6 +204,7 @@ Ext.define("esapp.view.analysis.mapView",{
             region: 'center',
             items: [{
                 xtype: 'container',
+                reference:'mapcontainer_'+me.id,
                 html: '<div id="mapview_' + me.id + '"></div>'
             }, {
                 xtype: 'slider',
@@ -149,7 +213,7 @@ Ext.define("esapp.view.analysis.mapView",{
                 fieldLabel: '',
                 labelStyle: {color: 'lightgray'},
                 labelSeparator: ' ',
-                labelWidth: 40,
+                labelWidth: 5,
                 hideLabel: false,
                 hideEmptyLabel: false,
                 border: false,
@@ -157,9 +221,9 @@ Ext.define("esapp.view.analysis.mapView",{
                 floating: true,
                 // alignTarget : me,
                 defaultAlign: 'tr-c?',
-                alwaysOnTop: false,
+                alwaysOnTop: true,
                 constrain: true,
-                width: 220,
+                width: 180,
                 value: 100,
                 increment: 10,
                 minValue: 0,
@@ -169,7 +233,6 @@ Ext.define("esapp.view.analysis.mapView",{
                 },
                 listeners: {
                     change: function (slider, newValue, thumb, eOpts) {
-                        //                    console.info(me.map.getLayers());
                         var _layers = me.map.getLayers();
                         _layers.a[0].setOpacity(newValue / 100)
                     }
@@ -203,48 +266,58 @@ Ext.define("esapp.view.analysis.mapView",{
             hideCollapseTool: true,
             split: true,
             splitterResize : false,
+            listeners: {
+                expand: function () {
+                    var size = [document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight];
+                    me.map.setSize(size);
+                    me.getController().redrawTimeLine(me);
+                }
+            },
             items: [{
-            //    xtype: 'container',
-            //    width: 15
-            //}, {
                 xtype: 'time-line-chart',
                 id: 'time-line-chart' + me.id,
                 reference: 'time-line-chart' + me.id,
                 layout: 'fit'
-            //},{
-            //    xtype: 'container',
-            //    width: 15
             }]
         }];
 
         me.listeners = {
             afterrender: function () {
+
                 var mousePositionControl = new ol.control.MousePosition({
-                  coordinateFormat: ol.coordinate.createStringXY(4),
-                  projection: 'EPSG:4326',
-                  // comment the following two lines to have the mouse position be placed within the map.
-                  // className: 'ol-full-screen',
-                  // className: 'custom-mouse-position',
-                  target:  document.getElementById('mouse-position_'+ me.id), // Ext.get('mouse-position_'+ me.id), //
-                  undefinedHTML: '&nbsp;'
+                    coordinateFormat: function(coord) {
+                        var stringifyFunc = ol.coordinate.createStringXY(3);
+                        return ol.coordinate.toStringHDMS(coord) + ' (' + stringifyFunc(coord) + ')';
+                    },
+                    projection: 'EPSG:4326',
+                    // comment the following two lines to have the mouse position be placed within the map.
+                    // className: 'ol-full-screen',
+                    // className: 'custom-mouse-position',
+                    target:  document.getElementById('mouse-position_'+ me.id), // Ext.get('mouse-position_'+ me.id), //
+                    undefinedHTML: '&nbsp;'
                 });
                 //console.info(me.getController());
                 //this.layers = me.getController().addProductLayer();
                 this.map = new ol.Map({
                     target: 'mapview_'+ this.id,
-                    projection:me.projection,
+                    projection: me.projection,
                     displayProjection:"EPSG:4326",
                     //layers: this.layers,
                     view: this.up().commonMapView,
                     controls: ol.control.defaults({
                         attribution:false,
                         attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
-                            collapsible: true // false to show always without the icon.
+                            collapsible: false // false to show always without the icon.
                         })
                     }).extend([mousePositionControl])
                 });
-//                this.map.getView().projection = me.projection;
 
+                //var layerSwitcher = new ol.control.LayerSwitcher({
+                //    tipLabel: 'Layers' // Optional label for button
+                //});
+                //this.map.addControl(layerSwitcher);
+
+//                this.map.getView().projection = me.projection;
 //                console.info(Ext.getCmp('opacityslider'+ this.id));
 //                console.info(this.layers[0]);
 //                var opacity = new ol.dom.Input(document.getElementById('opacityslider'+ this.id));
@@ -257,15 +330,10 @@ Ext.define("esapp.view.analysis.mapView",{
                 var size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight];
                 this.map.setSize(size);
 
-                this.getController().redrawTimeLine();
-            }
-            ,expand: function () {
-                var size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight];
-                this.map.setSize(size);
-                this.getController().redrawTimeLine();
+                this.getController().redrawTimeLine(this);
             }
             ,move: function () {
-                this.getController().redrawTimeLine();
+                this.getController().redrawTimeLine(this);
             }
 
         };
