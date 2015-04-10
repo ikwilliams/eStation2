@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.3.4
 -- Dumped by pg_dump version 9.3.4
--- Started on 2015-03-04 17:30:29 CET
+-- Started on 2015-04-10 16:39:07 CEST
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -616,7 +616,7 @@ CREATE TABLE internet_source (
     password character varying,
     type character varying,
     include_files_expression character varying,
-    exclude_files_expression character varying,
+    files_filter_expression character varying,
     status boolean DEFAULT false NOT NULL,
     pull_frequency integer,
     datasource_descr_id character varying,
@@ -900,7 +900,7 @@ ALTER TABLE products.sub_datasource_description OWNER TO estation;
 SET search_path = analysis, pg_catalog;
 
 --
--- TOC entry 1978 (class 2604 OID 17404)
+-- TOC entry 1978 (class 2604 OID 17991)
 -- Name: layerid; Type: DEFAULT; Schema: analysis; Owner: estation
 --
 
@@ -908,7 +908,7 @@ ALTER TABLE ONLY layers ALTER COLUMN layerid SET DEFAULT nextval('layers_layerid
 
 
 --
--- TOC entry 1979 (class 2604 OID 17405)
+-- TOC entry 1979 (class 2604 OID 17992)
 -- Name: legend_id; Type: DEFAULT; Schema: analysis; Owner: estation
 --
 
@@ -1342,7 +1342,7 @@ ALTER TABLE ONLY product_acquisition_data_source
     ADD CONSTRAINT products_description_product_acquisition_data_sources_fk FOREIGN KEY (subproductcode, productcode, version) REFERENCES product(subproductcode, productcode, version) ON UPDATE CASCADE;
 
 
--- Completed on 2015-03-04 17:30:29 CET
+-- Completed on 2015-04-10 16:39:07 CEST
 
 --
 -- PostgreSQL database dump complete
