@@ -278,8 +278,14 @@ def get_file_from_url(remote_url_file, target_file=None, target_dir=None, userpw
         if userpwd is not '':
             c.setopt(c.USERPWD,userpwd)
         c.perform()
-        outputfile.close()
-        return 0
+        # Check the result
+        if c.getinfo(pycurl.HTTP_CODE) != 200:
+            outputfile.close()
+            os.remove(target_fullpath)
+            raise Exception('HTTP Error in downloading the file: %i' % c.getinfo(pycurl.HTTP_CODE))
+        else:
+            outputfile.close()
+            return 0
     except:
         logger.warning('Output NOT downloaded: '+remote_url_file)
         return 1
@@ -370,14 +376,21 @@ def loop_get_internet(dry_run=False):
                     current_list = get_list_matching_files_dir_ftp(str(internet_source.url), str(usr_pwd), str(internet_source.include_files_expression))
 
                 elif internet_type == 'http_tmpl':
-                    if functions.is_date_yyyymmdd(str(internet_source.start_date)):
+                    # Manage the dates:start_date is mandatory .. end_date replaced by 'today' if missing/wrong
+                    try:
+                      if functions.is_date_yyyymmdd(str(internet_source.start_date), silent=True):
                         datetime_start=datetime.datetime.strptime(str(internet_source.start_date),'%Y%m%d')
-                    if functions.is_date_yyyymmdd(str(internet_source.end_date)):
+                      else:
+                        raise Exception("Start Date not valid")
+                    except:
+                        raise Exception("Start Date not valid")
+                    try:
+                      if functions.is_date_yyyymmdd(str(internet_source.end_date), silent=True):
                         datetime_end=datetime.datetime.strptime(str(internet_source.end_date),'%Y%m%d')
-                    else:
-                        if functions.is_date_yyyymmdd(str(internet_source.start_date)):
-                            datetime_end=datetime.datetime.today()
-
+                      else:
+                        datetime_end=datetime.datetime.today()
+                    except:
+                        pass
                     # Create the full filename from a 'template' which contains
                     try:
                         current_list = build_list_matching_for_http(str(internet_source.url),
@@ -408,7 +421,7 @@ def loop_get_internet(dry_run=False):
                                  logger.debug("Processing file: "+str(internet_source.url)+os.path.sep+filename)
                                  try:
                                     result = get_file_from_url(str(internet_source.url)+os.path.sep+filename, target_file=os.path.basename(filename), target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
-                                    if result:
+                                    if not result:
                                         logger.info("File %s copied.", filename)
                                         processed_list.append(filename)
                                  except:
