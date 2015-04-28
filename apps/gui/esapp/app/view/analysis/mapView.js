@@ -22,8 +22,8 @@ Ext.define("esapp.view.analysis.mapView",{
     layout: {
         type: 'border'
     },
-    width:650,
-    height:600,
+    width:850,
+    height:800,
     minWidth:400,
     minHeight:350,
     // glyph : 'xf080@FontAwesome',
@@ -81,11 +81,7 @@ Ext.define("esapp.view.analysis.mapView",{
             hidden: false,
             border: false,
             shadow: false,
-            //style: 'background: transparent',
-            //bodyStyle: 'background: transparent;',
-            //style:{
-            //    backgroundColor:'transparent'
-            //},
+            padding:0,
             items: [{
                 text: 'Product navigator',
                 iconCls: 'africa',
@@ -176,13 +172,27 @@ Ext.define("esapp.view.analysis.mapView",{
                     }]
                 }
             },{
-                xtype: 'box',
+                xtype: 'container',
                 width: 275,
-                height: 20,
+                height: 38,
+                top: 0,
                 align:'left',
-                // alignTarget : this.getBody(),
-                // defaultAlign : 'tr-tr',
-                html: '<div id="mouse-position_' + me.id + '"></div>'
+                defaults: {
+                    style: {
+                        "font-size": '12px'
+                    }
+                },
+                items: [{
+                    xtype: 'box',
+                    height: 17,
+                    top:0,
+                    html: '<div id="region_name_' + me.id + '" style="text-align:center; font-weight: bold;"></div>'
+                },{
+                    xtype: 'box',
+                    height: 17,
+                    top:17,
+                    html: '<div id="mouse-position_' + me.id + '"></div>'
+                }]
             },'->',{
                 //text: 'Unlink',
                 enableToggle: true,
@@ -193,9 +203,10 @@ Ext.define("esapp.view.analysis.mapView",{
         });
 
         me.mapView = new ol.View({
-            //projection:me.projection,
-            center: ol.proj.transform([21, 4], 'EPSG:4326', 'EPSG:3857'),
-            zoom: 2
+            projection:"EPSG:4326",
+            displayProjection:"EPSG:4326",
+            center: [21, 4],  // ol.proj.transform([21, 4], 'EPSG:4326', 'EPSG:3857'),
+            zoom: 4
         });
 
         me.name ='mapviewwindow_' + me.id;

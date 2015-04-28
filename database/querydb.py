@@ -22,6 +22,156 @@ dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
 
 
 ######################################################################################
+#   get_timeseries_subproducts(echo=False, productcode=None, version='undefined', subproductcode=None, masked=None)
+#   Purpose: Query the database to get the sub product list of the selected product.
+#            with their product category that are available for time series.
+#            The passed product is of type "Ingest" and must have the timeseries_role set to "Initial".
+#            Mainly used in the GUI Analysis tab.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2015/04/15
+#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
+#          productcode      - The productcode of the specific product requested. Default=None
+#          subproductcode   - The subproductcode of the specific product requested. Default=None
+#          version          - The version of the specific product requested. Default='undefined'
+#          masked           - If given, the result with contain all sub products which are not masked!
+#
+#   Output: Product list with their product category.
+#           The products are in general of type "Ingest" or "Derived" and must have the
+#           timeseries_role set to "<subproductcode>"
+#           Ordered by product category order_index and productcode.
+#
+#   SELECT p.productcode, p.version, p.subproductcode, p.activated, pc.category_id, pc.descriptive_name, pc.order_index
+#   FROM products.product p
+#   WHERE p.productcode = 'fewsnet-rfe'
+#     AND p.version = '2.0'
+#     AND (p.timeseries_role = '10d' or p.subproductcode = '10d')
+#   ORDER BY p.productcode
+#
+def get_timeseries_subproducts(echo=False,  productcode=None, version='undefined', subproductcode=None, masked=None):
+    try:
+        p = db.product._table
+
+        s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productID'),
+                    p.c.productcode,
+                    p.c.subproductcode,
+                    p.c.version,
+                    p.c.defined_by,
+                    p.c.activated,
+                    p.c.product_type,
+                    p.c.descriptive_name.label('prod_descriptive_name'),
+                    p.c.description,
+                    p.c.masked,
+                    p.c.timeseries_role])
+
+        s = s.alias('pl')
+        pl = db.map(s, primary_key=[s.c.productcode, s.c.subproductcode, s.c.version])
+
+        if masked is None:
+            where = and_(pl.c.productcode == productcode,
+                         pl.c.version == version,
+                         or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
+        else:
+            if not masked:
+                where = and_(pl.c.masked == 'f',
+                             pl.c.productcode == productcode,
+                             pl.c.version == version,
+                             or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
+            else:
+                where = and_(pl.c.masked == 't',
+                             pl.c.productcode == productcode,
+                             pl.c.version == version,
+                             or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
+
+        productslist = pl.filter(where).order_by(asc(pl.c.productcode), asc(pl.c.subproductcode)).all()
+
+        if echo:
+            for row in productslist:
+                print row
+
+        return productslist
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and log the error telling what happened.
+        logger.error("get_timeseries_products: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
+######################################################################################
+#   get_timeseries_products(echo=False, masked=None)
+#   Purpose: Query the database to get the product list with their product category that are available for time series.
+#            The products are in general of type "Ingest" and must have the timeseries_role set to "Initial"
+#            Mainly used in the GUI Analysis tab.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2015/04/15
+#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
+#          masked           - If given, the result with contain all Native products which are not masked!
+#                             (used by the Analysis tool in the Product Navigator)
+#
+#   Output: Product list with their product category.
+#           The products are in general of type "Ingest" and must have the timeseries_role set to "Initial"
+#           Ordered by product category order_index and productcode.
+#
+#   SELECT p.productcode, p.version, p.activated, pc.category_id, pc.descriptive_name, pc.order_index
+#   FROM products.product p outer join products.product_category pc on p.category_id = pc.category_id
+#   WHERE p.timeseries_role = 'Initial'
+#   ORDER BY pc.order_index, productcode
+#
+def get_timeseries_products(echo=False,  masked=None):
+    try:
+        pc = db.product_category._table
+        p = db.product._table
+
+        s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productID'),
+                    p.c.productcode,
+                    p.c.subproductcode,
+                    p.c.version,
+                    p.c.defined_by,
+                    p.c.activated,
+                    p.c.product_type,
+                    p.c.descriptive_name.label('prod_descriptive_name'),
+                    p.c.description,
+                    p.c.masked,
+                    p.c.timeseries_role,
+                    pc.c.category_id,
+                    pc.c.descriptive_name.label('cat_descr_name'),
+                    pc.c.order_index]).select_from(p.outerjoin(pc, p.c.category_id == pc.c.category_id))
+
+        s = s.alias('pl')
+        pl = db.map(s, primary_key=[s.c.productID])
+
+        if masked is None:
+            where = and_(pl.c.timeseries_role == 'Initial')
+        else:
+            if not masked:
+                where = and_(pl.c.timeseries_role == 'Initial', pl.c.masked == 'f')
+            else:
+                where = and_(pl.c.timeseries_role == 'Initial', pl.c.masked == 't')
+
+        productslist = pl.filter(where).order_by(asc(pl.c.order_index), asc(pl.c.productcode)).all()
+
+        if echo:
+            for row in productslist:
+                print row
+
+        return productslist
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and log the error telling what happened.
+        logger.error("get_timeseries_products: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
+######################################################################################
 #   get_legend_steps(legendid, echo=False)
 #   Purpose: Query the database to get the legend info needed for mapserver mapfile SCALE_BUCKETS setting.
 #   Author: Jurriaan van 't Klooster

@@ -63,7 +63,14 @@ Ext.define('esapp.Application', {
         //,'ProductNavigatorStore'
     ],
 
-    models: ['ProductNavigator', 'ProductNavigatorMapSet', 'ProductNavigatorMapSetDataSet'],
+    models: [
+        'ProductNavigator',
+        'ProductNavigatorMapSet',
+        'ProductNavigatorMapSetDataSet',
+        'TimeseriesProduct',
+        'TimeserieProductMapSet',
+        'TimeserieProductMapSetDataSet'
+    ],
 
 //    onBeforeLaunch: function () {
 //
@@ -77,6 +84,12 @@ Ext.define('esapp.Application', {
         // Ext.setGlyphFontFamily('Pictos');
         Ext.tip.QuickTipManager.init();
         Ext.state.Manager.setProvider(Ext.create('Ext.state.CookieProvider'));
+
+        var link = document.createElement('icolink');
+        link.type = 'image/ico';
+        link.rel = 'icon';
+        link.href = 'resources/img/africa.ico';
+        document.getElementsByTagName('head')[0].appendChild(link);
 
 
 //        Ext.define('Ext.LazyItems', {

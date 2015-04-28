@@ -13,6 +13,24 @@ from database import querydb
 
 class TestQuerydb(TestCase):
 
+    def Test_get_timeseries_subproducts(self):
+        timeseries_subproducts = querydb.get_timeseries_subproducts(productcode='fewsnet-rfe',
+                                                                    subproductcode='10d',
+                                                                    version='2.0')
+        logger.info("Time series products are: %s", timeseries_subproducts)
+        for timeseries_product in timeseries_subproducts:
+            print timeseries_product
+
+        self.assertEqual(1, 1)
+
+    def Test_get_timeseries_products(self):
+        timeseries_products = querydb.get_timeseries_products()
+        logger.info("Time series products are: %s", timeseries_products)
+        for timeseries_product in timeseries_products:
+            print timeseries_product
+
+        self.assertEqual(1, 1)
+
     def Test_get_active_internet_sources(self):
         internet_sources = querydb.get_active_internet_sources()
         logger.info("Internet sources are: %s", internet_sources)

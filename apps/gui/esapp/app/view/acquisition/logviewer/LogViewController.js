@@ -4,7 +4,7 @@ Ext.define('esapp.view.acquisition.logviewer.LogViewController', {
 
     // {{{
     ,getFile: function(win) {
-        //console.info(win);
+        console.info(win.params);
 
         //var params = Ext.JSON.encode(win.params);
         var params = {
@@ -13,7 +13,8 @@ Ext.define('esapp.view.acquisition.logviewer.LogViewController', {
                productcode:win.params.record.get('productcode'),
                mapsetcode:win.params.record.get('mapsetcode'),
                version:win.params.record.get('version'),
-               subproductcode:win.params.record.get('subproductcode')
+               subproductcode:win.params.record.get('subproductcode'),
+               id:win.params.record.get('data_source_id')
         };
 
         Ext.Ajax.request({

@@ -70,12 +70,15 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 // Set the MapView window title to the selected product and date
                 var versiontitle = '';
                 if (productversion !== 'undefined'){
-                    versiontitle = ' - <b class="smalltext">' + productversion + '</b>';
+                    versiontitle = ' <b class="smalltext">' + productversion + '</b>';
                 }
+                var mapsetcodeHTML = ' - <b class="smalltext">' + me.getView().mapsetcode + '</b>';
+
                 var pattern = /(\d{4})(\d{2})(\d{2})/;
                 me.getView().productdate = me.getView().productdate.replace(pattern,'$3-$2-$1');
                 //var dt = new Date(me.getView().productdate.replace(pattern,'$3-$2-$1'));
-                var mapwvieTitle = productname + versiontitle + ' - <b class="smalltext">' + me.getView().productdate + '</b>';
+                var productdateHTML = ' - <b class="smalltext">' + me.getView().productdate + '</b>';
+                var mapwvieTitle = productname + versiontitle + mapsetcodeHTML + productdateHTML;
                 me.getView().setTitle(mapwvieTitle);
 
                 // Show product time line
@@ -167,11 +170,18 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
         var versiontitle = '';
         if (productversion !== 'undefined'){
-            versiontitle = ' - <b class="smalltext">' + productversion + '</b>';
+            versiontitle = ' <b class="smalltext">' + productversion + '</b>';
         }
+
+        var mapsetcodeHTML = ' - <b class="smalltext">' + this.getView().mapsetcode + '</b>';
+
         var pattern = /(\d{4})(\d{2})(\d{2})/;
         this.getView().productdate = clickeddate.replace(pattern,'$3-$2-$1');
-        var mapwvieTitle = this.getView().productname + versiontitle + ' - <b class="smalltext">' + this.getView().productdate + '</b>';
+        var productdateHTML = ' - <b class="smalltext">' + this.getView().productdate + '</b>';
+
+        //var mapwvieTitle = this.getView().productname + versiontitle + ' - <b class="smalltext">' + this.getView().productdate + '</b>';
+        var mapwvieTitle = this.getView().productname + versiontitle + mapsetcodeHTML + productdateHTML;
+
         this.getView().setTitle(mapwvieTitle);
 
     }
@@ -273,7 +283,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
         }
 
         if (menuitem.checked) {
-            console.info(Ext.getCmp(me.id));
+            //console.info(Ext.getCmp(me.id));
             //var mapViewContainer = this.getView().lookupReference('mapcontainer_'+me.id);
             var myLoadMask = new Ext.LoadMask({
                 msg    : 'Loading vector layer...',
@@ -283,7 +293,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
 
             var vectorSource = new ol.source.GeoJSON({
-                projection: 'EPSG:3857',  // 'EPSG:4326'
+                projection: 'EPSG:4326', // 'EPSG:3857',  //
                 //url: 'resources/geojson/countries.geojson'
                 url: 'resources/geojson/' + geojsonfile
             });
@@ -412,12 +422,16 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 //overlay.setPosition(pixel);
 
 
-                var regionname = Ext.getCmp('regionname');
+                //var regionname = Ext.getCmp('regionname');
+                var regionname = Ext.get('region_name_' + me.id);
+
                 if (feature) {
-                    regionname.setValue(feature.get(namefield));
+                    //regionname.setValue(feature.get(namefield));
+                    regionname.setHtml(feature.get(namefield));
                     //featureTooltip.html = feature.getId() + ': ' + feature.get(namefield);
                 } else {
-                    regionname.setValue('&nbsp;');
+                    //regionname.setValue('&nbsp;');
+                    regionname.setHtml('&nbsp;');
                     //featureTooltip.html = '&nbsp;';
                 }
 

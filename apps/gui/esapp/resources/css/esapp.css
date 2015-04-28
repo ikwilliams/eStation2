@@ -38,8 +38,20 @@ p {
     background-image:url(../img/legends.png);
 }
 
-.chart-curve {
-    background-image:url(../img/chart_curve.png);
+.chart-curve_small {
+    background-image:url(../img/chart_curve_small.png);
+}
+
+.chart-curve_medium {
+    background-image:url(../img/chart_curve_medium.png);
+}
+
+.chart-curve_edit {
+    background-image:url(../img/chart_curve_edit.png);
+}
+
+.chart-curve_add {
+    background-image:url(../img/chart_curve_add.png);
 }
 
 .chart-line {

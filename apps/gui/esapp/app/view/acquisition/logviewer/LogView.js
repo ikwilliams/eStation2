@@ -24,7 +24,7 @@ Ext.define("esapp.view.acquisition.logviewer.LogView",{
         titlePosition: 0,
         titleAlign: 'center'
     },
-    modal: false,
+    modal: true,
     closable: true,
     closeAction: 'destroy', // 'hide',
     maximizable: false,
