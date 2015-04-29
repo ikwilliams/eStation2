@@ -143,16 +143,16 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                             dataacquisitiongrid.columns[1].show();
                             dataacquisitiongrid.columns[2].show();
                         });
-//                        Ext.Object.each(checkColumns, function(id, chkCol, myself) {
-//                            chkCol.enable();
-//                        });
+                        //Ext.Object.each(checkColumns, function(id, chkCol, myself) {
+                        //    chkCol.enable();
+                        //});
                         // TODO: Enable action columns
-//                        Ext.Object.each(actionColumns, function(id, actionCol, myself) {
-//                            actionCol.enable();
-//                            actionCol.items[0].disabled = false;
-//                            actionCol.enableAction(0);
-//                            actionCol.updateLayout();
-//                        })
+                        //Ext.Object.each(actionColumns, function(id, actionCol, myself) {
+                        //    actionCol.enable();
+                        //    actionCol.items[0].disabled = false;
+                        //    actionCol.enableAction(0);
+                        //    actionCol.updateLayout();
+                        //})
                         btn.setIconCls('fa fa-unlock fa-2x');
 
                     }

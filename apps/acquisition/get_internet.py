@@ -342,7 +342,7 @@ def loop_get_internet(dry_run=False):
 
                 # Create objects for list and info
                 processed_list = []
-                processed_info = {'lenght_proc_list': 0,
+                processed_info = {'length_proc_list': 0,
                                   'time_latest_exec': datetime.datetime.now(),
                                   'time_latest_copy': datetime.datetime.now()}
                 # Restore/Create List

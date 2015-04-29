@@ -26,6 +26,7 @@ if command == "start":
         daemon.start()
         
 if command == "stop":
+        print "Stopping deamon getinternet"
         daemon.stop()
 
 

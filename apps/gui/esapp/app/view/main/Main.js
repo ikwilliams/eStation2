@@ -93,6 +93,7 @@ Ext.define('esapp.view.main.Main', {
                        headerlogos.setHidden(false);
                        dashboardtab.up().down('container[id=acquisitionmaintab]').doLayout();
                        dashboardtab.up().down('container[id=datamanagementmaintab]').doLayout();
+                       dashboardtab.down('panel[id=dashboardpc2]').getController().checkStatusServices();
                    }
                 }
             }, {
@@ -109,11 +110,9 @@ Ext.define('esapp.view.main.Main', {
                 }],
                 listeners: {
                    activate: function (acquisitiontab) {
-                        var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
-                        headerlogos.setHidden(false);
-////                       console.info(this.down('toolbar > button[name=eumetcastbtn]'));
-//                       var eumetcastbtn = this.down('toolbar > button[name=eumetcastbtn]');
-//                       eumetcastbtn.fireEvent('render', eumetcastbtn.scope);
+                       var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
+                       headerlogos.setHidden(false);
+                       acquisitiontab.down('panel[name=acquisitionmain]').getController().checkStatusServices();
                    }
                 }
             }, {
@@ -128,8 +127,9 @@ Ext.define('esapp.view.main.Main', {
                 }],
                 listeners: {
                    activate: function (processingtab) {
-                        var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
-                        headerlogos.setHidden(false);
+                       var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
+                       headerlogos.setHidden(false);
+                       processingtab.down('panel[name=processingmain]').getController().checkStatusServices();
                    }
                 }
             }, {
