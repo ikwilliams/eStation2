@@ -16,6 +16,7 @@ if cur_dir not in sys.path:
 import web
 import datetime
 import json
+import glob
 # import re
 
 # import config
@@ -386,26 +387,39 @@ class GetLogFile:
 
     def GET(self):
         getparams = web.input()
+        logfilename = ''
         if getparams['logtype'] == 'get':
             if getparams['gettype'] == 'EUMETCAST':
-                logfilepath = es_constants.es2globals['log_dir']+'apps.acquisition.get_eumetcast.log'
+                logfilename = 'apps.get_eumetcast.' + getparams['data_source_id'] + '.log'
             else:
-                logfilepath = es_constants.es2globals['log_dir']+'apps.acquisition.get_internet.log'
+                logfilename = 'apps.get_internet.' + getparams['data_source_id'] + '.log'
         elif getparams['logtype'] == 'ingest':
-            logfilepath = es_constants.es2globals['log_dir']+'apps.acquisition.ingestion.log'
+            logfilename = 'apps.ingestion.log' + getparams['data_source_id'] + '.log'
 
-        logfile = open(logfilepath, 'r')
-        logfilecontent = logfile.read()
-        logfilecontent = logfilecontent.replace(chr(10), '<br />')
-        logfilecontent = logfilecontent.replace(' TRACE ', '<b style="color:gray"> TRACE </b>')
-        logfilecontent = logfilecontent.replace(' DEBUG ', '<b style="color:gray"> DEBUG </b>')
-        logfilecontent = logfilecontent.replace(' INFO ', '<b style="color:green"> INFO </b>')
-        logfilecontent = logfilecontent.replace(' WARNING ', '<b style="color:orange"> WARN </b>')
-        logfilecontent = logfilecontent.replace(' WARN ', '<b style="color:orange"> WARN </b>')
-        logfilecontent = logfilecontent.replace(' ERROR ', '<b style="color:red"> ERROR </b>')
-        logfilecontent = logfilecontent.replace(' CRITICAL ', '<b style="color:red"> FATAL </b>')
-        logfilecontent = logfilecontent.replace(' FATAL ', '<b style="color:red"> FATAL </b>')
-        logfilecontent = logfilecontent.replace(' CLOSED ', '<b style="color:brown"> CLOSED </b>')
+        logfilepath = es_constants.es2globals['log_dir']+logfilename
+        logfilenames = sorted(glob.glob(logfilepath + "*"), key=str, reverse=False)
+        # print sorted(logfilenames, key=str, reverse=False)
+        if len(logfilenames) > 0:
+            logfilecontent_all = ''
+            logfilecontent = ''
+            for logfilepath in logfilenames:
+                if os.path.isfile(logfilepath):
+                    logfile = open(logfilepath, 'r')
+                    logfilecontent = logfile.read()
+                    logfilecontent = logfilecontent.replace(chr(10), '<br />')
+                    logfilecontent = logfilecontent.replace(' TRACE ', '<b style="color:gray"> TRACE </b>')
+                    logfilecontent = logfilecontent.replace(' DEBUG ', '<b style="color:gray"> DEBUG </b>')
+                    logfilecontent = logfilecontent.replace(' INFO ', '<b style="color:green"> INFO </b>')
+                    logfilecontent = logfilecontent.replace(' WARNING ', '<b style="color:orange"> WARN </b>')
+                    logfilecontent = logfilecontent.replace(' WARN ', '<b style="color:orange"> WARN </b>')
+                    logfilecontent = logfilecontent.replace(' ERROR ', '<b style="color:red"> ERROR </b>')
+                    logfilecontent = logfilecontent.replace(' CRITICAL ', '<b style="color:red"> FATAL </b>')
+                    logfilecontent = logfilecontent.replace(' FATAL ', '<b style="color:red"> FATAL </b>')
+                    logfilecontent = logfilecontent.replace(' CLOSED ', '<b style="color:brown"> CLOSED </b>')
+
+                    logfilecontent_all += logfilecontent
+        else:
+            logfilecontent = 'NO LOG FILE PRESENT'
 
         return logfilecontent
 
@@ -909,7 +923,7 @@ class ExecuteServiceTask:
             # Define pid file and create daemon
             pid_file = es_constants.get_eumetcast_pid_filename
             eumetcast_daemon = acquisition.GetEumetcastDaemon(pid_file, dry_run=dryrun)
-            eumetcast_service_script=es_constants.es2globals['acq_service_dir']+os.sep+'service_get_eumetcast.py'
+            eumetcast_service_script = es_constants.es2globals['acq_service_dir']+os.sep+'service_get_eumetcast.py'
             status = eumetcast_daemon.status()
 
             logger.info(getparams.service)
@@ -917,47 +931,46 @@ class ExecuteServiceTask:
 
             if getparams.task == 'stop':
                 if status:
-                    os.system("python "+ eumetcast_service_script +" stop")
+                    os.system("python " + eumetcast_service_script + " stop")
                     message = 'Get_eumetcast service stopped'
                 else:
                     message = 'Get_eumetcast service is already down'
 
             elif getparams.task == 'run':
                 if not status:
-                    os.system("python "+ eumetcast_service_script +" start")
+                    os.system("python " + eumetcast_service_script + " start")
                     message = 'Get_eumetcast service started'
                 else:
                     message = 'Get_eumetcast service was already up'
 
             elif getparams.task == 'restart':
-                os.system("python "+ eumetcast_service_script +" stop")
-                os.system("python "+ eumetcast_service_script +" start")
+                os.system("python " + eumetcast_service_script + " stop")
+                os.system("python " + eumetcast_service_script + " start")
                 message = 'Get_eumetcast service restarted'
 
         if getparams.service == 'internet':
             # Define pid file and create daemon
             pid_file = es_constants.get_internet_pid_filename
             internet_daemon = acquisition.GetInternetDaemon(pid_file, dry_run=dryrun)
-            internet_service_script=es_constants.es2globals['acq_service_dir']+os.sep+'service_get_internet.py'
+            internet_service_script = es_constants.es2globals['acq_service_dir']+os.sep+'service_get_internet.py'
             status = internet_daemon.status()
 
             if getparams.task == 'stop':
                 if status:
-                    os.system("python "+ internet_service_script +" stop")
+                    os.system("python " + internet_service_script + " stop")
                     message = 'Get_internet service stopped'
                 else:
                     message = 'Get_internet service is already down'
-
             elif getparams.task == 'run':
                 if not status:
-                    os.system("python "+ internet_service_script +" start")
+                    os.system("python " + internet_service_script + " start")
                     message = 'Get_internet service started'
                 else:
                     message = 'Get_internet service was already up'
 
             elif getparams.task == 'restart':
-                os.system("python "+ internet_service_script +" stop")
-                os.system("python "+ internet_service_script +" start")
+                os.system("python " + internet_service_script + " stop")
+                os.system("python " + internet_service_script + " start")
                 message = 'Get_internet service restarted'
 
         if getparams.service == 'ingest':
@@ -965,24 +978,24 @@ class ExecuteServiceTask:
             pid_file = es_constants.ingestion_pid_filename
             ingest_daemon = acquisition.IngestionDaemon(pid_file, dry_run=dryrun)
             status = ingest_daemon.status()
-            ingest_service_script=es_constants.es2globals['acq_service_dir']+os.sep+'service_ingestion.py'
+            ingest_service_script = es_constants.es2globals['acq_service_dir']+os.sep+'service_ingestion.py'
             if getparams.task == 'stop':
                 if status:
-                    os.system("python "+ ingest_service_script +" stop")
+                    os.system("python " + ingest_service_script + " stop")
                     message = 'Ingestion service stopped'
                 else:
                     message = 'Ingestion service is already down'
 
             elif getparams.task == 'run':
                 if not status:
-                    os.system("python "+ ingest_service_script +" start")
+                    os.system("python " + ingest_service_script + " start")
                     message = 'Ingestion service started'
                 else:
                     message = 'Ingestion service was already up'
 
             elif getparams.task == 'restart':
-                os.system("python "+ ingest_service_script +" stop")
-                os.system("python "+ ingest_service_script +" start")
+                os.system("python " + ingest_service_script + " stop")
+                os.system("python " + ingest_service_script + " start")
                 message = 'ingest service restarted'
 
         logger.info(message)
@@ -1133,9 +1146,9 @@ class DataAcquisition:
                         else:
                             acq_dict[key] = acq_dates[key]
                 else:
-                    acq_dict['time_latest_copy'] = datetime.datetime.now().strftime("%y-%m-%d %H:%M")
-                    acq_dict['time_latest_exec'] = datetime.datetime.now().strftime("%y-%m-%d %H:%M")
-                    acq_dict['lenght_proc_list'] = datetime.datetime.now().strftime("%y-%m-%d %H:%M")
+                    acq_dict['time_latest_copy'] = ''   # datetime.datetime.now().strftime("%y-%m-%d %H:%M")
+                    acq_dict['time_latest_exec'] = ''   # datetime.datetime.now().strftime("%y-%m-%d %H:%M")
+                    acq_dict['length_proc_list'] = ''   # datetime.datetime.now().strftime("%y-%m-%d %H:%M")
 
                 acq_dict_all.append(acq_dict)
                 acq_json = json.dumps(acq_dict_all,

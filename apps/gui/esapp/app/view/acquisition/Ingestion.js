@@ -224,6 +224,7 @@ Ext.define("esapp.view.acquisition.Ingestion",{
                 scope: me,
                 // handler: me.onRemoveClick
                 handler: function (grid, rowIndex, colIndex, icon) {
+                    console.info(grid.up());
                     var rec = grid.getStore().getAt(rowIndex);
                     var logViewWin = new esapp.view.acquisition.logviewer.LogView({
                         params: {

@@ -14,7 +14,7 @@ Ext.define('esapp.view.acquisition.logviewer.LogViewController', {
                mapsetcode:win.params.record.get('mapsetcode'),
                version:win.params.record.get('version'),
                subproductcode:win.params.record.get('subproductcode'),
-               id:win.params.record.get('data_source_id')
+               data_source_id:win.params.record.get('data_source_id')
         };
 
         Ext.Ajax.request({
